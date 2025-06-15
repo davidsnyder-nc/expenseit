@@ -466,21 +466,25 @@
         }
 
         async function saveTrip() {
-            const form = document.getElementById('editTripForm');
-            const formData = new FormData();
-            
-            formData.append('action', 'update_trip');
-            formData.append('original_name', currentTrip.name);
-            formData.append('name', document.getElementById('editTripName').value);
-            formData.append('destination', document.getElementById('editDestination').value);
-            formData.append('start_date', document.getElementById('editStartDate').value);
-            formData.append('end_date', document.getElementById('editEndDate').value);
-            formData.append('notes', document.getElementById('editNotes').value);
+            const tripData = {
+                action: 'edit_trip_metadata',
+                tripName: currentTrip.name,
+                metadata: {
+                    name: document.getElementById('editTripName').value,
+                    destination: document.getElementById('editDestination').value,
+                    start_date: document.getElementById('editStartDate').value,
+                    end_date: document.getElementById('editEndDate').value,
+                    notes: document.getElementById('editNotes').value
+                }
+            };
 
             try {
-                const response = await fetch('api.php', {
+                const response = await fetch('save_trip.php', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(tripData)
                 });
                 
                 const result = await response.json();
@@ -489,8 +493,15 @@
                     showSuccessMessage('Trip updated successfully');
                     // Close modal
                     document.querySelector('.modal').remove();
-                    // Reload trip details
-                    loadTripDetails(currentTrip.name);
+                    // Update the current trip name if it changed
+                    const newTripName = tripData.metadata.name;
+                    if (newTripName !== currentTrip.name) {
+                        // Redirect to the new trip name
+                        window.location.href = `trip.html?trip=${encodeURIComponent(newTripName)}`;
+                    } else {
+                        // Reload trip details
+                        loadTripDetails(currentTrip.name);
+                    }
                 } else {
                     showErrorMessage('Failed to update trip: ' + (result.error || 'Unknown error'));
                 }
