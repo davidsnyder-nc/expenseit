@@ -74,8 +74,15 @@ function generateTripPDF($metadata, $expenses, $receipts = []) {
     // Calculate totals
     $total = 0;
     $categories = [];
+    $includedExpenseCount = 0;
     
     foreach ($expenses as $expense) {
+        // Skip excluded expenses from totals and categories
+        if ($expense['excluded'] ?? false) {
+            continue;
+        }
+        
+        $includedExpenseCount++;
         $amount = floatval($expense['amount'] ?? 0);
         $total += $amount;
         
@@ -103,7 +110,7 @@ function generateTripPDF($metadata, $expenses, $receipts = []) {
     $mpdf->SetAuthor('Expense Wizard');
     
     // Build HTML content
-    $html = buildPDFHTML($metadata, $expenses, $categories, $total, $receipts);
+    $html = buildPDFHTML($metadata, $expenses, $categories, $total, $receipts, $includedExpenseCount);
     
     // Write HTML to PDF
     $mpdf->WriteHTML($html);
@@ -114,7 +121,7 @@ function generateTripPDF($metadata, $expenses, $receipts = []) {
 /**
  * Build HTML content for PDF
  */
-function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = []) {
+function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [], $includedExpenseCount = 0) {
     $startDate = formatDate($metadata['start_date'] ?? '');
     $endDate = formatDate($metadata['end_date'] ?? '');
     $duration = calculateDuration($metadata['start_date'] ?? '', $metadata['end_date'] ?? '');
@@ -348,9 +355,14 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
         <div class="section">
             <h2>Detailed Expenses</h2>';
         
-        // Group expenses by category for detailed view
+        // Group expenses by category for detailed view (exclude excluded expenses)
         $expensesByCategory = [];
         foreach ($expenses as $expense) {
+            // Skip excluded expenses from detailed view
+            if ($expense['excluded'] ?? false) {
+                continue;
+            }
+            
             $category = $expense['category'] ?? 'Other';
             if (!isset($expensesByCategory[$category])) {
                 $expensesByCategory[$category] = [];

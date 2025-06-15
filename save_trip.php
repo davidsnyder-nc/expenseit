@@ -53,6 +53,9 @@ try {
         case 'delete_expense':
             $result = deleteExpense($data['tripName'], $data['expenseId']);
             break;
+        case 'toggle_expense_exclusion':
+            $result = toggleExpenseExclusion($data['tripName'], $data['expenseId']);
+            break;
         case 'delete_trip':
             $result = deleteTrip($data['tripName']);
             break;
@@ -356,6 +359,53 @@ function deleteExpense($tripName, $expenseId) {
     }
     
     return ['success' => true];
+}
+
+/**
+ * Toggle expense exclusion from totals
+ */
+function toggleExpenseExclusion($tripName, $expenseId) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    $expensesPath = $tripDir . "/expenses.json";
+    
+    if (!file_exists($expensesPath)) {
+        throw new Exception('Expenses file not found');
+    }
+    
+    // Load expenses
+    $expenses = json_decode(file_get_contents($expensesPath), true);
+    if (!$expenses) {
+        throw new Exception('Failed to load expenses');
+    }
+    
+    // Find and toggle expense exclusion
+    $found = false;
+    $excluded = false;
+    foreach ($expenses as &$expense) {
+        if ($expense['id'] === $expenseId) {
+            // Toggle excluded status
+            $expense['excluded'] = !($expense['excluded'] ?? false);
+            $excluded = $expense['excluded'];
+            $found = true;
+            break;
+        }
+    }
+    
+    if (!$found) {
+        throw new Exception('Expense not found');
+    }
+    
+    // Save expenses
+    if (!file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT))) {
+        throw new Exception('Failed to save expenses');
+    }
+    
+    return [
+        'success' => true, 
+        'excluded' => $excluded,
+        'message' => $excluded ? 'Expense excluded from totals' : 'Expense included in totals'
+    ];
 }
 
 /**
