@@ -2101,6 +2101,55 @@ body {
     padding: 2rem;
 }
 
+.processing-container h3 {
+    color: #2d3748;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+.processing-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.processing-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f7fafc;
+    transition: all 0.3s ease;
+}
+
+.processing-step i {
+    width: 20px;
+    height: 20px;
+    color: #718096;
+}
+
+.processing-step.active {
+    background: #e53e3e;
+    color: white;
+    transform: translateX(10px);
+}
+
+.processing-step.active i {
+    color: white;
+}
+
+.processing-step.completed {
+    background: #38a169;
+    color: white;
+}
+
+.processing-step.completed i {
+    color: white;
+}
+
 .processing-results {
     margin-top: 2rem;
 }
