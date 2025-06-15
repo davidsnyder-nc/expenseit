@@ -426,7 +426,12 @@
                 const data = await response.json();
                 
                 if (data.success && data.receipts) {
-                    receiptsData = data.receipts;
+                    // Store receipts data globally for bulk download with proper URLs
+                    receiptsData = data.receipts.map(receipt => ({
+                        ...receipt,
+                        fullUrl: receipt.url,
+                        filename: receipt.filename || receipt.url.split('/').pop()
+                    }));
                     displayReceipts(data.receipts);
                 }
             } catch (error) {
