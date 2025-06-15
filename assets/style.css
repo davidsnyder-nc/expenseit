@@ -199,11 +199,134 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.toolbar-left, .toolbar-right {
+.toolbar-left, .toolbar-center, .toolbar-right {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
     align-items: center;
+}
+
+.toolbar-center {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Search Styles */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-width: 400px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    background: transparent;
+}
+
+.search-input::placeholder {
+    color: #a0aec0;
+}
+
+.search-options {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+    border-left: 1px solid #e2e8f0;
+}
+
+.search-option {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: #4a5568;
+    cursor: pointer;
+}
+
+.search-option input[type="checkbox"] {
+    margin: 0;
+}
+
+.search-btn {
+    padding: 0.5rem 0.75rem;
+    min-width: auto;
+}
+
+/* Search Results */
+.search-results {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.search-results-header {
+    background: #f7fafc;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.search-results-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.search-match {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s;
+}
+
+.search-match:hover {
+    background: #f7fafc;
+}
+
+.search-match:last-child {
+    border-bottom: none;
+}
+
+.search-match-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.search-match-trip {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.search-match-type {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.search-match-content {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.search-highlight {
+    background: #fed7d7;
+    color: #c53030;
+    padding: 0.1rem 0.2rem;
+    border-radius: 2px;
 }
 
 .section-tabs {

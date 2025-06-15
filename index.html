@@ -53,7 +53,10 @@
             </div>
 
             <div class="trips-section">
-                <div class="section-tabs">
+                <!-- Search Results -->
+                <div id="searchResults" style="display: none;"></div>
+                
+                <div class="section-tabs" id="sectionTabs">
                     <button class="tab-btn active" onclick="switchTab('active')" id="activeTab">
                         <i data-feather="folder"></i> Active Trips
                     </button>
@@ -112,6 +115,15 @@
         // Load trips on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadTrips();
+            
+            // Add search event listeners
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', debounce(performSearch, 300));
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
         });
 
         function createNewTrip() {
@@ -492,6 +504,95 @@
                     document.body.removeChild(toast);
                 }, 300);
             }, 3000);
+        }
+
+        // Search functionality
+        async function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const includeArchives = document.getElementById('includeArchives').checked;
+            const query = searchInput.value.trim();
+            
+            if (query === '') {
+                hideSearchResults();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`api.php?action=search&query=${encodeURIComponent(query)}&include_archives=${includeArchives}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displaySearchResults(result.results, query);
+                } else {
+                    showErrorMessage('Search failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                showErrorMessage('Search failed. Please try again.');
+            }
+        }
+
+        function displaySearchResults(results, query) {
+            const searchResults = document.getElementById('searchResults');
+            const tripsContainer = document.getElementById('tripsContainer');
+            const sectionTabs = document.getElementById('sectionTabs');
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-results">
+                        <div class="search-results-header">
+                            <h3>No results found for "${query}"</h3>
+                        </div>
+                    </div>
+                `;
+            } else {
+                searchResults.innerHTML = `
+                    <div class="search-results">
+                        <div class="search-results-header">
+                            <h3>${results.length} result${results.length > 1 ? 's' : ''} for "${query}"</h3>
+                        </div>
+                        ${results.map(result => `
+                            <div class="search-match" onclick="viewTrip('${result.tripName}')">
+                                <div class="search-match-header">
+                                    <span class="search-match-trip">${result.tripName}</span>
+                                    <span class="search-match-type">${result.type}</span>
+                                </div>
+                                <div class="search-match-content">
+                                    ${highlightSearchTerms(result.content, query)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            searchResults.style.display = 'block';
+            tripsContainer.style.display = 'none';
+            sectionTabs.style.display = 'none';
+            feather.replace();
+        }
+
+        function hideSearchResults() {
+            const searchResults = document.getElementById('searchResults');
+            const tripsContainer = document.getElementById('tripsContainer');
+            const sectionTabs = document.getElementById('sectionTabs');
+            
+            searchResults.style.display = 'none';
+            tripsContainer.style.display = 'block';
+            sectionTabs.style.display = 'flex';
+        }
+
+        function highlightSearchTerms(text, query) {
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        function debounce(func, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
         }
     </script>
 </body>
