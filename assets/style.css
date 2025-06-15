@@ -38,6 +38,12 @@ body {
     gap: 0.5rem;
 }
 
+.app-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
 .header h1 i {
     color: #4299e1;
 }
