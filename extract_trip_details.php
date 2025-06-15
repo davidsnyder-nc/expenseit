@@ -75,8 +75,8 @@ If you cannot find specific information, return null for that field. Only return
             // Validate and clean up the extracted data
             $cleanedDetails = [
                 'tripName' => isset($tripDetails['tripName']) ? trim($tripDetails['tripName']) : null,
-                'startDate' => isset($tripDetails['startDate']) ? validateDate($tripDetails['startDate']) : null,
-                'endDate' => isset($tripDetails['endDate']) ? validateDate($tripDetails['endDate']) : null,
+                'startDate' => isset($tripDetails['startDate']) ? validateTripDate($tripDetails['startDate']) : null,
+                'endDate' => isset($tripDetails['endDate']) ? validateTripDate($tripDetails['endDate']) : null,
                 'notes' => isset($tripDetails['notes']) ? trim($tripDetails['notes']) : null
             ];
             
@@ -134,9 +134,9 @@ function extractTextFromPDF($filePath) {
 }
 
 /**
- * Validate and format date string
+ * Validate and format date string for trip details
  */
-function validateDate($dateString) {
+function validateTripDate($dateString) {
     if (!$dateString) return null;
     
     // Try to parse various date formats

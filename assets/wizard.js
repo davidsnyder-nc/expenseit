@@ -784,6 +784,7 @@ async function uploadTravelDocument(file) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('trip', 'temp_travel_docs');
+    formData.append('type', 'travel_document');
     
     try {
         // Upload the file first
@@ -796,6 +797,17 @@ async function uploadTravelDocument(file) {
         
         if (uploadResult.success) {
             displayTravelDocument(file, uploadResult.path);
+            
+            // Store in trip data for later saving
+            if (!tripData.travelDocuments) {
+                tripData.travelDocuments = [];
+            }
+            tripData.travelDocuments.push({
+                originalName: file.name,
+                path: uploadResult.path,
+                size: file.size,
+                type: file.type
+            });
             
             // Extract trip details from the document
             extractTripDetails(uploadResult.path, file.name);

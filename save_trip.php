@@ -98,6 +98,13 @@ function createTrip($tripData) {
         }
     }
     
+    $travelDocsDir = $tripDir . "/travel_documents";
+    if (!is_dir($travelDocsDir)) {
+        if (!mkdir($travelDocsDir, 0755, true)) {
+            throw new Exception('Failed to create travel documents directory');
+        }
+    }
+    
     // Move files from temp directory if they exist
     $tempDir = "data/trips/temp/receipts";
     if (is_dir($tempDir)) {

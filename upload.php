@@ -149,15 +149,16 @@ try {
     }
 
     $file = $_FILES['file'];
-    $tripName = $_POST['tripName'] ?? 'temp';
+    $tripName = $_POST['tripName'] ?? $_POST['trip'] ?? 'temp';
+    $documentType = $_POST['type'] ?? 'receipt'; // receipt or travel_document
     
     // Validate file type by extension (more reliable than MIME type for HEIC/TIFF)
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'heic', 'tiff', 'tif'];
-    $allowedMimeTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/tiff', 'image/tif'];
+    $allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'heic', 'tiff', 'tif', 'webp', 'bmp', 'gif'];
+    $allowedMimeTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/tiff', 'image/tif', 'image/webp', 'image/bmp', 'image/gif'];
     
     if (!in_array($extension, $allowedExtensions) && !in_array($file['type'], $allowedMimeTypes)) {
-        throw new Exception('Invalid file type. Only PDF, JPEG, PNG, HEIC, and TIFF files are allowed.');
+        throw new Exception('Invalid file type. Only PDF and image files are allowed.');
     }
     
     // Validate file size (max 10MB)
@@ -168,10 +169,10 @@ try {
     
     // Create directory structure
     $tripDir = "data/trips/" . sanitizeName($tripName);
-    $receiptsDir = $tripDir . "/receipts";
+    $targetDir = $documentType === 'travel_document' ? $tripDir . "/travel_documents" : $tripDir . "/receipts";
     
-    if (!is_dir($receiptsDir)) {
-        if (!mkdir($receiptsDir, 0755, true)) {
+    if (!is_dir($targetDir)) {
+        if (!mkdir($targetDir, 0755, true)) {
             throw new Exception('Failed to create upload directory');
         }
     }
@@ -182,16 +183,16 @@ try {
     
     if ($originalExtension === 'pdf') {
         // Keep PDFs as-is
-        $filename = generateUniqueFilename($file['name'], $receiptsDir, $originalExtension);
-        $targetPath = $receiptsDir . '/' . $filename;
+        $filename = generateUniqueFilename($file['name'], $targetDir, $originalExtension);
+        $targetPath = $targetDir . '/' . $filename;
         
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
             throw new Exception('Failed to save uploaded file');
         }
     } else {
         // Convert all image formats to JPEG
-        $filename = generateUniqueFilename($baseName . '.jpg', $receiptsDir, 'jpg');
-        $targetPath = $receiptsDir . '/' . $filename;
+        $filename = generateUniqueFilename($baseName . '.jpg', $targetDir, 'jpg');
+        $targetPath = $targetDir . '/' . $filename;
         
         if (!convertToJpeg($file['tmp_name'], $targetPath, $originalExtension)) {
             throw new Exception('Failed to convert and save image file');
