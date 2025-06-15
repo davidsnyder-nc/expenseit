@@ -13,6 +13,75 @@ function sanitizeName($name) {
     return trim($name, '_') ?: 'untitled';
 }
 
+function extractDestinationFromTransportation($note, $merchant) {
+    // Common patterns for flight destinations
+    $patterns = [
+        '/to\s+([A-Z]{3})\s*[\)\.]/',  // "to AUS)"
+        '/to\s+([A-Za-z\s]+)\s*\(([A-Z]{3})\)/',  // "to Austin (AUS)"
+        '/\s+to\s+([A-Za-z\s,]+?)[\.\,\;]/',  // " to Austin, TX."
+        '/destination:?\s*([A-Za-z\s,]+)/i',  // "Destination: Austin"
+        '/arriving\s+in\s+([A-Za-z\s,]+)/i',  // "arriving in Austin"
+    ];
+    
+    $text = $note . ' ' . $merchant;
+    
+    foreach ($patterns as $pattern) {
+        if (preg_match($pattern, $text, $matches)) {
+            $destination = trim($matches[1]);
+            
+            // Map airport codes to cities
+            $airportCodes = [
+                'AUS' => 'Austin, TX',
+                'DFW' => 'Dallas, TX',
+                'IAH' => 'Houston, TX',
+                'LAX' => 'Los Angeles, CA',
+                'JFK' => 'New York, NY',
+                'ORD' => 'Chicago, IL',
+                'ATL' => 'Atlanta, GA',
+                'MIA' => 'Miami, FL',
+                'SEA' => 'Seattle, WA',
+                'SFO' => 'San Francisco, CA',
+                'LAS' => 'Las Vegas, NV',
+                'PHX' => 'Phoenix, AZ',
+                'DEN' => 'Denver, CO',
+                'MSP' => 'Minneapolis, MN',
+                'DTW' => 'Detroit, MI',
+                'BOS' => 'Boston, MA',
+                'PHL' => 'Philadelphia, PA',
+                'LGA' => 'New York, NY',
+                'BWI' => 'Baltimore, MD',
+                'IAD' => 'Washington, DC',
+                'CLT' => 'Charlotte, NC',
+                'MCO' => 'Orlando, FL',
+                'FLL' => 'Fort Lauderdale, FL',
+                'SAN' => 'San Diego, CA',
+                'TPA' => 'Tampa, FL',
+                'PDX' => 'Portland, OR',
+                'MSY' => 'New Orleans, LA',
+                'BNA' => 'Nashville, TN',
+                'RDU' => 'Raleigh, NC',
+                'CLE' => 'Cleveland, OH',
+                'PIT' => 'Pittsburgh, PA',
+                'ILM' => 'Wilmington, NC'
+            ];
+            
+            if (isset($airportCodes[$destination])) {
+                return $airportCodes[$destination];
+            } elseif (strlen($destination) > 2) {
+                return $destination;
+            }
+        }
+    }
+    
+    return null;
+}
+
+function extractCityFromDestination($destination) {
+    // Extract just the city name from "City, State" format
+    $parts = explode(',', $destination);
+    return trim($parts[0]);
+}
+
 function analyzeFileWithGemini($filePath, $fileName) {
     try {
         // First, determine what type of document this is
@@ -202,6 +271,24 @@ try {
                 ];
                 
                 $expenses[] = $expense;
+                
+                // Extract trip metadata from transportation receipts (flights, trains, etc.)
+                if ($expense['category'] === 'Transportation' && !isset($tripMetadata['destination'])) {
+                    $destination = extractDestinationFromTransportation($expense['note'], $expense['merchant']);
+                    if ($destination) {
+                        $tripMetadata['destination'] = $destination;
+                        $tripMetadata['trip_name'] = extractCityFromDestination($destination);
+                    }
+                }
+                
+                // Track date range for all expenses
+                if (!isset($tripMetadata['start_date']) || $expense['date'] < $tripMetadata['start_date']) {
+                    $tripMetadata['start_date'] = $expense['date'];
+                }
+                if (!isset($tripMetadata['end_date']) || $expense['date'] > $tripMetadata['end_date']) {
+                    $tripMetadata['end_date'] = $expense['date'];
+                }
+                
                 $processedFiles[] = [
                     'file' => $fileName,
                     'type' => 'receipt',
@@ -270,45 +357,50 @@ try {
     file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT));
     file_put_contents($metadataPath, json_encode($tripMetadata, JSON_PRETTY_PRINT));
     
-    // Handle trip renaming if we extracted a better name
+    // Handle trip renaming if we extracted destination/date info
     $finalTripName = $tripName;
-    if (isset($tripMetadata['trip_name']) && $tripMetadata['trip_name'] !== $tripName) {
-        $baseName = $tripMetadata['trip_name'];
+    
+    // Create meaningful trip name for temp trips
+    if (preg_match('/^temp_\d+$/', $tripName)) {
+        $cityName = 'Trip';
+        $datePrefix = '';
         
-        // Create user-friendly trip name based on destination
-        if (preg_match('/^temp_\d+$/', $tripName)) {
-            // Extract city name from destination if available
-            $cityName = $baseName;
-            if (isset($tripMetadata['destination'])) {
-                // Extract city from "City, State" format
-                $parts = explode(',', $tripMetadata['destination']);
-                $cityName = trim($parts[0]);
-            }
+        // Extract city name from destination if available
+        if (isset($tripMetadata['destination'])) {
+            $parts = explode(',', $tripMetadata['destination']);
+            $cityName = trim($parts[0]);
+        } elseif (isset($tripMetadata['trip_name'])) {
+            $cityName = $tripMetadata['trip_name'];
+        }
+        
+        // Add date prefix if start date is available
+        if (isset($tripMetadata['start_date'])) {
+            $datePrefix = date('Y-m-d', strtotime($tripMetadata['start_date'])) . '_';
+        }
+        
+        // Create clean trip name with date and destination
+        $newTripName = sanitizeName($datePrefix . $cityName);
+        
+        // Handle conflicts by adding counter
+        $counter = 1;
+        $originalName = $newTripName;
+        while (is_dir("data/trips/" . $newTripName)) {
+            $counter++;
+            $newTripName = sanitizeName($datePrefix . $cityName . "_" . $counter);
+        }
+        
+        $newTripDir = "data/trips/" . $newTripName;
+        
+        if (rename($tripDir, $newTripDir)) {
+            $finalTripName = $newTripName;
+            $tripMetadata['name'] = $newTripName;
             
-            // Create clean trip name
-            $newTripName = sanitizeName($cityName . "_Trip");
+            // Update metadata in new location
+            file_put_contents($newTripDir . '/metadata.json', json_encode($tripMetadata, JSON_PRETTY_PRINT));
             
-            // Handle conflicts by adding number
-            $counter = 1;
-            $originalName = $newTripName;
-            while (is_dir("data/trips/" . $newTripName)) {
-                $counter++;
-                $newTripName = sanitizeName($cityName . "_Trip_" . $counter);
-            }
-            
-            $newTripDir = "data/trips/" . $newTripName;
-            
-            if (rename($tripDir, $newTripDir)) {
-                $finalTripName = $newTripName;
-                $tripMetadata['name'] = $newTripName;
-                
-                // Update metadata in new location
-                file_put_contents($newTripDir . '/metadata.json', json_encode($tripMetadata, JSON_PRETTY_PRINT));
-                
-                // Update expenses and metadata paths
-                $expensesPath = $newTripDir . '/expenses.json';
-                file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT));
-            }
+            // Update expenses and metadata paths
+            $expensesPath = $newTripDir . '/expenses.json';
+            file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT));
         }
     }
     
