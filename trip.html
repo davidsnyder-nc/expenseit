@@ -329,14 +329,14 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    alert('Trip deleted successfully');
+                    showSuccessMessage('Trip deleted successfully');
                     window.location.href = 'index.html';
                 } else {
-                    alert('Error deleting trip: ' + (result.error || 'Unknown error'));
+                    showErrorMessage('Error deleting trip: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error deleting trip:', error);
-                alert('Error deleting trip');
+                showErrorMessage('Error deleting trip');
             }
         }
 
@@ -465,6 +465,81 @@
                 closeModal();
             }
         });
+
+        // Custom modal functions
+        let confirmAction = null;
+
+        function showConfirmModal(title, message, action) {
+            // Create modal if it doesn't exist
+            if (!document.getElementById('confirmModal')) {
+                const modal = document.createElement('div');
+                modal.id = 'confirmModal';
+                modal.className = 'modal';
+                modal.style.display = 'none';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="confirmTitle">Confirm Action</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p id="confirmMessage">Are you sure?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                            <button class="btn btn-danger" id="confirmButton" onclick="executeConfirmAction()">Confirm</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmAction = action;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmAction = null;
+        }
+
+        function executeConfirmAction() {
+            if (confirmAction) {
+                confirmAction();
+            }
+            closeConfirmModal();
+        }
+
+        function showSuccessMessage(message) {
+            createToast(message, 'success');
+        }
+
+        function showErrorMessage(message) {
+            createToast(message, 'error');
+        }
+
+        function createToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            feather.replace();
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
