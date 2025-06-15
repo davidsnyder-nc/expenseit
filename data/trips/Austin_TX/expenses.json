@@ -1,20 +1,20 @@
 [
     {
-        "id": "3moxv6f6g",
-        "date": "2023-10-15",
-        "merchant": "Greenfield Grocers",
-        "amount": 75,
-        "category": "Groceries",
-        "note": "Purchase of groceries including organic apples, bread, milk, eggs, yogurt, granola bars, spinach, chicken breast, rice, chocolate, tea, honey, and nuts.",
-        "source": "receipts\/3 (2).heic"
+        "id": "exp_001",
+        "merchant": "Sample Receipt 1",
+        "amount": 75.00,
+        "category": "Meals",
+        "date": "2025-06-12",
+        "note": "Receipt from trip",
+        "source": "receipts/3_2.heic"
     },
     {
-        "id": "jic777otz",
-        "date": "2023-10-15",
-        "merchant": "Greenfield Grocers",
-        "amount": 75,
-        "category": "Groceries",
-        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
-        "source": "receipts\/1.jpg"
+        "id": "exp_002", 
+        "merchant": "Sample Receipt 2",
+        "amount": 75.00,
+        "category": "Transportation",
+        "date": "2025-06-13",
+        "note": "Receipt from trip",
+        "source": "receipts/1.jpg"
     }
 ]

@@ -105,42 +105,53 @@ function createTrip($tripData) {
         }
     }
     
-    // Move receipt files from temp directory if they exist
-    $tempDir = "data/trips/temp/receipts";
-    if (is_dir($tempDir)) {
-        $files = glob($tempDir . "/*");
-        foreach ($files as $file) {
-            $filename = basename($file);
-            $newPath = $receiptsDir . "/" . $filename;
-            if (!rename($file, $newPath)) {
-                error_log("Failed to move receipt file: $file to $newPath");
-            }
-        }
-        // Clean up temp receipts directory
-        @rmdir($tempDir);
-        @rmdir("data/trips/temp");
-    }
+    // Find and move files from temporary directories
+    $tempDirs = glob("data/trips/temp_*", GLOB_ONLYDIR);
     
-    // Move travel documents from temp directory if they exist
-    $tempTravelDocsDir = "data/trips/temp_travel_docs/receipts";
-    if (is_dir($tempTravelDocsDir)) {
-        $files = glob($tempTravelDocsDir . "/*");
-        foreach ($files as $file) {
-            $filename = basename($file);
-            $newPath = $travelDocsDir . "/" . $filename;
-            if (!rename($file, $newPath)) {
-                error_log("Failed to move travel document: $file to $newPath");
+    foreach ($tempDirs as $tempDir) {
+        // Move receipt files
+        $tempReceiptsDir = $tempDir . "/receipts";
+        if (is_dir($tempReceiptsDir)) {
+            $files = glob($tempReceiptsDir . "/*");
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $filename = basename($file);
+                    $newPath = $receiptsDir . "/" . $filename;
+                    if (!rename($file, $newPath)) {
+                        error_log("Failed to move receipt file: $file to $newPath");
+                    }
+                }
             }
+            @rmdir($tempReceiptsDir);
         }
-        // Clean up temp travel docs directory
-        @rmdir($tempTravelDocsDir);
-        @rmdir("data/trips/temp_travel_docs");
+        
+        // Move travel documents
+        $tempTravelDocsDir = $tempDir . "/travel_documents";
+        if (is_dir($tempTravelDocsDir)) {
+            $files = glob($tempTravelDocsDir . "/*");
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $filename = basename($file);
+                    $newPath = $travelDocsDir . "/" . $filename;
+                    if (!rename($file, $newPath)) {
+                        error_log("Failed to move travel document: $file to $newPath");
+                    }
+                }
+            }
+            @rmdir($tempTravelDocsDir);
+        }
+        
+        // Clean up temp directory
+        @rmdir($tempDir);
     }
     
     // Update expense sources to point to new location
     foreach ($tripData['expenses'] as &$expense) {
-        if (isset($expense['source']) && strpos($expense['source'], 'data/trips/temp/') === 0) {
-            $expense['source'] = str_replace('data/trips/temp/receipts/', 'receipts/', $expense['source']);
+        if (isset($expense['source'])) {
+            // Handle dynamic temp directories
+            if (preg_match('/data\/trips\/temp_\d+\/receipts\/(.+)/', $expense['source'], $matches)) {
+                $expense['source'] = 'receipts/' . $matches[1];
+            }
         }
     }
     
