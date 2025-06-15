@@ -1,6 +1,6 @@
 [
     {
-        "id": "684edd01dbd07",
+        "id": "684ede5d4f16c",
         "date": "2025-06-05",
         "merchant": "Global Horizons Airways",
         "amount": 357,
@@ -15,7 +15,7 @@
         "daily_breakdown": []
     },
     {
-        "id": "684edd038ccdc",
+        "id": "684ede5ecb5dd",
         "date": "2025-06-05",
         "merchant": "JetSet Coffee",
         "amount": 8.25,
@@ -30,7 +30,7 @@
         "daily_breakdown": []
     },
     {
-        "id": "684edd052b9db",
+        "id": "684ede606a38d",
         "date": "2025-06-06",
         "merchant": "Wanderlust Deli",
         "amount": 9.25,
@@ -45,7 +45,7 @@
         "daily_breakdown": []
     },
     {
-        "id": "684edd06c8f9c",
+        "id": "684ede62469bf",
         "date": "2025-06-07",
         "merchant": "Urban Outbound",
         "amount": 29.24,
@@ -60,7 +60,7 @@
         "daily_breakdown": []
     },
     {
-        "id": "684edd087f772",
+        "id": "684ede63e143f",
         "date": "2025-06-09",
         "merchant": "SkyMall Express",
         "amount": 50.49,
@@ -75,7 +75,7 @@
         "daily_breakdown": []
     },
     {
-        "id": "684edd0c47439",
+        "id": "684ede6795cc1",
         "date": "2025-06-10",
         "merchant": "Grand Voyager Inn",
         "amount": 660,
@@ -119,7 +119,7 @@
         ]
     },
     {
-        "id": "684edd0dd1e8a",
+        "id": "684ede693c4f9",
         "date": "2025-06-08",
         "merchant": "Flight Fuel Market",
         "amount": 11.23,
@@ -132,7 +132,7 @@
         "excluded": false
     },
     {
-        "id": "684edd0fb929a",
+        "id": "684ede6b10042",
         "date": "2025-06-10",
         "merchant": "Apex Auto Rentals",
         "amount": 299.75,
