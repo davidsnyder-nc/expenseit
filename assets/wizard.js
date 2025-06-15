@@ -247,7 +247,7 @@ function handleFiles(files) {
         if (isValidFile(file)) {
             uploadFile(file);
         } else {
-            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF, JPEG, PNG, HEIC, or TIFF files.`);
+            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF or image files (JPEG, PNG, HEIC, TIFF, WebP, BMP, GIF).`);
         }
     });
 }

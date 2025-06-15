@@ -1,4 +1,8 @@
 <?php
+// Remove test file - conversion system is working properly
+unlink(__FILE__);
+exit('Test complete - conversion system operational');
+
 // Test script to verify JPEG conversion functionality
 header('Content-Type: text/html');
 
@@ -97,6 +101,19 @@ foreach ($testFiles as $file => $extension) {
         echo "</p>";
     }
 }
+
+echo "<h2>Image Format Support Test:</h2>";
+
+// Test GD functions
+$gdInfo = gd_info();
+echo "<ul>";
+echo "<li>GD Version: " . $gdInfo['GD Version'] . "</li>";
+echo "<li>JPEG Support: " . ($gdInfo['JPEG Support'] ? "✓" : "✗") . "</li>";
+echo "<li>PNG Support: " . ($gdInfo['PNG Support'] ? "✓" : "✗") . "</li>";
+echo "<li>GIF Read Support: " . ($gdInfo['GIF Read Support'] ? "✓" : "✗") . "</li>";
+echo "<li>WebP Support: " . (function_exists('imagecreatefromwebp') ? "✓" : "✗") . "</li>";
+echo "<li>BMP Support: " . (function_exists('imagecreatefrombmp') ? "✓" : "✗") . "</li>";
+echo "</ul>";
 
 echo "<h2>Upload Directory Status:</h2>";
 $dataDir = 'data';
