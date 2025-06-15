@@ -478,11 +478,18 @@ async function extractTripDetailsFromUploads() {
                 // Update trip metadata with extracted details
                 const oldName = tripData.metadata.name;
                 
-                // Create proper trip name from destination
+                // Create proper trip name from destination and date
                 let tripName = result.tripDetails.trip_name || 'Trip';
                 if (result.tripDetails.destination) {
                     // Extract city name from full destination (e.g., "Austin, TX" -> "Austin")
                     tripName = result.tripDetails.destination.split(',')[0].trim();
+                }
+                
+                // Add date suffix if start date is available
+                if (result.tripDetails.start_date) {
+                    const startDate = new Date(result.tripDetails.start_date);
+                    const monthYear = startDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    tripName += ' ' + monthYear;
                 }
                 
                 tripData.metadata = {

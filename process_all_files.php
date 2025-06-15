@@ -373,20 +373,21 @@ try {
             $cityName = $tripMetadata['trip_name'];
         }
         
-        // Add date prefix if start date is available
+        // Add date suffix if start date is available
+        $dateSuffix = '';
         if (isset($tripMetadata['start_date'])) {
-            $datePrefix = date('Y-m-d', strtotime($tripMetadata['start_date'])) . '_';
+            $dateSuffix = ' ' . date('F Y', strtotime($tripMetadata['start_date']));
         }
         
-        // Create clean trip name with date and destination
-        $newTripName = sanitizeName($datePrefix . $cityName);
+        // Create clean trip name with destination and date
+        $newTripName = sanitizeName($cityName . $dateSuffix);
         
         // Handle conflicts by adding counter
         $counter = 1;
         $originalName = $newTripName;
         while (is_dir("data/trips/" . $newTripName)) {
             $counter++;
-            $newTripName = sanitizeName($datePrefix . $cityName . "_" . $counter);
+            $newTripName = sanitizeName($cityName . $dateSuffix . "_" . $counter);
         }
         
         $newTripDir = "data/trips/" . $newTripName;
