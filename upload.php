@@ -169,10 +169,10 @@ try {
     // Allow override from POST data
     $documentType = $_POST['type'] ?? $documentType;
     
-    // Validate file type by extension (more reliable than MIME type for HEIC)
+    // Validate file type by extension - only PDF and JPEG/JPG allowed
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'heic', 'webp', 'bmp', 'gif'];
-    $allowedMimeTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/webp', 'image/bmp', 'image/gif'];
+    $allowedExtensions = ['pdf', 'jpg', 'jpeg'];
+    $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/jpg'];
     
     if (!in_array($extension, $allowedExtensions) && !in_array($file['type'], $allowedMimeTypes)) {
         throw new Exception('Invalid file type. Only PDF and image files are allowed.');

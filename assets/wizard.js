@@ -271,9 +271,9 @@ async function handleFiles(files) {
 }
 
 function isValidFile(file) {
-    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/webp', 'image/bmp', 'image/gif'];
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg'];
     const extension = file.name.toLowerCase().split('.').pop();
-    const validExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'heic', 'webp', 'bmp', 'gif'];
+    const validExtensions = ['pdf', 'jpg', 'jpeg'];
     
     // Accept based on MIME type or file extension for better compatibility
     return validTypes.includes(file.type) || validExtensions.includes(extension);

@@ -433,42 +433,13 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
             if ($receipt['isImage']) {
                 $extension = strtolower(pathinfo($receipt['filename'], PATHINFO_EXTENSION));
                 
-                // For HEIC and TIFF, convert to JPEG using ImageMagick
-                if (in_array($extension, ['heic', 'tiff', 'tif'])) {
-                    $imageData = null;
-                    if (extension_loaded('imagick') && class_exists('Imagick')) {
-                        try {
-                            $imagick = new Imagick();
-                            $imagick->readImage($receipt['path']);
-                            $imagick->setImageFormat('jpeg');
-                            $imagick->setImageCompressionQuality(85);
-                            $imageData = base64_encode($imagick->getImageBlob());
-                            $imagick->clear();
-                        } catch (Exception $e) {
-                            error_log("HEIC/TIFF conversion failed: " . $e->getMessage());
-                        }
-                    }
-                    
-                    if ($imageData) {
-                        $html .= '
-                            <div class="receipt-image">
-                                <img src="data:image/jpeg;base64,' . $imageData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
-                            </div>';
-                    } else {
-                        $html .= '
-                            <div class="receipt-file">
-                                <strong>Image File</strong><br>
-                                Format not supported for display
-                            </div>';
-                    }
-                } else {
-                    // For PNG, JPG, JPEG - embed directly
+                // For JPG/JPEG - embed directly
+                if (in_array($extension, ['jpg', 'jpeg'])) {
                     $imageData = base64_encode(file_get_contents($receipt['path']));
-                    $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
                     
                     $html .= '
                         <div class="receipt-image">
-                            <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
+                            <img src="data:image/jpeg;base64,' . $imageData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
                         </div>';
                 }
             } else {
@@ -547,8 +518,8 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                 if ($thumbnailCreated && $thumbnailData) {
                     $html .= '
                         <div class="receipt-image">
-                            <img src="data:image/jpeg;base64,' . $thumbnailData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
-                            <p style="font-size: 10px; color: #666; margin-top: 5px;">PDF Preview</p>
+                            <img src="data:image/jpeg;base64,' . $thumbnailData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
+                            <p style="font-size: 10px; color: #666; margin-top: 5px;">Converted from PDF</p>
                         </div>';
                 } else {
                     $html .= '
@@ -557,6 +528,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                                 <div style="font-size: 24px; color: #6c757d; margin-bottom: 8px;">📄</div>
                                 <div style="font-size: 12px; color: #495057; font-weight: bold;">PDF Document</div>
                                 <div style="font-size: 10px; color: #6c757d; margin-top: 4px;">' . htmlspecialchars(basename($receipt['filename'])) . '</div>
+                                <div style="font-size: 10px; color: #dc3545; margin-top: 4px;">Conversion to JPG failed</div>
                             </div>
                         </div>';
                 }

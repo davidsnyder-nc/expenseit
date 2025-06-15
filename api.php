@@ -341,13 +341,13 @@ try {
                     $filename = basename($file);
                     $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                     
-                    // Skip TIFF files as they're not supported
-                    if (in_array($extension, ['tiff', 'tif'])) {
+                    // Only allow PDF and JPEG/JPG files
+                    if (!in_array($extension, ['pdf', 'jpg', 'jpeg'])) {
                         continue;
                     }
                     
                     $isPdf = $extension === 'pdf';
-                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'heic']);
+                    $isImage = in_array($extension, ['jpg', 'jpeg']);
                     
                     // Use relative web-accessible paths
                     $webPath = $targetDir . '/' . $filename;
