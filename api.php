@@ -332,9 +332,11 @@ try {
             exit;
         }
         
-        $tripName = sanitizeName($tripName);
-        $receiptsDir = 'data/trips/' . $tripName . '/receipts';
-        $archiveReceiptsDir = 'data/archive/' . $tripName . '/receipts';
+        // URL decode and convert to filesystem name
+        $displayName = urldecode($tripName);
+        $filesystemName = getFilesystemName($displayName);
+        $receiptsDir = 'data/trips/' . $filesystemName . '/receipts';
+        $archiveReceiptsDir = 'data/archive/' . $filesystemName . '/receipts';
         
         // Check both active and archived locations
         if (is_dir($receiptsDir)) {
@@ -394,9 +396,11 @@ try {
             exit;
         }
         
-        $tripName = sanitizeName($tripName);
-        $documentsDir = 'data/trips/' . $tripName . '/travel_documents';
-        $archiveDocumentsDir = 'data/archive/' . $tripName . '/travel_documents';
+        // URL decode and convert to filesystem name
+        $displayName = urldecode($tripName);
+        $filesystemName = getFilesystemName($displayName);
+        $documentsDir = 'data/trips/' . $filesystemName . '/travel_documents';
+        $archiveDocumentsDir = 'data/archive/' . $filesystemName . '/travel_documents';
         
         // Check both active and archived locations
         if (is_dir($documentsDir)) {
