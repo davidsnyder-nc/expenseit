@@ -39,50 +39,52 @@ function extractDestinationSimple($tripName) {
 
 function performSearch($query, $includeArchives = false) {
     $results = [];
-    $tripsDir = 'data/trips';
+    $searchDirs = ['data/trips'];
     
-    if (!is_dir($tripsDir)) {
-        return $results;
+    // Add archive directory to search if requested
+    if ($includeArchives) {
+        $searchDirs[] = 'data/archive';
     }
     
-    $tripDirs = glob($tripsDir . '/*', GLOB_ONLYDIR);
-    
-    foreach ($tripDirs as $tripDir) {
-        $tripName = basename($tripDir);
-        if ($tripName === 'temp') continue;
+    foreach ($searchDirs as $baseDir) {
+        if (!is_dir($baseDir)) continue;
         
-        $metadataPath = $tripDir . '/metadata.json';
-        $expensesPath = $tripDir . '/expenses.json';
+        $tripDirs = glob($baseDir . '/*', GLOB_ONLYDIR);
         
-        if (!file_exists($metadataPath)) continue;
+        foreach ($tripDirs as $tripDir) {
+            $tripName = basename($tripDir);
+            if ($tripName === 'temp') continue;
+            
+            $metadataPath = $tripDir . '/metadata.json';
+            $expensesPath = $tripDir . '/expenses.json';
+            
+            if (!file_exists($metadataPath)) continue;
+            
+            $metadata = json_decode(file_get_contents($metadataPath), true);
+            if (!$metadata) continue;
+            
+            $isArchived = ($baseDir === 'data/archive');
         
-        $metadata = json_decode(file_get_contents($metadataPath), true);
-        if (!$metadata) continue;
-        
-        // Skip archived trips if not included
-        if (!$includeArchives && isset($metadata['archived']) && $metadata['archived']) {
-            continue;
-        }
-        
-        // Search in trip metadata
-        $searchableMetadata = [
-            $metadata['name'] ?? '',
-            $metadata['destination'] ?? '',
-            $metadata['notes'] ?? '',
-            $metadata['start_date'] ?? '',
-            $metadata['end_date'] ?? ''
-        ];
-        
-        foreach ($searchableMetadata as $field) {
-            if (stripos($field, $query) !== false) {
-                $results[] = [
-                    'tripName' => $tripName,
-                    'type' => 'Trip Details',
-                    'content' => "Trip: {$metadata['name']} | Destination: {$metadata['destination']} | Notes: {$metadata['notes']}"
-                ];
-                break; // Avoid duplicate entries for the same trip
+            // Search in trip metadata
+            $searchableMetadata = [
+                $metadata['name'] ?? '',
+                $metadata['destination'] ?? '',
+                $metadata['notes'] ?? '',
+                $metadata['start_date'] ?? '',
+                $metadata['end_date'] ?? ''
+            ];
+            
+            foreach ($searchableMetadata as $field) {
+                if (stripos($field, $query) !== false) {
+                    $results[] = [
+                        'tripName' => $tripName,
+                        'type' => 'Trip Details' . ($isArchived ? ' (Archived)' : ''),
+                        'content' => "Trip: {$metadata['name']} | Destination: {$metadata['destination']} | Notes: {$metadata['notes']}",
+                        'archived' => $isArchived
+                    ];
+                    break; // Avoid duplicate entries for the same trip
+                }
             }
-        }
         
         // Search in expenses
         if (file_exists($expensesPath)) {
@@ -102,13 +104,15 @@ function performSearch($query, $includeArchives = false) {
                         $amount = number_format($expense['amount'] ?? 0, 2);
                         $results[] = [
                             'tripName' => $tripName,
-                            'type' => 'Expense',
-                            'content' => "Merchant: {$expense['merchant']} | Amount: \${$amount} | Category: {$expense['category']} | Note: {$expense['note']} | Date: {$expense['date']}"
+                            'type' => 'Expense' . ($isArchived ? ' (Archived)' : ''),
+                            'content' => "Merchant: {$expense['merchant']} | Amount: \${$amount} | Category: {$expense['category']} | Note: {$expense['note']} | Date: {$expense['date']}",
+                            'archived' => $isArchived
                         ];
                         break; // Avoid duplicate entries for the same expense
                     }
                 }
             }
+        }
         }
     }
     
@@ -179,7 +183,49 @@ try {
         echo json_encode(['success' => true, 'trips' => $trips]);
         
     } elseif ($action === 'archived_trips') {
-        echo json_encode(['success' => true, 'trips' => []]);
+        $trips = [];
+        $archiveDir = 'data/archive';
+        
+        if (is_dir($archiveDir)) {
+            $tripDirs = glob($archiveDir . '/*', GLOB_ONLYDIR);
+            
+            foreach ($tripDirs as $tripDir) {
+                $tripName = basename($tripDir);
+                $metadataPath = $tripDir . '/metadata.json';
+                
+                if (file_exists($metadataPath)) {
+                    $metadata = json_decode(file_get_contents($metadataPath), true) ?: [];
+                    
+                    $expensesPath = $tripDir . '/expenses.json';
+                    $expenses = [];
+                    if (file_exists($expensesPath)) {
+                        $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
+                    }
+                    
+                    $total = 0;
+                    foreach ($expenses as $expense) {
+                        $total += floatval($expense['amount'] ?? 0);
+                    }
+                    
+                    $trips[] = [
+                        'name' => $tripName,
+                        'metadata' => $metadata,
+                        'expenseCount' => count($expenses),
+                        'total' => number_format($total, 2),
+                        'archived' => true
+                    ];
+                }
+            }
+            
+            // Sort by archived date (newest first)
+            usort($trips, function($a, $b) {
+                $dateA = $a['metadata']['archivedDate'] ?? '';
+                $dateB = $b['metadata']['archivedDate'] ?? '';
+                return strtotime($dateB) <=> strtotime($dateA);
+            });
+        }
+        
+        echo json_encode(['success' => true, 'trips' => $trips]);
         
     } elseif ($action === 'trip') {
         $tripName = $_GET['name'] ?? '';

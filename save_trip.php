@@ -392,82 +392,36 @@ function generateUniqueFilename($originalName, $directory, $extension) {
 function archiveTrip($tripName) {
     $tripName = sanitizeName($tripName);
     $tripDir = "data/trips/" . $tripName;
-    $archiveDir = "data/archive";
+    $archiveBaseDir = "data/archive";
+    $archiveDestDir = $archiveBaseDir . "/" . $tripName;
     
     if (!is_dir($tripDir)) {
         throw new Exception('Trip not found');
     }
     
     // Create archive directory if it doesn't exist
-    if (!is_dir($archiveDir)) {
-        mkdir($archiveDir, 0755, true);
+    if (!is_dir($archiveBaseDir)) {
+        mkdir($archiveBaseDir, 0755, true);
     }
     
-    // Load trip metadata for archive info
-    $metadataPath = $tripDir . '/metadata.json';
-    $expensesPath = $tripDir . '/expenses.json';
-    
-    $metadata = [];
-    $expenseCount = 0;
-    $total = 0;
-    
-    if (file_exists($metadataPath)) {
-        $metadata = json_decode(file_get_contents($metadataPath), true) ?: [];
+    // If archived trip already exists, remove it first
+    if (is_dir($archiveDestDir)) {
+        deleteDirectory($archiveDestDir);
     }
     
-    if (file_exists($expensesPath)) {
-        $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
-        $expenseCount = count($expenses);
-        $total = array_sum(array_column($expenses, 'amount'));
-    }
-    
-    // Create archive metadata
-    $archiveMetadata = [
-        'metadata' => $metadata,
-        'expenseCount' => $expenseCount,
-        'total' => number_format($total, 2),
-        'archivedDate' => date('Y-m-d H:i:s')
-    ];
-    
-    // Save metadata separately for quick loading
-    $metadataFile = $archiveDir . '/' . $tripName . '_metadata.json';
-    file_put_contents($metadataFile, json_encode($archiveMetadata, JSON_PRETTY_PRINT));
-    
-    // Create zip file
-    $zipPath = $archiveDir . '/' . $tripName . '.zip';
-    $zip = new ZipArchive();
-    
-    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-        // Add all files and directories to zip
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($tripDir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-        
-        foreach ($iterator as $file) {
-            $filePath = $file->getRealPath();
-            $relativePath = substr($filePath, strlen($tripDir) + 1);
-            
-            if ($file->isDir()) {
-                $zip->addEmptyDir($relativePath);
-            } else {
-                $zip->addFile($filePath, $relativePath);
-            }
+    // Move trip directory to archive
+    if (rename($tripDir, $archiveDestDir)) {
+        // Add archived timestamp to metadata
+        $metadataPath = $archiveDestDir . '/metadata.json';
+        if (file_exists($metadataPath)) {
+            $metadata = json_decode(file_get_contents($metadataPath), true) ?: [];
+            $metadata['archivedDate'] = date('Y-m-d H:i:s');
+            file_put_contents($metadataPath, json_encode($metadata, JSON_PRETTY_PRINT));
         }
         
-        $zip->close();
-        
-        // Delete original trip directory after successful archiving
-        if (deleteDirectory($tripDir)) {
-            return ['success' => true, 'message' => 'Trip archived successfully'];
-        } else {
-            // Clean up zip file if directory deletion failed
-            unlink($zipPath);
-            unlink($metadataFile);
-            throw new Exception('Failed to remove original trip after archiving');
-        }
+        return ['success' => true, 'message' => 'Trip archived successfully'];
     } else {
-        throw new Exception('Failed to create archive zip file');
+        throw new Exception('Failed to move trip to archive');
     }
 }
 
