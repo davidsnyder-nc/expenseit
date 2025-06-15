@@ -429,7 +429,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                         <small>' . formatFileSize($receipt['size']) . '</small>
                     </div>';
             
-            // Embed images in PDF, show filename for PDFs
+            // Embed images and create thumbnails for PDFs
             if ($receipt['isImage']) {
                 $imageData = base64_encode(file_get_contents($receipt['path']));
                 $extension = strtolower(pathinfo($receipt['filename'], PATHINFO_EXTENSION));
@@ -440,10 +440,39 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                         <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
                     </div>';
             } else {
-                $html .= '
-                    <div class="receipt-file">
-                        <p style="color: #666; font-style: italic; margin-top: 10px;">PDF attachment: ' . htmlspecialchars($receipt['filename']) . '</p>
-                    </div>';
+                // For PDFs, try to convert first page to image using Imagick if available
+                $thumbnailCreated = false;
+                if (extension_loaded('imagick') && class_exists('Imagick')) {
+                    try {
+                        $imagick = new Imagick();
+                        $imagick->setResolution(150, 150);
+                        $imagick->readImage($receipt['path'] . '[0]'); // First page only
+                        $imagick->setImageFormat('jpeg');
+                        $imagick->scaleImage(200, 150, true);
+                        
+                        $thumbnailData = base64_encode($imagick->getImageBlob());
+                        $html .= '
+                            <div class="receipt-image">
+                                <img src="data:image/jpeg;base64,' . $thumbnailData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
+                                <p style="font-size: 10px; color: #666; margin-top: 5px;">PDF Preview</p>
+                            </div>';
+                        $thumbnailCreated = true;
+                        $imagick->clear();
+                    } catch (Exception $e) {
+                        // Fall back to text representation
+                    }
+                }
+                
+                if (!$thumbnailCreated) {
+                    $html .= '
+                        <div class="receipt-file">
+                            <div style="background: #f8f9fa; border: 2px dashed #dee2e6; padding: 20px; text-align: center; margin-top: 10px; border-radius: 8px;">
+                                <div style="font-size: 24px; color: #6c757d; margin-bottom: 8px;">📄</div>
+                                <div style="font-size: 12px; color: #495057; font-weight: bold;">PDF Document</div>
+                                <div style="font-size: 10px; color: #6c757d; margin-top: 4px;">' . htmlspecialchars(basename($receipt['filename'])) . '</div>
+                            </div>
+                        </div>';
+                }
             }
             
             $html .= '</div>';
@@ -455,9 +484,6 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
     }
     
     $html .= '
-        <div class="footer">
-            <p>Generated on ' . date('F j, Y \a\t g:i A') . ' by Expense Wizard</p>
-        </div>
     </body>
     </html>';
     
