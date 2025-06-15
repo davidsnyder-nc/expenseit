@@ -923,11 +923,18 @@ body {
 
 .trip-summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 2rem;
     align-items: start;
     padding: 1rem 0;
     margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .trip-summary-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -939,8 +946,10 @@ body {
 
 .trip-stat {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .trip-stat .icon {
@@ -968,6 +977,12 @@ body {
     color: #d69e2e;
 }
 
+.trip-stat .details {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
 .trip-stat .details h3 {
     margin: 0;
     font-size: 0.875rem;
@@ -975,6 +990,9 @@ body {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .trip-stat .details p {
@@ -982,6 +1000,8 @@ body {
     font-size: 1.25rem;
     font-weight: 600;
     color: #2d3748;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .trip-actions .btn {
