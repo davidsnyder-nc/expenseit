@@ -1,4 +1,6 @@
 <?php
+require_once 'extract_destination.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
@@ -118,6 +120,15 @@ function loadTripSummary($tripName, $tripDir) {
     $metadata = json_decode(file_get_contents($metadataPath), true);
     if (!$metadata) {
         return null;
+    }
+    
+    // Extract destination if not already set
+    if (empty($metadata['destination'])) {
+        $destination = extractDestination($metadata['name'] ?? $tripName);
+        $metadata['destination'] = $destination;
+        
+        // Save the updated metadata
+        file_put_contents($metadataPath, json_encode($metadata, JSON_PRETTY_PRINT));
     }
     
     // Load expenses to calculate totals
