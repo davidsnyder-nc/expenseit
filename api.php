@@ -168,7 +168,7 @@ try {
                 }
                 
                 $trips[] = [
-                    'name' => $tripName,
+                    'name' => $metadata['name'] ?? $tripName,
                     'metadata' => $metadata,
                     'expenseCount' => count($expenses),
                     'total' => number_format($total, 2)
@@ -177,8 +177,10 @@ try {
             
             usort($trips, function($a, $b) {
                 // Sort by creation time (newest first) - use directory modification time
-                $dirA = 'data/trips/' . sanitizeName($a['name']);
-                $dirB = 'data/trips/' . sanitizeName($b['name']);
+                $fsNameA = $a['metadata']['filesystem_name'] ?? getFilesystemName($a['name']);
+                $fsNameB = $b['metadata']['filesystem_name'] ?? getFilesystemName($b['name']);
+                $dirA = 'data/trips/' . $fsNameA;
+                $dirB = 'data/trips/' . $fsNameB;
                 $timeA = is_dir($dirA) ? filemtime($dirA) : 0;
                 $timeB = is_dir($dirB) ? filemtime($dirB) : 0;
                 return $timeB <=> $timeA;
