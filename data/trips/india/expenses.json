@@ -1,0 +1,29 @@
+[
+    {
+        "id": "wtzoudima",
+        "date": "2025-06-14",
+        "merchant": "WALMART Supercenter",
+        "amount": 12.14,
+        "category": "Groceries",
+        "note": "Groceries including milk, bread, bananas, and eggs",
+        "source": "receipts\/5.png"
+    },
+    {
+        "id": "g9ej5v43r",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
+        "source": "receipts\/1.jpg"
+    },
+    {
+        "id": "82o27f3ma",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Purchase of various grocery items including fruits, vegetables, dairy, and snacks.",
+        "source": "receipts\/2.pdf"
+    }
+]

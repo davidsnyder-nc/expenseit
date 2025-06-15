@@ -244,13 +244,13 @@ function handleFiles(files) {
         if (isValidFile(file)) {
             uploadFile(file);
         } else {
-            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF or image files.`);
+            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF, JPEG, PNG, HEIC, or TIFF files.`);
         }
     });
 }
 
 function isValidFile(file) {
-    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/tiff', 'image/tif'];
     return validTypes.includes(file.type);
 }
 
@@ -536,7 +536,7 @@ function setupReviewStep() {
                     `).join('')}
                 </tbody>
             </table>
-            <div style="margin-top: 1rem;">
+            <div style="margin-top: 1rem; padding: 0 1rem;">
                 <button class="btn btn-outline" onclick="addManualExpense()">
                     <i data-feather="plus"></i> Add Manual Expense
                 </button>

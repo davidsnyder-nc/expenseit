@@ -25,9 +25,9 @@ try {
     $tripName = $_POST['tripName'] ?? 'temp';
     
     // Validate file type
-    $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/tiff', 'image/tif'];
     if (!in_array($file['type'], $allowedTypes)) {
-        throw new Exception('Invalid file type. Only PDF and image files are allowed.');
+        throw new Exception('Invalid file type. Only PDF, JPEG, PNG, HEIC, and TIFF files are allowed.');
     }
     
     // Validate file size (max 10MB)
