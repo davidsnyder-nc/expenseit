@@ -1,4 +1,4 @@
-modules = ["php"]
+modules = ["php", "php-8.2"]
 
 [nix]
 channel = "stable-24_05"
@@ -26,3 +26,7 @@ waitForPort = 5000
 
 [deployment]
 run = ["sh", "-c", "php -S 0.0.0.0:5000"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
