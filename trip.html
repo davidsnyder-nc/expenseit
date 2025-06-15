@@ -108,30 +108,30 @@
 
             tripContent.innerHTML = `
                 <div class="trip-summary">
-                    <div class="trip-summary-grid">
-                        <div class="trip-stat">
-                            <div class="icon duration">
+                    <div class="trip-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon duration">
                                 <i data-feather="calendar"></i>
                             </div>
-                            <div class="details">
+                            <div class="stat-content">
                                 <h3>Duration</h3>
                                 <p>${formatDate(trip.metadata.start_date)} - ${formatDate(trip.metadata.end_date)}</p>
                             </div>
                         </div>
-                        <div class="trip-stat">
-                            <div class="icon expenses">
+                        <div class="stat-item">
+                            <div class="stat-icon expenses">
                                 <i data-feather="file-text"></i>
                             </div>
-                            <div class="details">
+                            <div class="stat-content">
                                 <h3>Expenses</h3>
                                 <p>${expenses.length} items</p>
                             </div>
                         </div>
-                        <div class="trip-stat">
-                            <div class="icon total">
+                        <div class="stat-item">
+                            <div class="stat-icon total">
                                 <i data-feather="dollar-sign"></i>
                             </div>
-                            <div class="details">
+                            <div class="stat-content">
                                 <h3>Total</h3>
                                 <p>$${total.toFixed(2)}</p>
                             </div>

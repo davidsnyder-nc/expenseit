@@ -921,87 +921,76 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-.trip-summary-grid {
+.trip-stats {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 2rem;
-    align-items: start;
-    padding: 1rem 0;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
-@media (max-width: 1024px) {
-    .trip-summary-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-}
-
 @media (max-width: 768px) {
-    .trip-summary-grid {
+    .trip-stats {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
 }
 
-.trip-stat {
+.stat-item {
     display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    min-width: 0;
-    overflow: hidden;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
 }
 
-.trip-stat .icon {
-    width: 40px;
-    height: 40px;
+.stat-icon {
+    width: 48px;
+    height: 48px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
+    flex-shrink: 0;
 }
 
-.trip-stat .icon.duration {
+.stat-icon.duration {
     background: #fed7d7;
     color: #e53e3e;
 }
 
-.trip-stat .icon.expenses {
+.stat-icon.expenses {
     background: #f0fff4;
     color: #48bb78;
 }
 
-.trip-stat .icon.total {
+.stat-icon.total {
     background: #fef5e7;
     color: #d69e2e;
 }
 
-.trip-stat .details {
+.stat-content {
     flex: 1;
     min-width: 0;
-    overflow: hidden;
 }
 
-.trip-stat .details h3 {
-    margin: 0;
+.stat-content h3 {
+    margin: 0 0 0.25rem 0;
     font-size: 0.875rem;
     color: #718096;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-.trip-stat .details p {
-    margin: 0.25rem 0 0 0;
-    font-size: 1.25rem;
+.stat-content p {
+    margin: 0;
+    font-size: 1.125rem;
     font-weight: 600;
     color: #2d3748;
     word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 .trip-actions .btn {
@@ -1682,10 +1671,9 @@ body {
 }
 
 .trip-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     padding: 1.5rem 0 0 0;
     border-top: 1px solid #e2e8f0;
     margin-top: 1.5rem;
@@ -1693,16 +1681,14 @@ body {
 
 @media (max-width: 768px) {
     .trip-actions {
-        gap: 0.5rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
         padding: 1rem 0 0 0;
-        justify-content: center;
     }
     
     .trip-actions .btn {
-        padding: 0.625rem 1rem;
-        font-size: 0.8rem;
-        flex: 1 1 calc(50% - 0.25rem);
-        max-width: calc(50% - 0.25rem);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
     }
 }
 
