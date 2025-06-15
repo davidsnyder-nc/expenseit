@@ -251,9 +251,12 @@
         }
 
         async function deleteExpense(expenseId) {
-            if (!confirm('Are you sure you want to delete this expense?')) {
-                return;
-            }
+            showConfirmModal('Delete Expense', 'Are you sure you want to delete this expense?', async () => {
+                await executeDeleteExpense(expenseId);
+            });
+        }
+
+        async function executeDeleteExpense(expenseId) {
 
             try {
                 const response = await fetch('save_trip.php', {
@@ -270,14 +273,15 @@
 
                 const result = await response.json();
                 if (result.success) {
+                    showSuccessMessage('Expense deleted successfully');
                     // Reload trip details
                     loadTripDetails(currentTrip.name);
                 } else {
-                    alert('Error deleting expense');
+                    showErrorMessage('Error deleting expense');
                 }
             } catch (error) {
                 console.error('Error deleting expense:', error);
-                alert('Error deleting expense');
+                showErrorMessage('Error deleting expense');
             }
         }
 
@@ -293,20 +297,23 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                 } else {
-                    alert('Error generating PDF report');
+                    showErrorMessage('Error generating PDF report');
                 }
             } catch (error) {
                 console.error('Error downloading report:', error);
-                alert('Error downloading report');
+                showErrorMessage('Error downloading report');
             }
         }
 
         async function deleteTrip() {
             const tripName = currentTrip.metadata.name;
             
-            if (!confirm(`Are you sure you want to delete "${tripName}"?\n\nThis will permanently delete all trip data including expenses and receipts. This action cannot be undone.`)) {
-                return;
-            }
+            showConfirmModal('Delete Trip', `Delete "${tripName}"?\n\nThis will permanently delete all trip data including expenses and receipts. This action cannot be undone.`, async () => {
+                await executeDeleteTrip(tripName);
+            });
+        }
+
+        async function executeDeleteTrip(tripName) {
 
             try {
                 const response = await fetch('save_trip.php', {
@@ -440,31 +447,6 @@
         function closeModal(event) {
             if (event && event.target !== event.currentTarget) return;
             
-            const modal = document.getElementById('receiptModal');
-            modal.style.display = 'none';
-                    <div style="text-align: center; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                        <a href="${fullPath}" target="_blank" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; text-decoration: none;">
-                            <i data-feather="external-link"></i> Open PDF
-                        </a>
-                        <a href="${fullPath}" download class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; text-decoration: none;">
-                            <i data-feather="download"></i> Download
-                        </a>
-                    </div>`;
-            } else {
-                modalContent.innerHTML = `
-                    <div style="text-align: center;">
-                        <img src="${displayUrl || fullPath}" 
-                             alt="${filename}" 
-                             style="max-width: 100%; max-height: 70vh; border-radius: 8px;" 
-                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='; this.onerror=null;">
-                    </div>`;
-            }
-            
-            modal.style.display = 'flex';
-            feather.replace();
-        }
-
-        function closeModal() {
             const modal = document.getElementById('receiptModal');
             modal.style.display = 'none';
         }
