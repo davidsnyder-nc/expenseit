@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once 'gemini_api.php';
+// Removed gemini_api.php include to prevent function redeclaration
 
 try {
     // Get request data

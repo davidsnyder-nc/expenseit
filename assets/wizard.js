@@ -600,11 +600,19 @@ async function finalizeTrip() {
         console.error('Processing error:', error);
     }
     
-    // Fallback to review step if processing fails
-    tripData.needsReview = true;
-    currentStep = 2;
-    updateWizard();
-    setupReviewStep();
+    // Check if we have any expenses processed
+    if (tripData.expenses && tripData.expenses.length > 0) {
+        // If we have expenses, go to completion
+        currentStep = 3;
+        updateWizard();
+        setupCompletionStep();
+    } else {
+        // Only show review step if we have uploaded files but no expenses
+        tripData.needsReview = true;
+        currentStep = 2;
+        updateWizard();
+        setupReviewStep();
+    }
 }
 
 function displayUploadedFile(file, path) {
