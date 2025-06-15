@@ -102,15 +102,15 @@ body {
 }
 
 .btn-primary {
-    background-color: #4299e1;
+    background-color: #e53e3e;
     color: white;
-    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.2);
+    box-shadow: 0 2px 4px rgba(229, 62, 62, 0.2);
 }
 
 .btn-primary:hover {
-    background-color: #3182ce;
+    background-color: #c53030;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+    box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
 }
 
 .btn-secondary {
@@ -124,12 +124,12 @@ body {
 
 .btn-outline {
     background-color: transparent;
-    color: #4299e1;
-    border: 2px solid #4299e1;
+    color: #e53e3e;
+    border: 2px solid #e53e3e;
 }
 
 .btn-outline:hover {
-    background-color: #4299e1;
+    background-color: #e53e3e;
     color: white;
 }
 
@@ -641,7 +641,7 @@ body {
 }
 
 .btn-icon:hover {
-    background: #4299e1;
+    background: #e53e3e;
     color: white;
     transform: translateY(-1px);
 }
@@ -851,8 +851,8 @@ body {
 }
 
 .trip-stat .icon.duration {
-    background: #ebf8ff;
-    color: #4299e1;
+    background: #fed7d7;
+    color: #e53e3e;
 }
 
 .trip-stat .icon.expenses {
@@ -895,7 +895,7 @@ body {
 }
 
 .trip-actions .btn-primary {
-    background: #4299e1;
+    background: #e53e3e;
     color: white;
     border: none;
 }
@@ -948,7 +948,7 @@ body {
 
 .progress-fill {
     height: 4px;
-    background-color: #4299e1;
+    background-color: #e53e3e;
     border-radius: 2px;
     transition: width 0.3s ease;
     width: 20%;
@@ -1076,8 +1076,8 @@ body {
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    border-color: #e53e3e;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
 }
 
 .form-group textarea {
@@ -1108,8 +1108,8 @@ body {
 
 .upload-dropzone:hover,
 .upload-dropzone.dragover {
-    border-color: #4299e1;
-    background-color: #ebf8ff;
+    border-color: #e53e3e;
+    background-color: #fed7d7;
 }
 
 .upload-dropzone i {
@@ -1210,7 +1210,7 @@ body {
 
 .processing-spinner {
     font-size: 3rem;
-    color: #4299e1;
+    color: #e53e3e;
     margin-bottom: 2rem;
     animation: spin 1s linear infinite;
 }
