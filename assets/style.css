@@ -1634,17 +1634,29 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-/* Receipts Section Styles */
+/* Travel Documents and Receipts Section Styles */
+.travel-documents-section,
 .receipts-section {
     margin-bottom: 2rem;
 }
 
+.travel-documents-section h2,
+.receipts-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+}
+
+.documents-grid,
 .receipts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1rem;
 }
 
+.document-item,
 .receipt-item {
     background: white;
     border-radius: 8px;
@@ -1653,10 +1665,12 @@ body {
     transition: box-shadow 0.2s;
 }
 
+.document-item:hover,
 .receipt-item:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.document-preview,
 .receipt-preview {
     height: 120px;
     display: flex;
@@ -1688,10 +1702,12 @@ body {
     color: #cbd5e0;
 }
 
+.document-info,
 .receipt-info {
     margin-bottom: 0.75rem;
 }
 
+.document-name,
 .receipt-name {
     font-weight: 500;
     color: #1a202c;
@@ -1700,11 +1716,13 @@ body {
     word-break: break-word;
 }
 
+.document-size,
 .receipt-size {
     font-size: 0.75rem;
     color: #718096;
 }
 
+.document-type,
 .receipt-type {
     font-size: 0.7rem;
     color: #4299e1;
@@ -1712,6 +1730,7 @@ body {
     margin-top: 0.25rem;
 }
 
+.document-actions,
 .receipt-actions {
     display: flex;
     gap: 0.5rem;
