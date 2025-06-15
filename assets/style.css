@@ -559,10 +559,16 @@ body {
     overflow: hidden;
 }
 
+.trips-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
+    min-width: 800px;
 }
 
 .data-table th,
@@ -571,6 +577,19 @@ body {
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
     vertical-align: middle;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .data-table {
+        min-width: 700px;
+    }
 }
 
 .data-table th {
@@ -594,6 +613,26 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+.trip-name-cell.clickable {
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.trip-name-cell.clickable:hover {
+    background: #fef5e7;
+    color: #e53e3e;
+}
+
+.trip-name-cell.clickable:hover strong {
+    text-decoration: underline;
+}
+
+.trip-name-cell.clickable strong {
+    color: #e53e3e;
 }
 
 .trip-name-cell strong {

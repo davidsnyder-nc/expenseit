@@ -234,7 +234,7 @@
                                         <input type="checkbox" class="trip-checkbox" value="${trip.name}" onchange="updateSelection()">
                                     </td>
                                     <td>
-                                        <div class="trip-name-cell">
+                                        <div class="trip-name-cell clickable" onclick="viewTrip('${trip.name}')">
                                             <strong>${trip.metadata.name || trip.name}</strong>
                                         </div>
                                     </td>
