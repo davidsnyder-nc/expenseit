@@ -419,9 +419,21 @@ function toggleExpenseExclusion($tripName, $expenseId) {
  */
 function deleteTrip($tripName) {
     $tripName = sanitizeName($tripName);
-    $tripDir = "data/trips/" . $tripName;
+    $activeTripDir = "data/trips/" . $tripName;
+    $archivedTripDir = "data/archive/" . $tripName;
     
-    if (!is_dir($tripDir)) {
+    $tripDir = null;
+    
+    // Check if trip exists in active trips
+    if (is_dir($activeTripDir)) {
+        $tripDir = $activeTripDir;
+    }
+    // Check if trip exists in archived trips
+    elseif (is_dir($archivedTripDir)) {
+        $tripDir = $archivedTripDir;
+    }
+    
+    if (!$tripDir) {
         throw new Exception('Trip not found');
     }
     
