@@ -25,6 +25,21 @@
         </div>
     </div>
 
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Receipt</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
         // Initialize feather icons
@@ -172,9 +187,9 @@
                                                 <td>${expense.note || '-'}</td>
                                                 <td>
                                                     ${expense.source ? `
-                                                        <a href="data/trips/${encodeURIComponent(currentTrip.name)}/${expense.source}" target="_blank" class="receipt-link">
-                                                            <i data-feather="file"></i> View
-                                                        </a>
+                                                        <button class="btn btn-small" onclick="viewReceipt('${expense.source}', '${expense.merchant || 'Receipt'}')">
+                                                            <i data-feather="eye"></i> View
+                                                        </button>
                                                     ` : '-'}
                                                 </td>
                                                 <td>
@@ -356,9 +371,9 @@
                             <div class="receipt-size">${formatFileSize(receipt.size)}</div>
                         </div>
                         <div class="receipt-actions">
-                            <a href="data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${receipt.filename}" target="_blank" class="btn btn-small">
+                            <button class="btn btn-small" onclick="viewReceipt('${receipt.filename}', '${receipt.filename}')">
                                 <i data-feather="eye"></i> View
-                            </a>
+                            </button>
                             <a href="data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${receipt.filename}" download class="btn btn-small btn-secondary">
                                 <i data-feather="download"></i> Download
                             </a>
@@ -387,6 +402,57 @@
                 year: 'numeric'
             });
         }
+
+        // Modal functions
+        function viewReceipt(receiptPath, title = 'Receipt') {
+            const modal = document.getElementById('receiptModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTitle.textContent = title;
+            
+            // Fix the file path - remove duplicated 'receipts/' and handle URL encoding
+            let cleanPath = receiptPath;
+            if (cleanPath.startsWith('receipts/')) {
+                cleanPath = cleanPath.substring(9);
+            }
+            
+            const fullPath = `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(cleanPath)}`;
+            
+            // Determine file type and display accordingly
+            const fileExtension = cleanPath.toLowerCase().split('.').pop();
+            
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+                modalContent.innerHTML = `<img src="${fullPath}" alt="${title}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='; this.onerror=null;">`;
+            } else if (fileExtension === 'pdf') {
+                modalContent.innerHTML = `<iframe src="${fullPath}" onload="this.style.display='block'" onerror="this.innerHTML='<p>PDF could not be loaded. <a href=&quot;${fullPath}&quot; target=&quot;_blank&quot;>Click here to download</a></p>'"></iframe>`;
+            } else {
+                modalContent.innerHTML = `<p>File type not supported for preview. <a href="${fullPath}" target="_blank" download>Click here to download</a></p>`;
+            }
+            
+            modal.style.display = 'flex';
+            feather.replace();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('receiptModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('receiptModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
