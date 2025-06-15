@@ -310,6 +310,21 @@ function generatePDFHTML($metadata, $expenses, $total, $taxTotal, $includedExpen
                         <td>' . htmlspecialchars($expense['note'] ?? '') . '</td>
                         <td class="amount">$' . number_format(floatval($expense['amount'] ?? 0), 2) . '</td>
                     </tr>';
+                
+                // Add daily breakdown for hotel stays
+                if (($expense['is_hotel_stay'] ?? false) && !empty($expense['daily_breakdown'])) {
+                    foreach ($expense['daily_breakdown'] as $day) {
+                        $html .= '
+                    <tr style="background: #f8f9fa; font-size: 11px;">
+                        <td style="padding-left: 20px;">' . formatDate($day['date'] ?? '') . '</td>
+                        <td style="padding-left: 20px;">└ Daily Rate</td>
+                        <td style="padding-left: 20px;">Room: $' . number_format(floatval($day['room_rate'] ?? 0), 2) . 
+                        ' + Tax: $' . number_format(floatval($day['tax_rate'] ?? 0), 2) . 
+                        ' (' . htmlspecialchars($day['tax_percentage'] ?? '') . ')</td>
+                        <td class="amount">$' . number_format(floatval($day['daily_total'] ?? 0), 2) . '</td>
+                    </tr>';
+                    }
+                }
             }
             
             // Category total

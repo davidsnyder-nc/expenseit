@@ -659,6 +659,13 @@
                         plainText += `\t[EXCLUDED]`;
                     }
                     plainText += `\n`;
+                    
+                    // Add daily breakdown for hotel stays
+                    if (expense.is_hotel_stay && expense.daily_breakdown && expense.daily_breakdown.length > 0) {
+                        expense.daily_breakdown.forEach(day => {
+                            plainText += `\t\t${formatDate(day.date)}\t  └ Daily Rate\tRoom: $${parseFloat(day.room_rate || 0).toFixed(2)} + Tax: $${parseFloat(day.tax_rate || 0).toFixed(2)} (${day.tax_percentage || ''})\t$${parseFloat(day.daily_total || 0).toFixed(2)}\n`;
+                        });
+                    }
                 });
                 plainText += `\n`;
             });
