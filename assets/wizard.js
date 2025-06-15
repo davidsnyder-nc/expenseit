@@ -260,10 +260,14 @@ async function handleFiles(files) {
     for (const file of validFiles) {
         try {
             await uploadFileOnly(file);
+            console.log(`Successfully uploaded: ${file.name}`);
         } catch (error) {
+            console.error(`Upload failed for ${file.name}:`, error);
             showErrorMessage(`Failed to upload ${file.name}: ${error.message}`);
         }
     }
+    
+    console.log(`Total files uploaded: ${tripData.files.length} of ${validFiles.length} attempted`);
     
     // Start automatic processing
     if (tripData.files.length > 0) {
@@ -272,9 +276,9 @@ async function handleFiles(files) {
 }
 
 function isValidFile(file) {
-    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg'];
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
     const extension = file.name.toLowerCase().split('.').pop();
-    const validExtensions = ['pdf', 'jpg', 'jpeg'];
+    const validExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
     
     // Accept based on MIME type or file extension for better compatibility
     return validTypes.includes(file.type) || validExtensions.includes(extension);

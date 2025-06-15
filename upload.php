@@ -155,9 +155,9 @@ try {
     $fileName = strtolower($file['name']);
     $documentType = 'receipt'; // default
     
-    // Enhanced travel document keywords
+    // Enhanced travel document keywords (including common misspellings)
     $travelKeywords = [
-        'itinerary', 'confirmation', 'boarding', 'flight', 'airline',
+        'itinerary', 'itenary', 'itenery', 'confirmation', 'boarding', 'flight', 'airline',
         'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
         'american airlines', 'delta', 'united', 'southwest', 'jetblue',
         'marriott', 'hilton', 'hyatt', 'homewood', 'rental', 'car',
@@ -195,10 +195,10 @@ try {
     // Allow override from POST data
     $documentType = $_POST['type'] ?? $documentType;
     
-    // Validate file type by extension - only PDF and JPEG/JPG allowed
+    // Validate file type by extension - PDF and image files allowed
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExtensions = ['pdf', 'jpg', 'jpeg'];
-    $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/jpg'];
+    $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+    $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
     
     if (!in_array($extension, $allowedExtensions) && !in_array($file['type'], $allowedMimeTypes)) {
         throw new Exception('Invalid file type. Only PDF and image files are allowed.');
