@@ -231,14 +231,13 @@
                                                     ` : '-'}
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-small" onclick="editExpense('${expense.id}')">
+                                                    <button class="btn btn-small" onclick="editExpense('${expense.id}')" title="Edit">
                                                         <i data-feather="edit-2"></i>
                                                     </button>
-                                                    <button class="btn btn-small ${expense.excluded ? 'btn-success' : 'btn-warning'}" onclick="toggleExpenseExclusion('${expense.id}')">
+                                                    <button class="btn btn-small ${expense.excluded ? 'btn-success' : 'btn-warning'}" onclick="toggleExpenseExclusion('${expense.id}')" title="${expense.excluded ? 'Include' : 'Exclude'}">
                                                         <i data-feather="${expense.excluded ? 'eye' : 'eye-off'}"></i>
-                                                        ${expense.excluded ? 'Include' : 'Exclude'}
                                                     </button>
-                                                    <button class="btn btn-small btn-danger" onclick="deleteExpense('${expense.id}')">
+                                                    <button class="btn btn-small btn-danger" onclick="deleteExpense('${expense.id}')" title="Delete">
                                                         <i data-feather="trash-2"></i>
                                                     </button>
                                                 </td>
