@@ -219,6 +219,29 @@ function validateTripDate($dateString) {
 }
 
 /**
+ * Parse natural language response when JSON parsing fails
+ */
+function parseNaturalLanguageResponse($content) {
+    $details = [];
+    
+    // Extract trip name patterns
+    if (preg_match('/(?:trip.*?to|destination.*?is|traveling.*?to|visiting)\s*:?\s*([A-Za-z\s,]+)/i', $content, $matches)) {
+        $details['tripName'] = trim($matches[1]);
+    }
+    
+    // Extract date patterns
+    if (preg_match('/(?:start|departure|from).*?(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})/i', $content, $matches)) {
+        $details['startDate'] = $matches[1];
+    }
+    
+    if (preg_match('/(?:end|return|to).*?(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})/i', $content, $matches)) {
+        $details['endDate'] = $matches[1];
+    }
+    
+    return !empty($details) ? $details : null;
+}
+
+/**
  * Call Gemini Vision API for image analysis
  */
 function callGeminiVisionAPI($prompt, $imagePath) {
