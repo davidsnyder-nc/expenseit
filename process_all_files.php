@@ -170,7 +170,9 @@ try {
                     'note' => $analysis['note'] ?? 'Receipt',
                     'source' => 'receipts/' . $fileName,
                     'is_travel_document' => false,
-                    'gemini_processed' => $analysis['gemini_processed'] ?? false
+                    'tax_amount' => floatval($analysis['tax_amount'] ?? 0),
+                    'gemini_processed' => $analysis['gemini_processed'] ?? false,
+                    'excluded' => false
                 ];
                 
                 $expenses[] = $expense;
@@ -212,6 +214,25 @@ try {
             }
             if (isset($analysis['end_date'])) {
                 $tripMetadata['end_date'] = $analysis['end_date'];
+            }
+            
+            // Include travel documents as expenses by default (user can exclude later)
+            if (isset($analysis['amount']) && floatval($analysis['amount']) > 0) {
+                $expense = [
+                    'id' => uniqid(),
+                    'date' => $analysis['date'] ?? date('Y-m-d'),
+                    'merchant' => $analysis['merchant'] ?? 'Travel Service',
+                    'amount' => floatval($analysis['amount']),
+                    'category' => $analysis['category'] ?? 'Travel',
+                    'note' => $analysis['note'] ?? 'Travel Document',
+                    'source' => 'travel_documents/' . $fileName,
+                    'is_travel_document' => true,
+                    'tax_amount' => floatval($analysis['tax_amount'] ?? 0),
+                    'gemini_processed' => $analysis['gemini_processed'] ?? false,
+                    'excluded' => false // Can be toggled by user
+                ];
+                
+                $expenses[] = $expense;
             }
         }
     }

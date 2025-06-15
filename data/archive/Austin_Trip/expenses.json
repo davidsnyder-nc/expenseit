@@ -1,6 +1,6 @@
 [
     {
-        "id": "684ec16d3b3f4",
+        "id": "684ec386e0475",
         "date": "2025-06-14",
         "merchant": "WALMART",
         "amount": 12.14,
@@ -11,7 +11,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec16fd98b6",
+        "id": "684ec389a3928",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
@@ -22,18 +22,18 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec172f06bd",
+        "id": "684ec38b3cab8",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
         "category": "Groceries",
-        "note": "Items Purchased:\n1. Organic Apples (2 lbs) $4.50\n2. Whole Wheat Bread (1 loaf) $3.00\n3. Almond Milk (1 carton) $3.75\n4. Free-range Eggs (1 dozen) $5.50\n5. Greek Yogurt (4 cups) $8.00\n6. Granola Bars (6 pack) $6.25\n7. Fresh Spinach (1 bunch) $2.00\n8. Chicken Breast (2 lbs) $18.00\n9. Brown Rice (1 bag) $5.00\n10. Dark Chocolate (1 bar) $3.00\n11. Herbal Tea (box) $5.00\n12. Honey (1 jar) $4.00\n13. Mixed Nuts (1 bag) $10.00\nSubtotal: $78.00\nDiscount: -$3.00\nTOTAL: $75.00",
+        "note": "Grocery shopping",
         "source": "receipts\/reciepts3.pdf",
         "is_travel_document": false,
         "gemini_processed": true
     },
     {
-        "id": "684ec175eb387",
+        "id": "684ec38dda927",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
@@ -44,7 +44,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec176f40b6",
+        "id": "684ec38ee3fcb",
         "date": "2023-10-17",
         "merchant": "Unknown",
         "amount": 200,
@@ -55,7 +55,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec17854749",
+        "id": "684ec390644d5",
         "date": "2023-10-16",
         "merchant": "THE GOURMET BISTRO",
         "amount": 120,
