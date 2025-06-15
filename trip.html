@@ -171,14 +171,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    ${trip.metadata.notes ? `
-                        <div class="trip-notes">
-                            <h3><i data-feather="file-text"></i> Notes</h3>
-                            <p>${trip.metadata.notes}</p>
-                        </div>
-                    ` : ''}
                 </div>
+
+                ${trip.metadata.notes ? `
+                    <div class="trip-notes-card">
+                        <h3><i data-feather="file-text"></i> Notes</h3>
+                        <p>${trip.metadata.notes}</p>
+                    </div>
+                ` : ''}
 
                 <div class="receipts-section">
                     <div class="section-header">

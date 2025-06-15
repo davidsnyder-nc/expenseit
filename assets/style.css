@@ -2342,28 +2342,30 @@ body {
     margin-bottom: 2rem;
 }
 
-.trip-notes {
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
+.trip-notes-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
     border: 1px solid #e2e8f0;
-    margin-top: 1.5rem;
 }
 
-.trip-notes h3 {
+.trip-notes-card h3 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1rem;
-    color: #4a5568;
-    font-size: 1rem;
+    color: #1a202c;
+    font-size: 1.25rem;
     font-weight: 600;
 }
 
-.trip-notes p {
+.trip-notes-card p {
     margin: 0;
     color: #4a5568;
     line-height: 1.5;
+    font-size: 0.95rem;
 }
 
 .trip-actions {
