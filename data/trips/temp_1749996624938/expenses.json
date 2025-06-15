@@ -1,19 +1,21 @@
 [
     {
-        "id": "684ec963726e6",
+        "id": "684ed45e4bde5",
         "date": "2025-06-05",
         "merchant": "Global Horizons Airways",
         "amount": 357,
         "category": "Transportation",
-        "note": "Flight GH218 from Wilmington (ILM) to Austin (AUS). Includes Base Fare, Airport Taxes & Fees, Checked Baggage (1), and Seat Selection.",
+        "note": "Flight GH218 from Wilmington (ILM) to Austin (AUS). Includes base fare, airport taxes & fees, checked baggage (1), and seat selection.",
         "source": "receipts\/2025-06-05-global_horizons_airways.pdf",
         "is_travel_document": false,
         "tax_amount": 52,
         "gemini_processed": true,
-        "excluded": false
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
     },
     {
-        "id": "684ec9651bee8",
+        "id": "684ed45fe39f7",
         "date": "2025-06-05",
         "merchant": "JetSet Coffee",
         "amount": 8.25,
@@ -23,67 +25,106 @@
         "is_travel_document": false,
         "tax_amount": 0,
         "gemini_processed": true,
-        "excluded": false
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
     },
     {
-        "id": "684ec9668b412",
+        "id": "684ed46185454",
         "date": "2025-06-06",
         "merchant": "Wanderlust Deli",
         "amount": 9.25,
         "category": "Meals",
-        "note": "Turkey Sandwich, Bottle Water",
+        "note": "Receipt",
         "source": "receipts\/2025-06-06-wanderlust_deli.pdf",
         "is_travel_document": false,
         "tax_amount": 0,
         "gemini_processed": true,
-        "excluded": false
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
     },
     {
-        "id": "684ec9680d46b",
+        "id": "684ed463077dc",
         "date": "2025-06-07",
         "merchant": "Urban Outbound",
         "amount": 29.24,
         "category": "Shopping",
-        "note": "Travel Pillow, USB Cable, Notebook",
+        "note": "Purchase of travel pillow, USB cable, and notebook.",
         "source": "receipts\/2025-06-07-urban_outbound.pdf",
         "is_travel_document": false,
         "tax_amount": 0,
         "gemini_processed": true,
-        "excluded": false
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
     },
     {
-        "id": "684ec969997b9",
+        "id": "684ed4648cf1a",
         "date": "2025-06-09",
         "merchant": "SkyMall Express",
         "amount": 50.49,
         "category": "Shopping",
-        "note": "Luggage Tag, Travel Adapter, Headphones",
+        "note": "Receipt",
         "source": "receipts\/2025-06-09-skymall_express.pdf",
         "is_travel_document": false,
         "tax_amount": 0,
         "gemini_processed": true,
-        "excluded": false
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
     },
     {
-        "id": "684ec96b4789b",
+        "id": "684ed46834660",
         "date": "2025-06-10",
         "merchant": "Grand Voyager Inn",
-        "amount": 760,
+        "amount": 660,
         "category": "Lodging",
-        "note": "Hotel stay for David Snyder from June 6 to June 10, 2025. Includes room charge, resort fee, room tax, and tourism fee.",
-        "source": "receipts\/2025-06-10-grand_voyager_inn.pdf",
+        "note": "Hotel stay details",
+        "source": "receipts\/2025-06-10-grand_voyager_inn_detailed.pdf",
         "is_travel_document": false,
         "tax_amount": 60,
         "gemini_processed": true,
-        "excluded": false
+        "excluded": false,
+        "is_hotel_stay": true,
+        "daily_breakdown": [
+            {
+                "date": "2025-06-06",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            },
+            {
+                "date": "2025-06-07",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            },
+            {
+                "date": "2025-06-08",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            },
+            {
+                "date": "2025-06-09",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            }
+        ]
     },
     {
-        "id": "684ec96cab900",
+        "id": "684ed469c14b0",
         "date": "2025-06-08",
         "merchant": "Flight Fuel Market",
         "amount": 11.23,
         "category": "Groceries",
-        "note": "Trail Mix, Protein Bar, Energy Drink",
+        "note": "Travel Document",
         "source": "travel_documents\/2025-06-08-flight_fuel_market.pdf",
         "is_travel_document": true,
         "tax_amount": 0,
@@ -91,7 +132,7 @@
         "excluded": false
     },
     {
-        "id": "684ec96e94625",
+        "id": "684ed46bc7c5f",
         "date": "2025-06-10",
         "merchant": "Apex Auto Rentals",
         "amount": 299.75,

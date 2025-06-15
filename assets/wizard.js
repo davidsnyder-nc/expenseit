@@ -340,9 +340,37 @@ async function uploadFileOnly(file) {
 }
 
 async function startAutomaticProcessing() {
-    // Move to processing step
-    currentStep = 2;
-    updateWizard();
+    // Stay on step 1 but show processing interface
+    const processingStatus = document.getElementById('processingStatus');
+    const uploadSection = document.querySelector('#step1 .upload-area');
+    
+    // Hide upload section and show processing
+    uploadSection.style.display = 'none';
+    processingStatus.style.display = 'block';
+    processingStatus.innerHTML = `
+        <div class="processing-container">
+            <h3>Processing your files...</h3>
+            <div class="processing-steps">
+                <div class="processing-step" id="step-detect">
+                    <i data-feather="search"></i>
+                    <span>Analyzing file types</span>
+                </div>
+                <div class="processing-step" id="step-extract">
+                    <i data-feather="file-text"></i>
+                    <span>Extracting trip details</span>
+                </div>
+                <div class="processing-step" id="step-receipts">
+                    <i data-feather="receipt"></i>
+                    <span>Processing receipts</span>
+                </div>
+                <div class="processing-step" id="step-complete">
+                    <i data-feather="check"></i>
+                    <span>Finalizing trip</span>
+                </div>
+            </div>
+        </div>
+    `;
+    feather.replace();
     
     // Show processing steps
     const steps = ['step-detect', 'step-extract', 'step-receipts', 'step-complete'];
@@ -372,8 +400,16 @@ async function startAutomaticProcessing() {
         console.error('Processing error:', error);
         showErrorMessage('Processing failed: ' + error.message);
         tripData.needsReview = true;
-        currentStep = 3; // Go to review step
+        
+        // Hide processing interface and show review step
+        const processingStatus = document.getElementById('processingStatus');
+        const uploadSection = document.querySelector('#step1 .upload-area');
+        processingStatus.style.display = 'none';
+        uploadSection.style.display = 'block';
+        
+        currentStep = 2; // Go to review step
         updateWizard();
+        setupReviewStep();
     }
 }
 
@@ -545,7 +581,7 @@ async function finalizeTrip() {
                 console.log(`Found ${result.expenseCount} expenses and ${result.travelDocumentCount} travel documents`);
                 
                 // Go to completion step
-                currentStep = 4;
+                currentStep = 3;
                 updateWizard();
                 setupCompletionStep();
                 return;
@@ -559,7 +595,7 @@ async function finalizeTrip() {
     
     // Fallback to review step if processing fails
     tripData.needsReview = true;
-    currentStep = 3;
+    currentStep = 2;
     updateWizard();
     setupReviewStep();
 }
