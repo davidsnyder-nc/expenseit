@@ -26,10 +26,10 @@ body {
     margin-bottom: 2rem;
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e2e8f0;
-    background: linear-gradient(90deg, #f56565 0%, #fed7d7 50%, #f56565 100%);
+    background: white;
     border-radius: 12px;
     color: #2d3748;
-    box-shadow: 0 4px 16px rgba(245, 101, 101, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     position: relative;
 }
 
@@ -843,10 +843,18 @@ body {
 
 .trip-summary-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
-    align-items: center;
+    align-items: start;
     padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .trip-summary-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
 }
 
 .trip-stat {
@@ -894,12 +902,6 @@ body {
     font-size: 1.25rem;
     font-weight: 600;
     color: #2d3748;
-}
-
-.trip-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
 }
 
 .trip-actions .btn {
@@ -1580,6 +1582,10 @@ body {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 1rem;
 }
 
 .expenses-section h2 {
