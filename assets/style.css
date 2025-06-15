@@ -819,32 +819,38 @@ body {
 
 .wizard-content .expenses-table th:nth-child(1),
 .wizard-content .expenses-table td:nth-child(1) {
-    width: 15%;
+    width: 140px;
+    min-width: 140px;
 }
 
 .wizard-content .expenses-table th:nth-child(2),
 .wizard-content .expenses-table td:nth-child(2) {
-    width: 25%;
+    width: 180px;
+    min-width: 180px;
 }
 
 .wizard-content .expenses-table th:nth-child(3),
 .wizard-content .expenses-table td:nth-child(3) {
-    width: 12%;
+    width: 120px;
+    min-width: 120px;
 }
 
 .wizard-content .expenses-table th:nth-child(4),
 .wizard-content .expenses-table td:nth-child(4) {
-    width: 18%;
+    width: 150px;
+    min-width: 150px;
 }
 
 .wizard-content .expenses-table th:nth-child(5),
 .wizard-content .expenses-table td:nth-child(5) {
-    width: 22%;
+    width: 200px;
+    min-width: 200px;
 }
 
 .wizard-content .expenses-table th:nth-child(6),
 .wizard-content .expenses-table td:nth-child(6) {
-    width: 8%;
+    width: 60px;
+    min-width: 60px;
 }
 
 .wizard-content .expenses-table td {
@@ -875,12 +881,13 @@ body {
 
 .expenses-table td input,
 .expenses-table td select {
-    width: 100%;
-    min-width: 120px;
+    width: calc(100% - 8px);
+    margin: 4px;
     padding: 0.5rem;
     border: 1px solid #e2e8f0;
     border-radius: 4px;
     font-size: 0.875rem;
+    box-sizing: border-box;
 }
 
 .expenses-table td input[type="date"] {

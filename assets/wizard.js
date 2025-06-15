@@ -27,7 +27,24 @@ function nextStep() {
         
         if (currentStep < totalSteps) {
             currentStep++;
+            
+            // Auto-advance from step 3 if receipts are processed
+            if (currentStep === 3 && tripData.files.length === 0) {
+                // Skip processing step if no files
+                currentStep++;
+            }
+            
             updateWizard();
+            
+            // Auto-advance from step 3 after a delay to show processing
+            if (currentStep === 3 && tripData.files.length > 0) {
+                setTimeout(() => {
+                    if (currentStep === 3) { // Still on step 3
+                        currentStep++;
+                        updateWizard();
+                    }
+                }, 2000); // 2 second delay to show processing
+            }
         }
     }
 }

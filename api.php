@@ -12,6 +12,7 @@ function sanitizeName($name) {
 function extractDestinationSimple($tripName) {
     // Simple pattern matching for common destinations
     $patterns = [
+        '/\b(toronto|ontario|canada)\b/i' => 'Toronto',
         '/\b(austin|texas|tx)\b/i' => 'Austin',
         '/\b(paris|france)\b/i' => 'Paris',
         '/\b(nyc|new york|manhattan)\b/i' => 'New York City',
@@ -21,7 +22,9 @@ function extractDestinationSimple($tripName) {
         '/\b(chicago|illinois|il)\b/i' => 'Chicago',
         '/\b(miami|florida|fl)\b/i' => 'Miami',
         '/\b(seattle|washington|wa)\b/i' => 'Seattle',
-        '/\b(boston|massachusetts|ma)\b/i' => 'Boston'
+        '/\b(boston|massachusetts|ma)\b/i' => 'Boston',
+        '/\b(vancouver|bc|british columbia)\b/i' => 'Vancouver',
+        '/\b(montreal|quebec)\b/i' => 'Montreal'
     ];
     
     foreach ($patterns as $pattern => $destination) {
