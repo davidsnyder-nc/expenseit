@@ -203,8 +203,8 @@
                                 <i data-feather="tag"></i> ${category}
                                 <span class="category-total">$${categories[category].filter(exp => !exp.excluded).reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0).toFixed(2)}</span>
                             </h3>
-                            <div class="expenses-table">
-                                <table>
+                            <div class="expenses-table-container">
+                                <table class="expenses-table">
                                     <thead>
                                         <tr>
                                             <th>Date</th>

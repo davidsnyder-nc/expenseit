@@ -1120,6 +1120,73 @@ body {
     margin-right: 0;
 }
 
+/* Table Column Layout Fixes */
+.expenses-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.expenses-table th,
+.expenses-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    padding: 0.75rem 0.5rem;
+    vertical-align: top;
+}
+
+.expenses-table th:nth-child(1), /* Date */
+.expenses-table td:nth-child(1) {
+    width: 12%;
+    min-width: 100px;
+}
+
+.expenses-table th:nth-child(2), /* Merchant */
+.expenses-table td:nth-child(2) {
+    width: 20%;
+    min-width: 150px;
+}
+
+.expenses-table th:nth-child(3), /* Amount */
+.expenses-table td:nth-child(3) {
+    width: 12%;
+    min-width: 90px;
+    text-align: right;
+}
+
+.expenses-table th:nth-child(4), /* Tax */
+.expenses-table td:nth-child(4) {
+    width: 10%;
+    min-width: 80px;
+    text-align: right;
+}
+
+.expenses-table th:nth-child(5), /* Note */
+.expenses-table td:nth-child(5) {
+    width: 25%;
+    min-width: 200px;
+}
+
+.expenses-table th:nth-child(6), /* Receipt */
+.expenses-table td:nth-child(6) {
+    width: 10%;
+    min-width: 80px;
+    text-align: center;
+}
+
+.expenses-table th:nth-child(7), /* Actions */
+.expenses-table td:nth-child(7) {
+    width: 11%;
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Ensure consistent table container behavior */
+.expenses-table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
 .stat-content {
     flex: 1;
     min-width: 0;
