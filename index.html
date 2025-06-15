@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Tracker</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i data-feather="credit-card"></i> Personal Expense Tracker</h1>
+            <p class="subtitle">Track expenses across trips and projects</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="actions">
+                <button class="btn btn-primary" onclick="createNewTrip()">
+                    <i data-feather="plus"></i> Create New Trip
+                </button>
+                <button class="btn btn-secondary" onclick="refreshTrips()">
+                    <i data-feather="refresh-cw"></i> Refresh
+                </button>
+            </div>
+
+            <div class="trips-grid" id="tripsGrid">
+                <div class="loading" id="loadingState">
+                    <div class="spinner"></div>
+                    <p>Loading trips...</p>
+                </div>
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i data-feather="folder"></i>
+                    <h3>No trips found</h3>
+                    <p>Create your first trip to start tracking expenses</p>
+                    <button class="btn btn-primary" onclick="createNewTrip()">
+                        <i data-feather="plus"></i> Create Trip
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        // Initialize feather icons
+        feather.replace();
+
+        // Load trips on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTrips();
+        });
+
+        function createNewTrip() {
+            window.location.href = 'wizard.html';
+        }
+
+        function refreshTrips() {
+            loadTrips();
+        }
+
+        async function loadTrips() {
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            const tripsGrid = document.getElementById('tripsGrid');
+            
+            // Show loading state
+            loadingState.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            try {
+                const response = await fetch('load.php?action=trips');
+                const data = await response.json();
+                
+                loadingState.style.display = 'none';
+                
+                if (data.success && data.trips && data.trips.length > 0) {
+                    displayTrips(data.trips);
+                } else {
+                    emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading trips:', error);
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+        }
+
+        function displayTrips(trips) {
+            const tripsGrid = document.getElementById('tripsGrid');
+            
+            tripsGrid.innerHTML = trips.map(trip => `
+                <div class="trip-card" onclick="viewTrip('${trip.name}')">
+                    <div class="trip-header">
+                        <h3>${trip.metadata.name || trip.name}</h3>
+                        <span class="trip-badge">${trip.expenseCount || 0} expenses</span>
+                    </div>
+                    <div class="trip-details">
+                        <div class="trip-dates">
+                            <i data-feather="calendar"></i>
+                            <span>${formatDate(trip.metadata.start_date)} - ${formatDate(trip.metadata.end_date)}</span>
+                        </div>
+                        <div class="trip-total">
+                            <i data-feather="dollar-sign"></i>
+                            <span class="amount">$${trip.total || '0.00'}</span>
+                        </div>
+                    </div>
+                    <div class="trip-actions">
+                        <button class="btn btn-small" onclick="event.stopPropagation(); viewTrip('${trip.name}')">
+                            <i data-feather="eye"></i> View
+                        </button>
+                        <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); editTrip('${trip.name}')">
+                            <i data-feather="edit"></i> Edit
+                        </button>
+                        <button class="btn btn-small btn-accent" onclick="event.stopPropagation(); downloadReport('${trip.name}')">
+                            <i data-feather="download"></i> PDF
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Re-initialize feather icons for new content
+            feather.replace();
+        }
+
+        function viewTrip(tripName) {
+            window.location.href = `trip.html?trip=${encodeURIComponent(tripName)}`;
+        }
+
+        function editTrip(tripName) {
+            window.location.href = `edit.html?trip=${encodeURIComponent(tripName)}`;
+        }
+
+        async function downloadReport(tripName) {
+            try {
+                const response = await fetch(`generate_pdf.php?trip=${encodeURIComponent(tripName)}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${tripName}-report.pdf`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Error generating PDF report');
+                }
+            } catch (error) {
+                console.error('Error downloading report:', error);
+                alert('Error downloading report');
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Trip - Expense Tracker</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 id="pageTitle"><i data-feather="edit"></i> Edit Trip</h1>
+            <a href="#" id="backLink" class="back-link">
+                <i data-feather="arrow-left"></i> Back
+            </a>
+        </header>
+
+        <div class="edit-content" id="editContent">
+            <div class="loading" id="loadingState">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        // Initialize feather icons
+        feather.replace();
+
+        let currentTrip = null;
+        let editMode = 'trip'; // 'trip', 'add', 'expense'
+        let expenseId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tripName = urlParams.get('trip');
+            const action = urlParams.get('action');
+            expenseId = urlParams.get('expense');
+            
+            if (!tripName) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Set edit mode
+            if (action === 'add') {
+                editMode = 'add';
+            } else if (expenseId) {
+                editMode = 'expense';
+            }
+
+            // Set back link
+            document.getElementById('backLink').href = `trip.html?trip=${encodeURIComponent(tripName)}`;
+
+            loadTripForEdit(tripName);
+        });
+
+        async function loadTripForEdit(tripName) {
+            try {
+                const response = await fetch(`load.php?action=trip&name=${encodeURIComponent(tripName)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentTrip = data.trip;
+                    displayEditForm();
+                } else {
+                    showError('Failed to load trip details');
+                }
+            } catch (error) {
+                console.error('Error loading trip:', error);
+                showError('Error loading trip details');
+            }
+        }
+
+        function displayEditForm() {
+            const pageTitle = document.getElementById('pageTitle');
+            const editContent = document.getElementById('editContent');
+
+            if (editMode === 'add') {
+                pageTitle.innerHTML = '<i data-feather="plus"></i> Add Expense';
+                editContent.innerHTML = createExpenseForm();
+            } else if (editMode === 'expense') {
+                pageTitle.innerHTML = '<i data-feather="edit"></i> Edit Expense';
+                const expense = currentTrip.expenses.find(e => e.id === expenseId);
+                if (expense) {
+                    editContent.innerHTML = createExpenseForm(expense);
+                } else {
+                    showError('Expense not found');
+                    return;
+                }
+            } else {
+                pageTitle.innerHTML = '<i data-feather="edit"></i> Edit Trip';
+                editContent.innerHTML = createTripForm();
+            }
+
+            feather.replace();
+        }
+
+        function createTripForm() {
+            return `
+                <form class="edit-form" onsubmit="saveTripInfo(event)">
+                    <div class="form-group">
+                        <label for="tripName">Trip Name *</label>
+                        <input type="text" id="tripName" value="${currentTrip.metadata.name || ''}" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date *</label>
+                            <input type="date" id="startDate" value="${currentTrip.metadata.start_date || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date *</label>
+                            <input type="date" id="endDate" value="${currentTrip.metadata.end_date || ''}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tripNotes">Notes</label>
+                        <textarea id="tripNotes" rows="4">${currentTrip.metadata.notes || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="save"></i> Save Changes
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="goBack()">
+                            <i data-feather="x"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            `;
+        }
+
+        function createExpenseForm(expense = null) {
+            const isEdit = expense !== null;
+            return `
+                <form class="edit-form" onsubmit="saveExpense(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseDate">Date *</label>
+                            <input type="date" id="expenseDate" value="${expense?.date || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseAmount">Amount *</label>
+                            <input type="number" id="expenseAmount" step="0.01" min="0" value="${expense?.amount || ''}" placeholder="0.00" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseMerchant">Merchant</label>
+                            <input type="text" id="expenseMerchant" value="${expense?.merchant || ''}" placeholder="e.g., Walmart, Uber">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseCategory">Category</label>
+                            <select id="expenseCategory">
+                                <option value="Meals" ${expense?.category === 'Meals' ? 'selected' : ''}>Meals</option>
+                                <option value="Transportation" ${expense?.category === 'Transportation' ? 'selected' : ''}>Transportation</option>
+                                <option value="Lodging" ${expense?.category === 'Lodging' ? 'selected' : ''}>Lodging</option>
+                                <option value="Entertainment" ${expense?.category === 'Entertainment' ? 'selected' : ''}>Entertainment</option>
+                                <option value="Groceries" ${expense?.category === 'Groceries' ? 'selected' : ''}>Groceries</option>
+                                <option value="Shopping" ${expense?.category === 'Shopping' ? 'selected' : ''}>Shopping</option>
+                                <option value="Gas" ${expense?.category === 'Gas' ? 'selected' : ''}>Gas</option>
+                                <option value="Other" ${expense?.category === 'Other' ? 'selected' : ''}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expenseNote">Note</label>
+                        <input type="text" id="expenseNote" value="${expense?.note || ''}" placeholder="Optional description">
+                    </div>
+                    
+                    ${!isEdit ? `
+                        <div class="form-group">
+                            <label for="expenseReceipt">Receipt (Optional)</label>
+                            <input type="file" id="expenseReceipt" accept=".pdf,.png,.jpg,.jpeg">
+                            <small>Upload a receipt image or PDF</small>
+                        </div>
+                    ` : expense?.source ? `
+                        <div class="form-group">
+                            <label>Current Receipt</label>
+                            <div class="current-receipt">
+                                <a href="data/trips/${encodeURIComponent(currentTrip.name)}/${expense.source}" target="_blank" class="receipt-link">
+                                    <i data-feather="file"></i> View Current Receipt
+                                </a>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="save"></i> ${isEdit ? 'Update' : 'Add'} Expense
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="goBack()">
+                            <i data-feather="x"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            `;
+        }
+
+        async function saveTripInfo(event) {
+            event.preventDefault();
+            
+            const tripName = document.getElementById('tripName').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const notes = document.getElementById('tripNotes').value;
+
+            try {
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_metadata',
+                        originalName: currentTrip.name,
+                        metadata: {
+                            name: tripName,
+                            start_date: startDate,
+                            end_date: endDate,
+                            notes: notes
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // Redirect to trip view with updated name
+                    window.location.href = `trip.html?trip=${encodeURIComponent(tripName)}`;
+                } else {
+                    alert('Error saving trip information');
+                }
+            } catch (error) {
+                console.error('Error saving trip:', error);
+                alert('Error saving trip information');
+            }
+        }
+
+        async function saveExpense(event) {
+            event.preventDefault();
+            
+            const expenseData = {
+                id: expenseId || generateId(),
+                date: document.getElementById('expenseDate').value,
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                merchant: document.getElementById('expenseMerchant').value,
+                category: document.getElementById('expenseCategory').value,
+                note: document.getElementById('expenseNote').value
+            };
+
+            const formData = new FormData();
+            formData.append('action', editMode === 'expense' ? 'update_expense' : 'add_expense');
+            formData.append('tripName', currentTrip.name);
+            formData.append('expenseData', JSON.stringify(expenseData));
+            
+            // Handle receipt upload for new expenses
+            if (editMode === 'add') {
+                const receiptFile = document.getElementById('expenseReceipt').files[0];
+                if (receiptFile) {
+                    formData.append('receipt', receiptFile);
+                }
+            }
+
+            try {
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = `trip.html?trip=${encodeURIComponent(currentTrip.name)}`;
+                } else {
+                    alert('Error saving expense');
+                }
+            } catch (error) {
+                console.error('Error saving expense:', error);
+                alert('Error saving expense');
+            }
+        }
+
+        function goBack() {
+            window.location.href = `trip.html?trip=${encodeURIComponent(currentTrip.name)}`;
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function showError(message) {
+            const editContent = document.getElementById('editContent');
+            editContent.innerHTML = `
+                <div class="error-state">
+                    <i data-feather="alert-circle"></i>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                        <i data-feather="home"></i> Back to Dashboard
+                    </button>
+                </div>
+            `;
+            feather.replace();
+        }
+    </script>
+</body>
+</html>

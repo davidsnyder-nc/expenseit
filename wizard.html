@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Trip - Expense Tracker</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i data-feather="map"></i> Create New Trip</h1>
+            <a href="index.html" class="back-link">
+                <i data-feather="arrow-left"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <div class="wizard-container">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Trip Info</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Upload</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Process</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Review</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Complete</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step Content -->
+            <div class="wizard-content">
+                <!-- Step 1: Trip Information -->
+                <div class="step-content active" id="step1">
+                    <h2>Trip Information</h2>
+                    <div class="form-group">
+                        <label for="tripName">Trip Name *</label>
+                        <input type="text" id="tripName" placeholder="e.g., Austin Business Trip 2025" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date *</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date *</label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tripNotes">Notes (Optional)</label>
+                        <textarea id="tripNotes" placeholder="Additional trip details..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 2: Upload Receipts -->
+                <div class="step-content" id="step2">
+                    <h2>Upload Receipts</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-dropzone" id="dropzone">
+                            <i data-feather="upload"></i>
+                            <h3>Drop files here or click to browse</h3>
+                            <p>Supports PDF and image files (PNG, JPG, JPEG)</p>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.png,.jpg,.jpeg" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="uploaded-files" id="uploadedFiles"></div>
+                </div>
+
+                <!-- Step 3: Process with Gemini -->
+                <div class="step-content" id="step3">
+                    <h2>Process Receipts</h2>
+                    <div class="processing-status" id="processingStatus">
+                        <p>Click "Process Receipts" to extract data from your uploaded files using AI</p>
+                        <button class="btn btn-primary" id="processBtn" onclick="processReceipts()">
+                            <i data-feather="zap"></i> Process Receipts
+                        </button>
+                    </div>
+                    <div class="processing-results" id="processingResults"></div>
+                </div>
+
+                <!-- Step 4: Review & Edit -->
+                <div class="step-content" id="step4">
+                    <h2>Review & Edit</h2>
+                    <div class="expenses-table" id="expensesTable">
+                        <p>No expenses to review yet. Process receipts in the previous step.</p>
+                    </div>
+                </div>
+
+                <!-- Step 5: Complete -->
+                <div class="step-content" id="step5">
+                    <h2>Trip Created Successfully!</h2>
+                    <div class="completion-summary" id="completionSummary">
+                        <div class="success-icon">
+                            <i data-feather="check-circle"></i>
+                        </div>
+                        <p>Your trip has been created and all expenses have been saved.</p>
+                        <div class="completion-actions">
+                            <button class="btn btn-primary" onclick="viewTrip()">
+                                <i data-feather="eye"></i> View Trip
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadReport()">
+                                <i data-feather="download"></i> Download PDF
+                            </button>
+                            <button class="btn btn-outline" onclick="createAnother()">
+                                <i data-feather="plus"></i> Create Another Trip
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="wizard-navigation">
+                <button class="btn btn-outline" id="prevBtn" onclick="previousStep()" style="display: none;">
+                    <i data-feather="arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                    Next <i data-feather="arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="assets/wizard.js"></script>
+</body>
+</html>
