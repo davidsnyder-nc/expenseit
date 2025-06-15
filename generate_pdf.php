@@ -298,7 +298,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [],
                 </td>
                 <td class="summary-card">
                     <h3>Expenses</h3>
-                    <div class="value">' . count($expenses) . ' items</div>
+                    <div class="value">' . $includedExpenseCount . ' items</div>
                 </td>
                 <td class="summary-card">
                     <h3>Total Amount</h3>
