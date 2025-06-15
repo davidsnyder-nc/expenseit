@@ -7,10 +7,11 @@ header('Access-Control-Allow-Headers: Content-Type');
 require_once 'gemini_api.php';
 
 function sanitizeName($name) {
-    // Keep spaces for user-friendly names, only remove problematic characters
+    // For file system compatibility, replace spaces with underscores but keep user display name separate
     $name = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $name);
-    $name = preg_replace('/\s+/', ' ', $name); // Normalize multiple spaces to single space
-    return trim($name) ?: 'untitled';
+    $name = preg_replace('/\s+/', '_', $name); // Replace spaces with underscores for file system
+    $name = preg_replace('/_+/', '_', $name); // Normalize multiple underscores
+    return trim($name, '_') ?: 'untitled';
 }
 
 function extractDestinationFromTransportation($note, $merchant) {

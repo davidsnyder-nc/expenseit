@@ -234,9 +234,11 @@ try {
             exit;
         }
         
-        $tripName = sanitizeName($tripName);
-        $tripDir = 'data/trips/' . $tripName;
-        $archiveDir = 'data/archive/' . $tripName;
+        // URL decode the trip name first, then sanitize for filesystem
+        $displayName = urldecode($tripName);
+        $filesystemName = str_replace(' ', '_', sanitizeName($displayName));
+        $tripDir = 'data/trips/' . $filesystemName;
+        $archiveDir = 'data/archive/' . $filesystemName;
         
         // Check both active and archived locations
         if (is_dir($tripDir)) {
