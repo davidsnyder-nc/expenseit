@@ -181,12 +181,18 @@ try {
             $receiptFiles = glob($receiptsDir . '/*');
             foreach ($receiptFiles as $file) {
                 if (is_file($file)) {
+                    $filename = basename($file);
+                    $isPdf = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
+                    
                     $receipts[] = [
-                        'name' => basename($file),
+                        'filename' => $filename,
+                        'name' => $filename,
                         'path' => $file,
-                        'url' => $file,
+                        'fullUrl' => $file,
+                        'displayUrl' => $file,
                         'size' => filesize($file),
-                        'modified' => filemtime($file)
+                        'modified' => filemtime($file),
+                        'isPdf' => $isPdf
                     ];
                 }
             }

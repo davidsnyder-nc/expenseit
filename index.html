@@ -66,6 +66,22 @@
         </div>
     </div>
 
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirmButton" onclick="executeConfirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
         // Initialize feather icons
@@ -74,6 +90,7 @@
         let currentTab = 'active';
         let selectedTrips = new Set();
         let allTrips = [];
+        let confirmAction = null;
 
         // Load trips on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -284,9 +301,14 @@
             if (selectedTrips.size === 0) return;
             
             const tripNames = Array.from(selectedTrips);
-            const message = `Are you sure you want to delete ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}?\n\nThis will permanently delete all trip data including expenses and receipts. This action cannot be undone.`;
+            const message = `Delete ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}?\n\nThis will permanently delete all trip data including expenses and receipts. This action cannot be undone.`;
             
-            if (!confirm(message)) return;
+            showConfirmModal('Delete Trips', message, async () => {
+                await executeDeleteTrips(tripNames);
+            });
+        }
+
+        async function executeDeleteTrips(tripNames) {
             
             try {
                 for (const tripName of tripNames) {
@@ -309,12 +331,12 @@
                     }
                 }
                 
-                alert(`${tripNames.length} trip${tripNames.length > 1 ? 's' : ''} deleted successfully`);
+                showSuccessMessage(`${tripNames.length} trip${tripNames.length > 1 ? 's' : ''} deleted successfully`);
                 selectedTrips.clear();
                 await loadTrips();
             } catch (error) {
                 console.error('Error deleting trips:', error);
-                alert('Error deleting trips: ' + error.message);
+                showErrorMessage('Error deleting trips: ' + error.message);
             }
         }
 
@@ -399,6 +421,56 @@
 
         function editTrip(tripName) {
             window.location.href = `edit.html?trip=${encodeURIComponent(tripName)}`;
+        }
+
+        // Custom modal functions
+        function showConfirmModal(title, message, action) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmAction = action;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmAction = null;
+        }
+
+        function executeConfirmAction() {
+            if (confirmAction) {
+                confirmAction();
+            }
+            closeConfirmModal();
+        }
+
+        function showSuccessMessage(message) {
+            createToast(message, 'success');
+        }
+
+        function showErrorMessage(message) {
+            createToast(message, 'error');
+        }
+
+        function createToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            feather.replace();
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
         }
     </script>
 </body>
