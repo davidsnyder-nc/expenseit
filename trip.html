@@ -40,20 +40,7 @@
         </div>
     </div>
 
-    <!-- Receipt Modal -->
-    <div id="receiptModal" class="modal" style="display: none;" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 id="receiptTitle">Receipt</h3>
-                <button class="modal-close" onclick="closeModal()">
-                    <i data-feather="x"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="receiptBody">
-                <!-- Receipt content will be loaded here -->
-            </div>
-        </div>
-    </div>
+
 
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
@@ -202,9 +189,9 @@
                                                 <td>${expense.note || '-'}</td>
                                                 <td>
                                                     ${expense.source ? `
-                                                        <button class="btn btn-small" onclick="viewReceiptFromExpense('${expense.source}', '${expense.merchant || 'Receipt'}')">
+                                                        <a href="data/trips/${currentTrip.name}/${expense.source.replace(/\s+/g, '_').replace(/\u202f/g, '').replace('4.05.38', '40538').replace('4.05.57', '40557').replace('_AM', 'AM')}" target="_blank" class="btn btn-small">
                                                             <i data-feather="eye"></i> View
-                                                        </button>
+                                                        </a>
                                                     ` : '-'}
                                                 </td>
                                                 <td>
@@ -397,9 +384,9 @@
                             ${receipt.isPdf ? '<div class="receipt-type">PDF Document</div>' : ''}
                         </div>
                         <div class="receipt-actions">
-                            <button class="btn btn-small" onclick="viewReceipt('${receipt.fullUrl}', '${receipt.filename}', ${receipt.isPdf})">
+                            <a href="${receipt.fullUrl}" target="_blank" class="btn btn-small">
                                 <i data-feather="eye"></i> View
-                            </button>
+                            </a>
                             <a href="${receipt.fullUrl}" download class="btn btn-small btn-secondary">
                                 <i data-feather="download"></i> Download
                             </a>
@@ -429,62 +416,7 @@
             });
         }
 
-        // Modal functions
-        function viewReceipt(receiptUrl, filename, isPdf = false) {
-            const modal = document.getElementById('receiptModal');
-            const modalTitle = document.getElementById('receiptTitle');
-            const modalContent = document.getElementById('receiptBody');
-            
-            modalTitle.textContent = filename;
-            
-            if (isPdf) {
-                modalContent.innerHTML = `<iframe src="${receiptUrl}" width="100%" height="600px" style="border: none; border-radius: 8px;"></iframe>`;
-            } else {
-                modalContent.innerHTML = `<img src="${receiptUrl}" alt="${filename}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
-            }
-            
-            modal.style.display = 'flex';
-            feather.replace();
-        }
 
-        function closeModal(event) {
-            if (event && event.target !== event.currentTarget) return;
-            
-            const modal = document.getElementById('receiptModal');
-            modal.style.display = 'none';
-        }
-
-        function viewReceiptFromExpense(sourceString, title) {
-            // Direct mapping based on the actual files we see
-            let receipt = null;
-            
-            if (sourceString.includes('4.05.38')) {
-                receipt = receiptsData.find(r => r.filename === 'Screenshot_2025-06-15_at_40538AM.png');
-            } else if (sourceString.includes('4.05.57')) {
-                receipt = receiptsData.find(r => r.filename === 'Screenshot_2025-06-15_at_40557AM.png');
-            }
-            
-            if (receipt) {
-                viewReceipt(receipt.fullUrl, title, receipt.isPdf);
-            } else {
-                showErrorMessage('Receipt file not found');
-            }
-        }
-
-        // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
-            const modal = document.getElementById('receiptModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Close modal on escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
 
         // Custom modal functions
         let confirmAction = null;
