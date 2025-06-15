@@ -633,6 +633,31 @@ function displayProcessingResult(fileName, expense, success, error = null) {
 
 // Review step functions
 function setupReviewStep() {
+    // Update review summary
+    const reviewSummary = document.getElementById('reviewSummary');
+    const totalAmount = tripData.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+    
+    reviewSummary.innerHTML = `
+        <h3>Trip Summary</h3>
+        <div class="trip-summary">
+            <div class="summary-item">
+                <strong>Trip Name:</strong> ${tripData.metadata.name || 'Untitled Trip'}
+            </div>
+            <div class="summary-item">
+                <strong>Dates:</strong> ${tripData.metadata.start_date || 'Not set'} to ${tripData.metadata.end_date || 'Not set'}
+            </div>
+            <div class="summary-item">
+                <strong>Files Processed:</strong> ${tripData.files.length}
+            </div>
+            <div class="summary-item">
+                <strong>Expenses Found:</strong> ${tripData.expenses.length}
+            </div>
+            <div class="summary-item">
+                <strong>Total Amount:</strong> $${totalAmount.toFixed(2)}
+            </div>
+        </div>
+    `;
+    
     const expensesTable = document.getElementById('expensesTable');
     
     if (tripData.expenses.length === 0) {
@@ -645,6 +670,10 @@ function setupReviewStep() {
         `;
     } else {
         expensesTable.innerHTML = `
+            <div class="expenses-header">
+                <h3>Review Extracted Expenses</h3>
+                <p>Please review and edit the extracted expense information below:</p>
+            </div>
             <table>
                 <thead>
                     <tr>
