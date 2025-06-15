@@ -662,6 +662,56 @@ try {
             echo json_encode(['success' => false, 'error' => 'Failed to save changes']);
         }
         
+    } elseif ($action === 'delete_trip') {
+        $tripName = $_POST['name'] ?? '';
+        
+        if (empty($tripName)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name is required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        
+        // Check in both active and archived directories
+        $tripDir = 'data/trips/' . $tripName;
+        $archiveDir = 'data/archive/' . $tripName;
+        
+        $targetDir = null;
+        if (is_dir($tripDir)) {
+            $targetDir = $tripDir;
+        } elseif (is_dir($archiveDir)) {
+            $targetDir = $archiveDir;
+        }
+        
+        if (!$targetDir) {
+            echo json_encode(['success' => false, 'error' => 'Trip not found']);
+            exit;
+        }
+        
+        // Recursively delete the trip directory and all its contents
+        function deleteDirectory($dir) {
+            if (!is_dir($dir)) {
+                return false;
+            }
+            
+            $files = array_diff(scandir($dir), ['.', '..']);
+            foreach ($files as $file) {
+                $path = $dir . '/' . $file;
+                if (is_dir($path)) {
+                    deleteDirectory($path);
+                } else {
+                    unlink($path);
+                }
+            }
+            return rmdir($dir);
+        }
+        
+        if (deleteDirectory($targetDir)) {
+            echo json_encode(['success' => true, 'message' => 'Trip deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to delete trip']);
+        }
+        
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
     }
