@@ -51,6 +51,7 @@
                 if (data.success) {
                     currentTrip = data.trip;
                     displayTripDetails(data.trip);
+                    loadTripReceipts(data.trip.name);
                 } else {
                     showError('Failed to load trip details');
                 }
@@ -128,6 +129,13 @@
                         <button class="btn btn-outline" onclick="addExpense()">
                             <i data-feather="plus"></i> Add Expense
                         </button>
+                    </div>
+                </div>
+
+                <div class="receipts-section">
+                    <h2><i data-feather="paperclip"></i> Receipts</h2>
+                    <div class="receipts-grid" id="receiptsGrid">
+                        <!-- Receipts will be loaded here -->
                     </div>
                 </div>
 

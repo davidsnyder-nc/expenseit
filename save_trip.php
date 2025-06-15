@@ -108,7 +108,7 @@ function createTrip($tripData) {
     // Update expense sources to point to new location
     foreach ($tripData['expenses'] as &$expense) {
         if (isset($expense['source']) && strpos($expense['source'], 'data/trips/temp/') === 0) {
-            $expense['source'] = str_replace('data/trips/temp/', 'receipts/', $expense['source']);
+            $expense['source'] = str_replace('data/trips/temp/receipts/', 'receipts/', $expense['source']);
         }
     }
     

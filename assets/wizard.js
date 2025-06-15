@@ -351,7 +351,7 @@ async function processReceipts() {
                 const expense = {
                     id: generateId(),
                     ...result.expense,
-                    source: file.path.replace('data/trips/temp/', 'receipts/')
+                    source: 'receipts/' + file.name
                 };
                 tripData.expenses.push(expense);
                 

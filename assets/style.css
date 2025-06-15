@@ -505,26 +505,58 @@ body {
     background: white;
     border-radius: 12px;
     overflow: hidden;
+    overflow-x: auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
 }
 
 .expenses-table table {
     width: 100%;
+    min-width: 800px;
     border-collapse: collapse;
 }
 
 .expenses-table th,
 .expenses-table td {
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.expenses-table td input,
+.expenses-table td select {
+    width: 100%;
+    min-width: 120px;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.expenses-table td input[type="date"] {
+    min-width: 140px;
+}
+
+.expenses-table td input[type="number"] {
+    min-width: 100px;
+}
+
+.expenses-table td input[type="text"] {
+    min-width: 150px;
+}
+
+.expenses-table td select {
+    min-width: 130px;
 }
 
 .expenses-table th {
     background-color: #f7fafc;
     font-weight: 600;
     color: #4a5568;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .expenses-table .amount {
