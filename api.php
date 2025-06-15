@@ -448,6 +448,50 @@ try {
         $results = performSearch($query, $includeArchives);
         echo json_encode(['success' => true, 'results' => $results]);
         
+    } elseif ($action === 'rename_trip') {
+        // Handle POST data for rename operation
+        $input = json_decode(file_get_contents('php://input'), true);
+        $oldName = $input['oldName'] ?? '';
+        $newName = $input['newName'] ?? '';
+        
+        if (empty($oldName) || empty($newName)) {
+            echo json_encode(['success' => false, 'error' => 'Old and new names are required']);
+            exit;
+        }
+        
+        $oldName = sanitizeName($oldName);
+        $newName = sanitizeName($newName);
+        
+        $oldDir = 'data/trips/' . $oldName;
+        $newDir = 'data/trips/' . $newName;
+        
+        if (!is_dir($oldDir)) {
+            echo json_encode(['success' => false, 'error' => 'Source trip not found']);
+            exit;
+        }
+        
+        if (is_dir($newDir)) {
+            echo json_encode(['success' => false, 'error' => 'Destination trip already exists']);
+            exit;
+        }
+        
+        // Rename the directory
+        if (rename($oldDir, $newDir)) {
+            // Update metadata file with new name
+            $metadataPath = $newDir . '/metadata.json';
+            if (file_exists($metadataPath)) {
+                $metadata = json_decode(file_get_contents($metadataPath), true);
+                if ($metadata) {
+                    $metadata['name'] = $newName;
+                    file_put_contents($metadataPath, json_encode($metadata, JSON_PRETTY_PRINT));
+                }
+            }
+            
+            echo json_encode(['success' => true, 'message' => 'Trip renamed successfully']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to rename trip directory']);
+        }
+        
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
     }

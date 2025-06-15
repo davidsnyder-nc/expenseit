@@ -570,19 +570,34 @@ async function processSingleReceipt(file, path) {
         const result = await response.json();
         
         if (result.success && result.expense) {
-            // Check if this is a travel document based on filename or content
-            const isTravelDoc = file.name.toLowerCase().includes('itinerary') || 
+            // Check if this is a travel document based on file path or filename
+            const isTravelDoc = path.includes('/travel_documents/') ||
+                              file.name.toLowerCase().includes('itinerary') || 
                               file.name.toLowerCase().includes('itenary') ||
                               file.name.toLowerCase().includes('confirmation') ||
                               file.name.toLowerCase().includes('boarding') ||
                               file.name.toLowerCase().includes('flight') ||
                               file.name.toLowerCase().includes('hotel') ||
-                              (result.expense.category && result.expense.category.toLowerCase() === 'travel');
+                              file.name.toLowerCase().includes('travel') ||
+                              file.name.toLowerCase().includes('booking') ||
+                              file.name.toLowerCase().includes('reservation');
+            
+            // Determine correct source path based on document type
+            let sourcePath;
+            if (isTravelDoc) {
+                sourcePath = path.includes('/travel_documents/') ? 
+                    'travel_documents/' + file.name : 
+                    'travel_documents/' + file.name;
+            } else {
+                sourcePath = path.includes('/receipts/') ? 
+                    'receipts/' + file.name : 
+                    'receipts/' + file.name;
+            }
             
             const expense = {
                 id: generateId(),
                 ...result.expense,
-                source: 'receipts/' + file.name,
+                source: sourcePath,
                 is_travel_document: isTravelDoc
             };
             tripData.expenses.push(expense);
