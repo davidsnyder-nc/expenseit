@@ -468,10 +468,20 @@ function exportAllTrips() {
             $archivedDir = $tempDir . '/archived_trips';
             mkdir($archivedDir, 0755, true);
             
-            $files = glob($archiveDir . '/*');
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    copy($file, $archivedDir . '/' . basename($file));
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($archiveDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach ($iterator as $file) {
+                $sourceFile = $file->getRealPath();
+                $relativePath = substr($sourceFile, strlen($archiveDir) + 1);
+                $destFile = $archivedDir . '/' . $relativePath;
+                
+                if ($file->isDir()) {
+                    mkdir($destFile, 0755, true);
+                } else {
+                    copy($sourceFile, $destFile);
                 }
             }
         }
