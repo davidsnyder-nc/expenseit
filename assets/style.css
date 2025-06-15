@@ -998,14 +998,6 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-.trip-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    width: 100%;
-}
-
 @media (max-width: 768px) {
     .trip-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -2343,52 +2335,19 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-.summary-cards {
+.trip-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
-.summary-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: #f7fafc;
-    border-radius: 12px;
-}
-
-.card-icon {
-    background: #4299e1;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.card-content h3 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #718096;
-    margin-bottom: 0.25rem;
-}
-
-.card-content p {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1a202c;
-}
-
 .trip-notes {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
     margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    clear: both;
-    width: 100%;
 }
 
 .trip-notes h3 {
