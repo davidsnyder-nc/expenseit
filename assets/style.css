@@ -214,6 +214,11 @@ body {
 
 /* Loading and Empty States */
 .loading, .empty-state, .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
     text-align: center;
     padding: 3rem 1rem;
     color: #718096;

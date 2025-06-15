@@ -227,6 +227,43 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                 margin: 0 0 10px 0;
                 color: #4299e1;
             }
+            .receipts-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 15px;
+            }
+            .receipt-attachment {
+                border: 1px solid #e9ecef;
+                border-radius: 8px;
+                padding: 15px;
+                background: #f8f9fa;
+                text-align: center;
+            }
+            .receipt-info {
+                margin-bottom: 10px;
+            }
+            .receipt-info strong {
+                display: block;
+                margin-bottom: 5px;
+                color: #333;
+            }
+            .receipt-info small {
+                color: #666;
+            }
+            .receipt-image img {
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                max-width: 100%;
+                height: auto;
+            }
+            .receipt-file {
+                padding: 20px;
+                background: #fff;
+                border: 2px dashed #ccc;
+                border-radius: 4px;
+                color: #666;
+            }
             .footer {
                 margin-top: 40px;
                 text-align: center;
@@ -434,6 +471,21 @@ function formatDate($date) {
         return $dateObj->format('M j, Y');
     } catch (Exception $e) {
         return $date;
+    }
+}
+
+/**
+ * Format file size for display
+ */
+function formatFileSize($bytes) {
+    if ($bytes >= 1073741824) {
+        return number_format($bytes / 1073741824, 2) . ' GB';
+    } elseif ($bytes >= 1048576) {
+        return number_format($bytes / 1048576, 2) . ' MB';
+    } elseif ($bytes >= 1024) {
+        return number_format($bytes / 1024, 2) . ' KB';
+    } else {
+        return $bytes . ' bytes';
     }
 }
 
