@@ -148,7 +148,8 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
             }
             .summary-grid {
                 width: 100%;
-                border-collapse: collapse;
+                border-collapse: separate;
+                border-spacing: 10px;
                 margin-bottom: 20px;
             }
             .summary-card {
@@ -158,13 +159,6 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                 border-radius: 8px;
                 border: 1px solid #e9ecef;
                 width: 33.33%;
-                display: inline-block;
-                vertical-align: top;
-                box-sizing: border-box;
-                margin-right: 1%;
-            }
-            .summary-card:last-child {
-                margin-right: 0;
             }
             .summary-card h3 {
                 margin: 0 0 5px 0;
@@ -288,20 +282,22 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
             <div class="subtitle">' . $startDate . ' - ' . $endDate . '</div>
         </div>
         
-        <div class="summary-grid">
-            <div class="summary-card">
-                <h3>Duration</h3>
-                <div class="value">' . $duration . '</div>
-            </div>
-            <div class="summary-card">
-                <h3>Expenses</h3>
-                <div class="value">' . count($expenses) . ' items</div>
-            </div>
-            <div class="summary-card">
-                <h3>Total Amount</h3>
-                <div class="value total">$' . number_format($total, 2) . '</div>
-            </div>
-        </div>';
+        <table class="summary-grid">
+            <tr>
+                <td class="summary-card">
+                    <h3>Duration</h3>
+                    <div class="value">' . $duration . '</div>
+                </td>
+                <td class="summary-card">
+                    <h3>Expenses</h3>
+                    <div class="value">' . count($expenses) . ' items</div>
+                </td>
+                <td class="summary-card">
+                    <h3>Total Amount</h3>
+                    <div class="value total">$' . number_format($total, 2) . '</div>
+                </td>
+            </tr>
+        </table>';
     
     // Add notes section if exists
     if (!empty($metadata['notes'])) {
