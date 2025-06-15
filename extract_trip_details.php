@@ -54,24 +54,36 @@ If you cannot find specific information, return null for that field. Only return
     $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
     
     if ($extension === 'pdf') {
-        // For PDF files, we need to convert to image first or use text extraction
-        // For now, let's try to extract text and analyze it
-        $extractedText = extractTextFromPDF($filePath);
-        if ($extractedText) {
-            $result = callGeminiTextAPI($prompt . "\n\nDocument text:\n" . $extractedText);
-        } else {
-            throw new Exception('Could not extract text from PDF');
-        }
+        // For PDF files, use Vision API directly since it can handle PDFs
+        $result = callGeminiVisionAPI($prompt, $filePath);
     } else {
         // For image files, use Vision API
         $result = callGeminiVisionAPI($prompt, $filePath);
     }
     
     if ($result && $result['success']) {
-        // Parse the JSON response from Gemini
-        $tripDetails = json_decode($result['content'], true);
+        $content = $result['content'];
+        error_log("Gemini API response: " . $content);
         
-        if ($tripDetails && json_last_error() === JSON_ERROR_NONE) {
+        // Try to extract JSON from the response
+        $tripDetails = null;
+        
+        // First try direct JSON decode
+        $tripDetails = json_decode($content, true);
+        
+        // If that fails, try to find JSON within the response
+        if (!$tripDetails || json_last_error() !== JSON_ERROR_NONE) {
+            if (preg_match('/\{.*\}/s', $content, $matches)) {
+                $tripDetails = json_decode($matches[0], true);
+            }
+        }
+        
+        // If still no valid JSON, try to parse natural language response
+        if (!$tripDetails || json_last_error() !== JSON_ERROR_NONE) {
+            $tripDetails = parseNaturalLanguageResponse($content);
+        }
+        
+        if ($tripDetails && is_array($tripDetails)) {
             // Validate and clean up the extracted data
             $cleanedDetails = [
                 'tripName' => isset($tripDetails['tripName']) ? trim($tripDetails['tripName']) : null,
@@ -93,19 +105,22 @@ If you cannot find specific information, return null for that field. Only return
             } else {
                 echo json_encode([
                     'success' => false,
-                    'error' => 'No valid trip details could be extracted'
+                    'error' => 'No valid trip details could be extracted',
+                    'debug' => 'Parsed data was empty after cleaning'
                 ]);
             }
         } else {
             echo json_encode([
                 'success' => false,
-                'error' => 'Could not parse trip details from document'
+                'error' => 'Could not parse trip details from document',
+                'debug' => 'JSON parsing failed, content: ' . substr($content, 0, 200)
             ]);
         }
     } else {
         echo json_encode([
             'success' => false,
-            'error' => 'Failed to analyze document with AI'
+            'error' => 'Failed to analyze document with AI',
+            'debug' => isset($result['error']) ? $result['error'] : 'Unknown API error'
         ]);
     }
     
@@ -118,18 +133,54 @@ If you cannot find specific information, return null for that field. Only return
 }
 
 /**
- * Extract text from PDF file
+ * Extract text from PDF file using multiple methods
  */
 function extractTextFromPDF($filePath) {
-    // Try using pdftotext if available
+    // Method 1: Try pdftotext command line tool
     if (function_exists('shell_exec')) {
         $output = shell_exec("pdftotext " . escapeshellarg($filePath) . " - 2>/dev/null");
         if ($output && trim($output)) {
-            return $output;
+            return trim($output);
         }
     }
     
-    // Fallback: return false to indicate we couldn't extract text
+    // Method 2: Try using PHP's file_get_contents to read raw PDF content
+    // This will extract some readable text from simple PDFs
+    $content = file_get_contents($filePath);
+    if ($content) {
+        // Extract text between stream objects in PDF
+        $text = '';
+        if (preg_match_all('/BT\s*(.*?)\s*ET/s', $content, $matches)) {
+            foreach ($matches[1] as $match) {
+                // Extract text within parentheses or brackets
+                if (preg_match_all('/\((.*?)\)|\[(.*?)\]/s', $match, $textMatches)) {
+                    foreach ($textMatches[1] as $textMatch) {
+                        if (!empty($textMatch)) {
+                            $text .= $textMatch . ' ';
+                        }
+                    }
+                    foreach ($textMatches[2] as $textMatch) {
+                        if (!empty($textMatch)) {
+                            $text .= $textMatch . ' ';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Also try to extract any readable ASCII text
+        if (empty(trim($text))) {
+            // Filter out binary data and keep only readable text
+            $readableText = preg_replace('/[^\x20-\x7E\s]/', '', $content);
+            $readableText = preg_replace('/\s+/', ' ', $readableText);
+            if (strlen($readableText) > 50) { // Only if we got substantial text
+                $text = $readableText;
+            }
+        }
+        
+        return trim($text);
+    }
+    
     return false;
 }
 
