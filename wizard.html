@@ -28,14 +28,10 @@
                     </div>
                     <div class="step" data-step="2">
                         <div class="step-number">2</div>
-                        <div class="step-label">Processing</div>
+                        <div class="step-label">Review</div>
                     </div>
                     <div class="step" data-step="3">
                         <div class="step-number">3</div>
-                        <div class="step-label">Review</div>
-                    </div>
-                    <div class="step" data-step="4">
-                        <div class="step-number">4</div>
                         <div class="step-label">Complete</div>
                     </div>
                 </div>
@@ -62,46 +58,15 @@
                     <div class="processing-status" id="processingStatus" style="display: none;"></div>
                 </div>
 
-                <!-- Step 2: Processing -->
+                <!-- Step 2: Review -->
                 <div class="step-content" id="step2">
-                    <h2>Processing Your Files</h2>
-                    <div class="processing-progress">
-                        <div class="processing-spinner">
-                            <i data-feather="loader"></i>
-                        </div>
-                        <h3 id="processingTitle">Analyzing your files...</h3>
-                        <p id="processingDescription">Please wait while we extract trip details and process receipts.</p>
-                        <div class="processing-steps" id="processingSteps">
-                            <div class="processing-step" id="step-detect">
-                                <i data-feather="search"></i>
-                                <span>Detecting file types</span>
-                            </div>
-                            <div class="processing-step" id="step-extract">
-                                <i data-feather="file-text"></i>
-                                <span>Extracting trip details</span>
-                            </div>
-                            <div class="processing-step" id="step-receipts">
-                                <i data-feather="credit-card"></i>
-                                <span>Processing receipts</span>
-                            </div>
-                            <div class="processing-step" id="step-complete">
-                                <i data-feather="check"></i>
-                                <span>Finalizing trip</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="processing-results" id="processingResults"></div>
-                </div>
-
-                <!-- Step 3: Review (Only shown if needed) -->
-                <div class="step-content" id="step3">
                     <h2>Review & Edit</h2>
                     <div class="review-summary" id="reviewSummary"></div>
                     <div class="expenses-table" id="expensesTable"></div>
                 </div>
 
-                <!-- Step 4: Complete -->
-                <div class="step-content" id="step4">
+                <!-- Step 3: Complete -->
+                <div class="step-content" id="step3">
                     <h2>Trip Created Successfully!</h2>
                     <div class="completion-summary" id="completionSummary">
                         <div class="success-icon">

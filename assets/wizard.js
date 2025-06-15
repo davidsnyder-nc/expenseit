@@ -949,13 +949,14 @@ async function completeTrip() {
 function setupCompletionStep() {
     const completionSummary = document.getElementById('completionSummary');
     const total = tripData.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+    const expenseCount = tripData.expenses.length;
     
     completionSummary.innerHTML = `
         <div class="success-icon">
             <i data-feather="check-circle"></i>
         </div>
         <h3>Trip Created Successfully!</h3>
-        <p>Your trip "${tripData.metadata.name}" has been created with ${tripData.expenses.length} expenses totaling $${total.toFixed(2)}.</p>
+        <p>Your trip "${tripData.metadata.name}" has been created with ${expenseCount} expenses totaling $${total.toFixed(2)}.</p>
         <div class="completion-actions">
             <button class="btn btn-primary" onclick="viewTrip()">
                 <i data-feather="eye"></i> View Trip
