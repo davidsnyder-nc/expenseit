@@ -89,7 +89,6 @@
         }
 
         function switchTab(tab) {
-            console.log('Switching to tab:', tab);
             currentTab = tab;
             document.getElementById('activeTab').classList.toggle('active', tab === 'active');
             document.getElementById('archivedTab').classList.toggle('active', tab === 'archived');
@@ -102,19 +101,18 @@
         }
 
         async function loadTrips() {
-            const loadingState = document.getElementById('loadingState');
-            const emptyState = document.getElementById('emptyState');
             const tripsContainer = document.getElementById('tripsContainer');
             
-            console.log('Loading trips for tab:', currentTab);
-            
             // Show loading state
-            loadingState.style.display = 'block';
-            emptyState.style.display = 'none';
+            tripsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading trips...</p>
+                </div>
+            `;
             
             try {
                 const action = currentTab === 'active' ? 'trips' : 'archived_trips';
-                console.log('Fetching with action:', action);
                 const response = await fetch(`load.php?action=${action}`);
                 
                 if (!response.ok) {
@@ -122,9 +120,6 @@
                 }
                 
                 const data = await response.json();
-                console.log('Received data:', data);
-                
-                loadingState.style.display = 'none';
                 
                 if (data.success && data.trips && data.trips.length > 0) {
                     allTrips = data.trips;
@@ -157,7 +152,6 @@
                 }
             } catch (error) {
                 console.error('Error loading trips:', error);
-                loadingState.style.display = 'none';
                 
                 tripsContainer.innerHTML = `
                     <div class="error-state">
