@@ -1,14 +1,5 @@
 [
     {
-        "id": "exp_001",
-        "merchant": "Sample Receipt 1",
-        "amount": 75.00,
-        "category": "Meals",
-        "date": "2025-06-12",
-        "note": "Receipt from trip",
-        "source": "receipts/3_2.heic"
-    },
-    {
         "id": "exp_002", 
         "merchant": "Sample Receipt 2",
         "amount": 75.00,
