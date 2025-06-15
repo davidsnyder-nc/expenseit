@@ -1367,3 +1367,89 @@ function fillTripDetailsForm(tripDetails) {
         tripNotesField.value = tripDetails.notes;
     }
 }
+
+// Mobile Camera Functions
+function setupMobileCamera() {
+    // Only show camera button on mobile devices
+    const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const cameraSection = document.getElementById('mobileCameraSection');
+    
+    if (cameraSection && isMobile) {
+        cameraSection.style.display = 'block';
+    }
+}
+
+let cameraStream = null;
+
+async function openCamera() {
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraVideo');
+    
+    try {
+        // Request camera access with back camera preference for mobile
+        const constraints = {
+            video: {
+                facingMode: { ideal: 'environment' }, // Back camera
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            }
+        };
+        
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = cameraStream;
+        modal.style.display = 'flex';
+        feather.replace();
+        
+    } catch (error) {
+        console.error('Camera access error:', error);
+        showErrorMessage('Unable to access camera. Please check permissions.');
+    }
+}
+
+function closeCamera() {
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraVideo');
+    
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+    
+    video.srcObject = null;
+    modal.style.display = 'none';
+}
+
+async function capturePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Convert canvas to blob
+    canvas.toBlob(async (blob) => {
+        if (blob) {
+            // Create a file object from the blob
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `receipt-${timestamp}.jpg`;
+            const file = new File([blob], filename, { type: 'image/jpeg' });
+            
+            // Close camera first
+            closeCamera();
+            
+            // Add to upload queue
+            try {
+                await uploadFileOnly(file);
+                showSuccessMessage('Photo captured and uploaded successfully!');
+            } catch (error) {
+                console.error('Upload error:', error);
+                showErrorMessage('Failed to upload photo. Please try again.');
+            }
+        }
+    }, 'image/jpeg', 0.9);
+}
