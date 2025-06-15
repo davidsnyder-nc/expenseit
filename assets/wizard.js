@@ -735,3 +735,197 @@ function createToast(message, type) {
         }, 300);
     }, 3000);
 }
+
+// Travel document upload functionality
+function setupTravelDocumentUpload() {
+    const dropzone = document.getElementById('travelDocsDropzone');
+    const fileInput = document.getElementById('travelDocsInput');
+    
+    if (!dropzone || !fileInput) return;
+    
+    // Click to browse
+    dropzone.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    // Drag and drop
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+    
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        handleTravelDocumentFiles(e.dataTransfer.files);
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        handleTravelDocumentFiles(e.target.files);
+    });
+}
+
+function handleTravelDocumentFiles(files) {
+    Array.from(files).forEach(file => {
+        if (isValidFile(file)) {
+            uploadTravelDocument(file);
+        } else {
+            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF or image files.`);
+        }
+    });
+}
+
+async function uploadTravelDocument(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('trip', 'temp_travel_docs');
+    
+    try {
+        // Upload the file first
+        const uploadResponse = await fetch('upload.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const uploadResult = await uploadResponse.json();
+        
+        if (uploadResult.success) {
+            displayTravelDocument(file, uploadResult.path);
+            
+            // Extract trip details from the document
+            extractTripDetails(uploadResult.path, file.name);
+        } else {
+            showErrorMessage(`Failed to upload ${file.name}: ${uploadResult.error}`);
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        showErrorMessage(`Error uploading ${file.name}`);
+    }
+}
+
+function displayTravelDocument(file, path) {
+    const uploadedDocs = document.getElementById('uploadedTravelDocs');
+    
+    const docItem = document.createElement('div');
+    docItem.className = 'file-item';
+    docItem.dataset.path = path;
+    
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
+    const fileSize = formatFileSize(file.size);
+    
+    let preview = '';
+    if (isImage) {
+        preview = `<img src="${path}" alt="${file.name}">`;
+    } else if (isPdf) {
+        preview = `<div class="file-icon"><i data-feather="file-text"></i></div>`;
+    } else {
+        preview = `<div class="file-icon"><i data-feather="file"></i></div>`;
+    }
+    
+    docItem.innerHTML = `
+        ${preview}
+        <div class="file-name">${file.name}</div>
+        <div class="file-size">${fileSize}</div>
+        <button class="btn btn-small btn-danger" onclick="removeTravelDocument('${path}')">
+            <i data-feather="trash-2"></i> Remove
+        </button>
+    `;
+    
+    uploadedDocs.appendChild(docItem);
+    feather.replace();
+}
+
+function removeTravelDocument(path) {
+    const docItem = document.querySelector(`[data-path="${path}"]`);
+    if (docItem) {
+        docItem.remove();
+    }
+    
+    // Remove from trip data if stored
+    if (tripData.travelDocuments) {
+        tripData.travelDocuments = tripData.travelDocuments.filter(doc => doc.path !== path);
+    }
+}
+
+async function extractTripDetails(filePath, fileName) {
+    const extractionStatus = document.getElementById('extractionStatus');
+    
+    // Show processing status
+    extractionStatus.className = 'extraction-status processing';
+    extractionStatus.innerHTML = `
+        <i data-feather="loader"></i> Analyzing ${fileName} for trip details...
+    `;
+    feather.replace();
+    
+    try {
+        const response = await fetch('extract_trip_details.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                filePath: filePath,
+                fileName: fileName
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.tripDetails) {
+            // Show success status
+            extractionStatus.className = 'extraction-status success';
+            extractionStatus.innerHTML = `
+                <i data-feather="check-circle"></i> Trip details extracted successfully!
+            `;
+            
+            // Auto-fill form fields
+            fillTripDetailsForm(result.tripDetails);
+            
+        } else {
+            extractionStatus.className = 'extraction-status error';
+            extractionStatus.innerHTML = `
+                <i data-feather="x-circle"></i> Could not extract trip details from ${fileName}
+            `;
+        }
+        
+        feather.replace();
+        
+    } catch (error) {
+        console.error('Extraction error:', error);
+        extractionStatus.className = 'extraction-status error';
+        extractionStatus.innerHTML = `
+            <i data-feather="x-circle"></i> Error analyzing ${fileName}
+        `;
+        feather.replace();
+    }
+}
+
+function fillTripDetailsForm(tripDetails) {
+    const tripNameField = document.getElementById('tripName');
+    const startDateField = document.getElementById('startDate');
+    const endDateField = document.getElementById('endDate');
+    const tripNotesField = document.getElementById('tripNotes');
+    
+    // Only fill empty fields to avoid overwriting user input
+    if (tripDetails.tripName && !tripNameField.value) {
+        tripNameField.value = tripDetails.tripName;
+    }
+    
+    if (tripDetails.startDate && !startDateField.value) {
+        startDateField.value = tripDetails.startDate;
+    }
+    
+    if (tripDetails.endDate && !endDateField.value) {
+        endDateField.value = tripDetails.endDate;
+    }
+    
+    if (tripDetails.notes && !tripNotesField.value) {
+        tripNotesField.value = tripDetails.notes;
+    }
+}
