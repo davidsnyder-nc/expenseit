@@ -106,6 +106,53 @@ function loadAllTrips() {
 }
 
 /**
+ * Load archived trips for dashboard display
+ */
+function loadArchivedTrips() {
+    $archiveDir = 'data/archive';
+    
+    // Check if archive directory exists
+    if (!is_dir($archiveDir)) {
+        return [
+            'success' => true,
+            'trips' => []
+        ];
+    }
+    
+    $trips = [];
+    $archiveFiles = glob($archiveDir . '/*.json');
+    
+    foreach ($archiveFiles as $archiveFile) {
+        try {
+            $archiveData = json_decode(file_get_contents($archiveFile), true);
+            if ($archiveData && isset($archiveData['metadata'])) {
+                $trips[] = [
+                    'name' => $archiveData['name'] ?? basename($archiveFile, '.json'),
+                    'metadata' => $archiveData['metadata'],
+                    'expenseCount' => $archiveData['expenseCount'] ?? 0,
+                    'total' => $archiveData['total'] ?? '0.00',
+                    'archived_date' => $archiveData['archived_date'] ?? ''
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("Error loading archived trip " . basename($archiveFile) . ": " . $e->getMessage());
+        }
+    }
+    
+    // Sort by archived date (most recent first)
+    usort($trips, function($a, $b) {
+        $dateA = $a['archived_date'] ?? '';
+        $dateB = $b['archived_date'] ?? '';
+        return strtotime($dateB) <=> strtotime($dateA);
+    });
+    
+    return [
+        'success' => true,
+        'trips' => $trips
+    ];
+}
+
+/**
  * Load trip summary for dashboard
  */
 function loadTripSummary($tripName, $tripDir) {
@@ -304,66 +351,7 @@ function getTripReceipts($tripName) {
     return $receipts;
 }
 
-/**
- * Load archived trips
- */
-function loadArchivedTrips() {
-    $archiveDir = 'data/archive';
-    
-    if (!is_dir($archiveDir)) {
-        return [
-            'success' => true,
-            'trips' => []
-        ];
-    }
-    
-    $trips = [];
-    $zipFiles = glob($archiveDir . '/*.zip');
-    
-    foreach ($zipFiles as $zipFile) {
-        $tripName = basename($zipFile, '.zip');
-        
-        try {
-            // Try to read metadata from a separate file or extract from zip
-            $metadataFile = $archiveDir . '/' . $tripName . '_metadata.json';
-            if (file_exists($metadataFile)) {
-                $metadata = json_decode(file_get_contents($metadataFile), true);
-                if ($metadata) {
-                    $trips[] = [
-                        'name' => $tripName,
-                        'metadata' => $metadata['metadata'] ?? [],
-                        'expenseCount' => $metadata['expenseCount'] ?? 0,
-                        'total' => $metadata['total'] ?? '0.00',
-                        'archived' => true,
-                        'archiveDate' => filemtime($zipFile)
-                    ];
-                }
-            } else {
-                // Fallback: create basic info from filename and file stats
-                $trips[] = [
-                    'name' => $tripName,
-                    'metadata' => ['name' => $tripName],
-                    'expenseCount' => 0,
-                    'total' => '0.00',
-                    'archived' => true,
-                    'archiveDate' => filemtime($zipFile)
-                ];
-            }
-        } catch (Exception $e) {
-            error_log("Error loading archived trip $tripName: " . $e->getMessage());
-        }
-    }
-    
-    // Sort by archive date (most recent first)
-    usort($trips, function($a, $b) {
-        return $b['archiveDate'] <=> $a['archiveDate'];
-    });
-    
-    return [
-        'success' => true,
-        'trips' => $trips
-    ];
-}
+
 
 /**
  * Get trip statistics
