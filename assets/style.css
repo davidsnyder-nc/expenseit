@@ -1059,6 +1059,29 @@ body {
     color: #a0aec0 !important;
 }
 
+/* Section header styling */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
+/* Note preview and tooltip styling */
+.note-preview {
+    cursor: help;
+    border-bottom: 1px dotted #666;
+    position: relative;
+}
+
+.note-preview:hover {
+    color: #e53e3e;
+}
+
 /* Wizard Styles */
 .wizard-container {
     max-width: 800px;
