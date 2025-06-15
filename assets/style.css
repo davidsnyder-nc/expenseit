@@ -1005,10 +1005,10 @@ body {
 }
 
 .trip-actions .btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     font-size: 0.875rem;
     border-radius: 8px;
-    min-width: 120px;
+    min-width: auto;
     flex: 0 0 auto;
     text-align: center;
     white-space: nowrap;
@@ -1683,28 +1683,26 @@ body {
 
 .trip-actions {
     display: flex;
-    gap: 1rem;
-    flex-wrap: nowrap;
+    gap: 0.75rem;
     justify-content: center;
+    flex-wrap: wrap;
     padding: 1.5rem 0 0 0;
     border-top: 1px solid #e2e8f0;
     margin-top: 1.5rem;
-    overflow-x: auto;
 }
 
 @media (max-width: 768px) {
     .trip-actions {
         gap: 0.5rem;
         padding: 1rem 0 0 0;
-        justify-content: flex-start;
+        justify-content: center;
     }
     
     .trip-actions .btn {
-        min-width: auto;
-        padding: 0.625rem 0.875rem;
+        padding: 0.625rem 1rem;
         font-size: 0.8rem;
-        white-space: nowrap;
-        flex-shrink: 0;
+        flex: 1 1 calc(50% - 0.25rem);
+        max-width: calc(50% - 0.25rem);
     }
 }
 

@@ -134,20 +134,21 @@
                                 <p>$${total.toFixed(2)}</p>
                             </div>
                         </div>
-                        <div class="trip-actions">
-                            <button class="btn btn-primary" onclick="editTrip()">
-                                <i data-feather="edit"></i> Edit Trip
-                            </button>
-                            <button class="btn btn-secondary" onclick="downloadReport()">
-                                <i data-feather="download"></i> Download PDF
-                            </button>
-                            <button class="btn btn-outline" onclick="addExpense()">
-                                <i data-feather="plus"></i> Add Expense
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteTrip()">
-                                <i data-feather="trash-2"></i> Delete Trip
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <div class="trip-actions">
+                        <button class="btn btn-primary" onclick="editTrip()">
+                            <i data-feather="edit"></i> Edit Trip
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadReport()">
+                            <i data-feather="download"></i> Download PDF
+                        </button>
+                        <button class="btn btn-outline" onclick="addExpense()">
+                            <i data-feather="plus"></i> Add Expense
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTrip()">
+                            <i data-feather="trash-2"></i> Delete Trip
+                        </button>
                     </div>
                     
                     ${trip.metadata.notes ? `
