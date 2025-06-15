@@ -202,7 +202,7 @@
                                                 <td>${expense.note || '-'}</td>
                                                 <td>
                                                     ${expense.source ? `
-                                                        <button class="btn btn-small" onclick="viewReceipt('data/trips/${currentTrip.name}/${expense.source}', '${expense.merchant || 'Receipt'}', ${expense.source.toLowerCase().endsWith('.pdf')})">
+                                                        <button class="btn btn-small" onclick="viewReceiptFromExpense('${expense.source}', '${expense.merchant || 'Receipt'}')">
                                                             <i data-feather="eye"></i> View
                                                         </button>
                                                     ` : '-'}
@@ -355,12 +355,24 @@
             feather.replace();
         }
 
+        let receiptsMap = {};
+
         async function loadTripReceipts(tripName) {
             try {
                 const response = await fetch(`api.php?action=receipts&name=${encodeURIComponent(tripName)}`);
                 const data = await response.json();
                 
                 if (data.success && data.receipts) {
+                    // Create a map of filenames to actual file paths for modal viewing
+                    receiptsMap = {};
+                    data.receipts.forEach(receipt => {
+                        const originalName = receipt.filename.replace(/_/g, ' ');
+                        receiptsMap[receipt.filename] = receipt.fullUrl;
+                        receiptsMap[originalName] = receipt.fullUrl;
+                        receiptsMap[`receipts/${receipt.filename}`] = receipt.fullUrl;
+                        receiptsMap[`receipts/${originalName}`] = receipt.fullUrl;
+                    });
+                    
                     displayReceipts(data.receipts);
                 }
             } catch (error) {
@@ -449,6 +461,37 @@
             
             const modal = document.getElementById('receiptModal');
             modal.style.display = 'none';
+        }
+
+        function viewReceiptFromExpense(sourceString, title) {
+            // Find the correct file path from our receipts map
+            let receiptUrl = null;
+            
+            // Try different variations of the source string
+            const variations = [
+                sourceString,
+                sourceString.replace(/\//g, '_'),
+                sourceString.replace(/\s+/g, '_'),
+                sourceString.replace(/receipts\//, ''),
+                sourceString.replace(/receipts\\/, ''),
+                sourceString.replace(/\u202f/g, ''),
+                sourceString.replace(/\u202f/g, ' ')
+            ];
+            
+            for (const variation of variations) {
+                if (receiptsMap[variation]) {
+                    receiptUrl = receiptsMap[variation];
+                    break;
+                }
+            }
+            
+            if (receiptUrl) {
+                const isPdf = receiptUrl.toLowerCase().endsWith('.pdf');
+                viewReceipt(receiptUrl, title, isPdf);
+            } else {
+                showErrorMessage('Receipt file not found');
+                console.error('Could not find receipt for:', sourceString, 'Available receipts:', Object.keys(receiptsMap));
+            }
         }
 
         // Close modal when clicking outside
