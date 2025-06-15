@@ -238,52 +238,53 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [],
             }
             .receipts-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                gap: 12px;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 8px;
                 margin-top: 15px;
                 max-width: 100%;
             }
             .receipt-attachment {
                 border: 1px solid #e9ecef;
-                border-radius: 8px;
-                padding: 10px;
+                border-radius: 4px;
+                padding: 6px;
                 background: #f8f9fa;
                 text-align: center;
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
             .receipt-info {
-                margin-bottom: 8px;
-                font-size: 10px;
+                margin-bottom: 4px;
+                font-size: 8px;
+                line-height: 1.2;
             }
             .receipt-info strong {
                 display: block;
-                margin-bottom: 3px;
+                margin-bottom: 1px;
                 color: #333;
-                font-size: 11px;
+                font-size: 9px;
             }
             .receipt-info small {
                 color: #666;
-                font-size: 9px;
+                font-size: 7px;
             }
             .receipt-image img {
-                border-radius: 4px;
+                border-radius: 3px;
                 border: 1px solid #ddd;
                 width: 100%;
-                max-width: 180px;
-                max-height: 150px;
+                max-width: 110px;
+                max-height: 80px;
                 height: auto;
                 object-fit: contain;
                 display: block;
             }
             .receipt-file {
-                padding: 15px;
+                padding: 8px;
                 background: #fff;
-                border: 2px dashed #ccc;
-                border-radius: 4px;
+                border: 1px dashed #ccc;
+                border-radius: 3px;
                 color: #666;
-                font-size: 10px;
-                min-height: 80px;
+                font-size: 8px;
+                min-height: 60px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
