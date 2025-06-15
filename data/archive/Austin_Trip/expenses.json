@@ -1,17 +1,6 @@
 [
     {
-        "id": "684ec16d3b3f4",
-        "date": "2025-06-14",
-        "merchant": "WALMART",
-        "amount": 12.14,
-        "category": "Groceries",
-        "note": "Milk 2%, Bread Whole Wheat, Bananas 2 lbs, Eggs Large Dozen",
-        "source": "receipts\/reciepts1.jpg",
-        "is_travel_document": false,
-        "gemini_processed": true
-    },
-    {
-        "id": "684ec16fd98b6",
+        "id": "684ebe9b561e2",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
@@ -22,7 +11,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec172f06bd",
+        "id": "684ebe9e8e26e",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
@@ -33,7 +22,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec175eb387",
+        "id": "684ebea158836",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
@@ -44,7 +33,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec176f40b6",
+        "id": "684ebea27d9b7",
         "date": "2023-10-17",
         "merchant": "Unknown",
         "amount": 200,
@@ -55,7 +44,7 @@
         "gemini_processed": true
     },
     {
-        "id": "684ec17854749",
+        "id": "684ebea3d061b",
         "date": "2023-10-16",
         "merchant": "THE GOURMET BISTRO",
         "amount": 120,

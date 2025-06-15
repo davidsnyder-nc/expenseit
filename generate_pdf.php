@@ -269,10 +269,12 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [],
             .receipt-image img {
                 border-radius: 4px;
                 border: 1px solid #ddd;
-                max-width: 100%;
-                max-height: 200px;
+                width: 100%;
+                max-width: 180px;
+                max-height: 150px;
                 height: auto;
                 object-fit: contain;
+                display: block;
             }
             .receipt-file {
                 padding: 15px;
@@ -464,7 +466,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [],
                     
                     $html .= '
                         <div class="receipt-image">
-                            <img src="data:image/jpeg;base64,' . $imageData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
+                            <img src="data:image/jpeg;base64,' . $imageData . '">
                         </div>';
                 }
             } else {
@@ -543,7 +545,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [],
                 if ($thumbnailCreated && $thumbnailData) {
                     $html .= '
                         <div class="receipt-image">
-                            <img src="data:image/jpeg;base64,' . $thumbnailData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
+                            <img src="data:image/jpeg;base64,' . $thumbnailData . '">
                             <p style="font-size: 10px; color: #666; margin-top: 5px;">Converted from PDF</p>
                         </div>';
                 } else {
