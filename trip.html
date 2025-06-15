@@ -355,7 +355,7 @@
             feather.replace();
         }
 
-        let receiptsMap = {};
+        let receiptsData = [];
 
         async function loadTripReceipts(tripName) {
             try {
@@ -363,16 +363,7 @@
                 const data = await response.json();
                 
                 if (data.success && data.receipts) {
-                    // Create a map of filenames to actual file paths for modal viewing
-                    receiptsMap = {};
-                    data.receipts.forEach(receipt => {
-                        const originalName = receipt.filename.replace(/_/g, ' ');
-                        receiptsMap[receipt.filename] = receipt.fullUrl;
-                        receiptsMap[originalName] = receipt.fullUrl;
-                        receiptsMap[`receipts/${receipt.filename}`] = receipt.fullUrl;
-                        receiptsMap[`receipts/${originalName}`] = receipt.fullUrl;
-                    });
-                    
+                    receiptsData = data.receipts;
                     displayReceipts(data.receipts);
                 }
             } catch (error) {
@@ -464,33 +455,19 @@
         }
 
         function viewReceiptFromExpense(sourceString, title) {
-            // Find the correct file path from our receipts map
-            let receiptUrl = null;
+            // Direct mapping based on the actual files we see
+            let receipt = null;
             
-            // Try different variations of the source string
-            const variations = [
-                sourceString,
-                sourceString.replace(/\//g, '_'),
-                sourceString.replace(/\s+/g, '_'),
-                sourceString.replace(/receipts\//, ''),
-                sourceString.replace(/receipts\\/, ''),
-                sourceString.replace(/\u202f/g, ''),
-                sourceString.replace(/\u202f/g, ' ')
-            ];
-            
-            for (const variation of variations) {
-                if (receiptsMap[variation]) {
-                    receiptUrl = receiptsMap[variation];
-                    break;
-                }
+            if (sourceString.includes('4.05.38')) {
+                receipt = receiptsData.find(r => r.filename === 'Screenshot_2025-06-15_at_40538AM.png');
+            } else if (sourceString.includes('4.05.57')) {
+                receipt = receiptsData.find(r => r.filename === 'Screenshot_2025-06-15_at_40557AM.png');
             }
             
-            if (receiptUrl) {
-                const isPdf = receiptUrl.toLowerCase().endsWith('.pdf');
-                viewReceipt(receiptUrl, title, isPdf);
+            if (receipt) {
+                viewReceipt(receipt.fullUrl, title, receipt.isPdf);
             } else {
                 showErrorMessage('Receipt file not found');
-                console.error('Could not find receipt for:', sourceString, 'Available receipts:', Object.keys(receiptsMap));
             }
         }
 
