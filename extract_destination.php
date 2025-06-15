@@ -1,5 +1,5 @@
 <?php
-require_once 'gemini.php';
+require_once 'gemini_api.php';
 
 function extractDestination($tripName) {
     $prompt = "Extract the destination/location from this trip name: \"$tripName\"
