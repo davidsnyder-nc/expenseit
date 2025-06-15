@@ -15,8 +15,8 @@
         </header>
 
         <div class="dashboard">
-            <div class="dashboard-actions">
-                <div class="actions">
+            <div class="dashboard-toolbar">
+                <div class="toolbar-left">
                     <button class="btn btn-primary" onclick="createNewTrip()">
                         <i data-feather="plus"></i> New Trip
                     </button>
@@ -24,22 +24,43 @@
                         <i data-feather="refresh-cw"></i> Refresh
                     </button>
                 </div>
+                <div class="toolbar-right">
+                    <span id="selectedCount" style="display: none; margin-right: 15px; color: #4299e1; font-weight: 500;"></span>
+                    <button class="btn btn-danger" id="deleteBtn" onclick="deleteSelectedTrips()" style="display: none;">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                    <button class="btn btn-warning" id="archiveBtn" onclick="archiveSelectedTrips()" style="display: none;">
+                        <i data-feather="archive"></i> Archive Selected
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportAllTrips()">
+                        <i data-feather="download"></i> Export All
+                    </button>
+                </div>
             </div>
 
             <div class="trips-section">
-                <div class="trips-grid" id="tripsGrid">
-                <div class="loading" id="loadingState">
-                    <div class="spinner"></div>
-                    <p>Loading trips...</p>
-                </div>
-                <div class="empty-state" id="emptyState" style="display: none;">
-                    <i data-feather="folder"></i>
-                    <h3>No trips found</h3>
-                    <p>Create your first trip to start tracking expenses</p>
-                    <button class="btn btn-primary" onclick="createNewTrip()">
-                        <i data-feather="plus"></i> New Trip
+                <div class="section-tabs">
+                    <button class="tab-btn active" onclick="switchTab('active')" id="activeTab">
+                        <i data-feather="folder"></i> Active Trips
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('archived')" id="archivedTab">
+                        <i data-feather="archive"></i> Archived Trips
                     </button>
                 </div>
+
+                <div class="trips-table-container" id="tripsContainer">
+                    <div class="loading" id="loadingState">
+                        <div class="spinner"></div>
+                        <p>Loading trips...</p>
+                    </div>
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <i data-feather="folder"></i>
+                        <h3>No trips found</h3>
+                        <p>Create your first trip to start tracking expenses</p>
+                        <button class="btn btn-primary" onclick="createNewTrip()">
+                            <i data-feather="plus"></i> New Trip
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -49,6 +70,10 @@
     <script>
         // Initialize feather icons
         feather.replace();
+
+        let currentTab = 'active';
+        let selectedTrips = new Set();
+        let allTrips = [];
 
         // Load trips on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -63,68 +88,260 @@
             loadTrips();
         }
 
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('activeTab').classList.toggle('active', tab === 'active');
+            document.getElementById('archivedTab').classList.toggle('active', tab === 'archived');
+            loadTrips();
+        }
+
         async function loadTrips() {
             const loadingState = document.getElementById('loadingState');
             const emptyState = document.getElementById('emptyState');
-            const tripsGrid = document.getElementById('tripsGrid');
+            const tripsContainer = document.getElementById('tripsContainer');
             
             // Show loading state
             loadingState.style.display = 'block';
             emptyState.style.display = 'none';
             
             try {
-                const response = await fetch('load.php?action=trips');
+                const action = currentTab === 'active' ? 'trips' : 'archived_trips';
+                const response = await fetch(`load.php?action=${action}`);
                 const data = await response.json();
                 
                 loadingState.style.display = 'none';
                 
                 if (data.success && data.trips && data.trips.length > 0) {
-                    displayTrips(data.trips);
+                    allTrips = data.trips;
+                    displayTripsTable(data.trips);
                 } else {
                     emptyState.style.display = 'block';
+                    tripsContainer.innerHTML = loadingState.outerHTML + emptyState.outerHTML;
                 }
             } catch (error) {
                 console.error('Error loading trips:', error);
                 loadingState.style.display = 'none';
                 emptyState.style.display = 'block';
+                tripsContainer.innerHTML = loadingState.outerHTML + emptyState.outerHTML;
             }
         }
 
-        function displayTrips(trips) {
-            const tripsGrid = document.getElementById('tripsGrid');
+        function displayTripsTable(trips) {
+            const tripsContainer = document.getElementById('tripsContainer');
             
-            tripsGrid.innerHTML = trips.map(trip => `
-                <div class="trip-card" onclick="viewTrip('${trip.name}')">
-                    <div class="trip-header">
-                        <h3>${trip.metadata.name || trip.name}</h3>
-                        <span class="trip-badge">${trip.expenseCount || 0} expenses</span>
-                    </div>
-                    <div class="trip-details">
-                        <div class="trip-dates">
-                            <i data-feather="calendar"></i>
-                            <span>${formatDate(trip.metadata.start_date)} - ${formatDate(trip.metadata.end_date)}</span>
-                        </div>
-                        <div class="trip-total">
-                            <i data-feather="dollar-sign"></i>
-                            <span class="amount">$${trip.total || '0.00'}</span>
-                        </div>
-                    </div>
-                    <div class="trip-actions">
-                        <button class="btn btn-small" onclick="event.stopPropagation(); viewTrip('${trip.name}')">
-                            <i data-feather="eye"></i> View
-                        </button>
-                        <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); editTrip('${trip.name}')">
-                            <i data-feather="edit"></i> Edit
-                        </button>
-                        <button class="btn btn-small btn-accent" onclick="event.stopPropagation(); downloadReport('${trip.name}')">
-                            <i data-feather="download"></i> PDF
-                        </button>
-                    </div>
+            tripsContainer.innerHTML = `
+                <div class="trips-table">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                                </th>
+                                <th>Trip Name</th>
+                                <th>Destination</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Expenses</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${trips.map(trip => `
+                                <tr class="trip-row" data-trip-name="${trip.name}">
+                                    <td>
+                                        <input type="checkbox" class="trip-checkbox" value="${trip.name}" onchange="updateSelection()">
+                                    </td>
+                                    <td>
+                                        <div class="trip-name-cell">
+                                            <strong>${trip.metadata.name || trip.name}</strong>
+                                        </div>
+                                    </td>
+                                    <td>${trip.metadata.destination || '-'}</td>
+                                    <td>${formatDate(trip.metadata.start_date)}</td>
+                                    <td>${formatDate(trip.metadata.end_date)}</td>
+                                    <td>
+                                        <span class="expense-count">${trip.expenseCount || 0}</span>
+                                    </td>
+                                    <td>
+                                        <span class="amount">$${trip.total || '0.00'}</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge ${currentTab}">${currentTab === 'active' ? 'Active' : 'Archived'}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon" onclick="viewTrip('${trip.name}')" title="View Trip">
+                                                <i data-feather="eye"></i>
+                                            </button>
+                                            <button class="btn-icon" onclick="editTrip('${trip.name}')" title="Edit Trip">
+                                                <i data-feather="edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </div>
-            `).join('');
+            `;
             
-            // Re-initialize feather icons for new content
+            // Clear previous selections
+            selectedTrips.clear();
+            updateSelectionUI();
+            
+            // Re-initialize feather icons
             feather.replace();
+        }
+
+        function toggleSelectAll(checkbox) {
+            const tripCheckboxes = document.querySelectorAll('.trip-checkbox');
+            tripCheckboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                if (checkbox.checked) {
+                    selectedTrips.add(cb.value);
+                } else {
+                    selectedTrips.delete(cb.value);
+                }
+            });
+            updateSelectionUI();
+        }
+
+        function updateSelection() {
+            selectedTrips.clear();
+            const checkedBoxes = document.querySelectorAll('.trip-checkbox:checked');
+            checkedBoxes.forEach(cb => selectedTrips.add(cb.value));
+            
+            const selectAllBox = document.getElementById('selectAll');
+            const allCheckboxes = document.querySelectorAll('.trip-checkbox');
+            selectAllBox.checked = allCheckboxes.length > 0 && checkedBoxes.length === allCheckboxes.length;
+            selectAllBox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allCheckboxes.length;
+            
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const selectedCount = selectedTrips.size;
+            const countSpan = document.getElementById('selectedCount');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const archiveBtn = document.getElementById('archiveBtn');
+            
+            if (selectedCount > 0) {
+                countSpan.textContent = `${selectedCount} trip${selectedCount > 1 ? 's' : ''} selected`;
+                countSpan.style.display = 'inline';
+                deleteBtn.style.display = 'inline-flex';
+                archiveBtn.style.display = currentTab === 'active' ? 'inline-flex' : 'none';
+            } else {
+                countSpan.style.display = 'none';
+                deleteBtn.style.display = 'none';
+                archiveBtn.style.display = 'none';
+            }
+        }
+
+        async function deleteSelectedTrips() {
+            if (selectedTrips.size === 0) return;
+            
+            const tripNames = Array.from(selectedTrips);
+            const message = `Are you sure you want to delete ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}?\n\nThis will permanently delete all trip data including expenses and receipts. This action cannot be undone.`;
+            
+            if (!confirm(message)) return;
+            
+            try {
+                for (const tripName of tripNames) {
+                    const response = await fetch('save_trip.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'delete_trip',
+                            tripName: tripName
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                        console.error(`Failed to delete trip: ${tripName}`);
+                    }
+                }
+                
+                alert(`${tripNames.length} trip${tripNames.length > 1 ? 's' : ''} deleted successfully`);
+                selectedTrips.clear();
+                loadTrips();
+            } catch (error) {
+                console.error('Error deleting trips:', error);
+                alert('Error deleting trips');
+            }
+        }
+
+        async function archiveSelectedTrips() {
+            if (selectedTrips.size === 0) return;
+            
+            const tripNames = Array.from(selectedTrips);
+            const message = `Are you sure you want to archive ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}?\n\nArchived trips will be moved to a separate section and compressed into zip files.`;
+            
+            if (!confirm(message)) return;
+            
+            try {
+                for (const tripName of tripNames) {
+                    const response = await fetch('save_trip.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'archive_trip',
+                            tripName: tripName
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                        console.error(`Failed to archive trip: ${tripName}`);
+                    }
+                }
+                
+                alert(`${tripNames.length} trip${tripNames.length > 1 ? 's' : ''} archived successfully`);
+                selectedTrips.clear();
+                loadTrips();
+            } catch (error) {
+                console.error('Error archiving trips:', error);
+                alert('Error archiving trips');
+            }
+        }
+
+        async function exportAllTrips() {
+            try {
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'export_all_trips'
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `all-trips-${new Date().toISOString().split('T')[0]}.zip`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Error exporting trips');
+                }
+            } catch (error) {
+                console.error('Error exporting trips:', error);
+                alert('Error exporting trips');
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
         }
 
         function viewTrip(tripName) {
@@ -133,36 +350,6 @@
 
         function editTrip(tripName) {
             window.location.href = `edit.html?trip=${encodeURIComponent(tripName)}`;
-        }
-
-        async function downloadReport(tripName) {
-            try {
-                const response = await fetch(`generate_pdf.php?trip=${encodeURIComponent(tripName)}`);
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${tripName}-report.pdf`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    alert('Error generating PDF report');
-                }
-            } catch (error) {
-                console.error('Error downloading report:', error);
-                alert('Error downloading report');
-            }
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-            });
         }
     </script>
 </body>
