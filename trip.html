@@ -1033,16 +1033,85 @@
                 plainText += `\n`;
             });
             
-            // Copy to clipboard using modern API
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(plainText).then(() => {
-                    showSuccessMessage('Trip data copied to clipboard successfully!');
-                }).catch(err => {
-                    console.error('Failed to copy to clipboard:', err);
-                    fallbackCopyTextToClipboard(plainText);
-                });
+            // Open text in new window
+            const newWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (newWindow) {
+                newWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Trip Expense Report - ${currentTrip.metadata.name}</title>
+                        <style>
+                            body {
+                                font-family: 'Courier New', monospace;
+                                margin: 20px;
+                                line-height: 1.4;
+                                background: white;
+                                color: black;
+                            }
+                            pre {
+                                white-space: pre-wrap;
+                                word-wrap: break-word;
+                                font-size: 12px;
+                            }
+                            .header {
+                                text-align: center;
+                                margin-bottom: 20px;
+                                font-family: Arial, sans-serif;
+                            }
+                            .actions {
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                            button {
+                                padding: 10px 20px;
+                                margin: 0 10px;
+                                border: 1px solid #ccc;
+                                background: #f5f5f5;
+                                cursor: pointer;
+                                border-radius: 4px;
+                            }
+                            button:hover {
+                                background: #e0e0e0;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h2>Trip Expense Report</h2>
+                            <p>Generated on ${new Date().toLocaleDateString()}</p>
+                        </div>
+                        <div class="actions">
+                            <button onclick="selectAll()">Select All</button>
+                            <button onclick="copyToClipboard()">Copy to Clipboard</button>
+                            <button onclick="window.print()">Print</button>
+                        </div>
+                        <pre id="reportText">${plainText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                        <script>
+                            function selectAll() {
+                                const range = document.createRange();
+                                range.selectNode(document.getElementById('reportText'));
+                                window.getSelection().removeAllRanges();
+                                window.getSelection().addRange(range);
+                            }
+                            
+                            function copyToClipboard() {
+                                selectAll();
+                                try {
+                                    document.execCommand('copy');
+                                    alert('Report copied to clipboard!');
+                                } catch (err) {
+                                    alert('Please select the text manually and copy with Ctrl+C');
+                                }
+                            }
+                        </script>
+                    </body>
+                    </html>
+                `);
+                newWindow.document.close();
+                showSuccessMessage('Trip report opened in new window');
             } else {
-                fallbackCopyTextToClipboard(plainText);
+                showErrorMessage('Please allow popups to view the text report');
             }
         }
         
