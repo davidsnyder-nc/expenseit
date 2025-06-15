@@ -790,7 +790,122 @@
         }
 
         function addExpense() {
-            showSuccessMessage('Add expense functionality will be implemented');
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Add New Expense</h3>
+                        <button type="button" onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addExpenseForm">
+                            <div class="form-group">
+                                <label for="expenseDate">Date</label>
+                                <input type="date" id="expenseDate" name="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseMerchant">Merchant</label>
+                                <input type="text" id="expenseMerchant" name="merchant" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseAmount">Amount</label>
+                                <input type="number" id="expenseAmount" name="amount" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseTax">Tax Amount (optional)</label>
+                                <input type="number" id="expenseTax" name="tax_amount" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseCategory">Category</label>
+                                <select id="expenseCategory" name="category" required>
+                                    <option value="">Select category</option>
+                                    <option value="Food & Dining">Food & Dining</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Accommodation">Accommodation</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Travel">Travel</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseNote">Note (optional)</label>
+                                <textarea id="expenseNote" name="note" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveNewExpense()">Add Expense</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Set default date to today
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+            
+            // Focus first input
+            document.getElementById('expenseDate').focus();
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        async function saveNewExpense() {
+            const form = document.getElementById('addExpenseForm');
+            const formData = new FormData(form);
+            
+            // Validate required fields
+            if (!formData.get('date') || !formData.get('merchant') || !formData.get('amount') || !formData.get('category')) {
+                showErrorMessage('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                // Create expense data object
+                const expenseData = {
+                    id: 'manual_' + Date.now(),
+                    date: formData.get('date'),
+                    merchant: formData.get('merchant'),
+                    amount: formData.get('amount'),
+                    tax_amount: formData.get('tax_amount') || null,
+                    category: formData.get('category'),
+                    note: formData.get('note') || null,
+                    is_manual: true
+                };
+                
+                const postData = new FormData();
+                postData.append('action', 'add_expense');
+                postData.append('tripName', currentTrip.name);
+                postData.append('expenseData', JSON.stringify(expenseData));
+                
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    body: postData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage('Expense added successfully');
+                    closeModal();
+                    // Reload the trip data to show the new expense
+                    loadTrip();
+                } else {
+                    showErrorMessage('Failed to add expense: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+                showErrorMessage('Error adding expense');
+            }
         }
 
         async function toggleExpenseExclusion(expenseId) {
