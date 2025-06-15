@@ -17,11 +17,13 @@ $trip = str_replace(' ', '_', $trip);
 $file = basename($file); // Prevent directory traversal
 
 $filePath = "data/trips/$trip/receipts/$file";
+$extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-// Check if file exists and is a PDF
-if (!file_exists($filePath) || strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) !== 'pdf') {
+// Check if file exists and is a supported format
+$supportedFormats = ['pdf', 'png', 'jpg', 'jpeg', 'heic', 'tiff', 'tif'];
+if (!file_exists($filePath) || !in_array($extension, $supportedFormats)) {
     http_response_code(404);
-    exit('File not found or not a PDF');
+    exit('File not found or unsupported format');
 }
 
 // Generate cache path

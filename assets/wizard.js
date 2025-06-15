@@ -97,6 +97,9 @@ function updateNavigationButtons() {
     // Next button
     if (currentStep === totalSteps) {
         nextBtn.style.display = 'none';
+    } else if (currentStep === 3 && window.isProcessing) {
+        // Hide next button during automatic processing in step 3
+        nextBtn.style.display = 'none';
     } else {
         nextBtn.innerHTML = currentStep === totalSteps - 1 ? 
             'Complete <i data-feather="check"></i>' : 
@@ -392,6 +395,10 @@ async function processReceipts() {
         return;
     }
     
+    // Set processing flag and hide next button
+    window.isProcessing = true;
+    updateNavigationButtons();
+    
     // Update UI
     processBtn.disabled = true;
     processBtn.innerHTML = '<i data-feather="loader"></i> Processing...';
@@ -438,6 +445,10 @@ async function processReceipts() {
             errors++;
         }
     }
+    
+    // Clear processing flag and update navigation
+    window.isProcessing = false;
+    updateNavigationButtons();
     
     // Update UI
     processBtn.disabled = false;

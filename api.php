@@ -167,9 +167,12 @@ try {
             }
             
             usort($trips, function($a, $b) {
-                $dateA = $a['metadata']['start_date'] ?? '';
-                $dateB = $b['metadata']['start_date'] ?? '';
-                return strtotime($dateB) <=> strtotime($dateA);
+                // Sort by creation time (newest first) - use directory modification time
+                $dirA = 'data/trips/' . sanitizeName($a['name']);
+                $dirB = 'data/trips/' . sanitizeName($b['name']);
+                $timeA = is_dir($dirA) ? filemtime($dirA) : 0;
+                $timeB = is_dir($dirB) ? filemtime($dirB) : 0;
+                return $timeB <=> $timeA;
             });
         }
         
