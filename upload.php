@@ -155,14 +155,40 @@ try {
     $fileName = strtolower($file['name']);
     $documentType = 'receipt'; // default
     
-    if (strpos($fileName, 'itinerary') !== false || 
-        strpos($fileName, 'confirmation') !== false ||
-        strpos($fileName, 'boarding') !== false ||
-        strpos($fileName, 'flight') !== false ||
-        strpos($fileName, 'travel') !== false ||
-        strpos($fileName, 'gmail') !== false ||
-        strpos($fileName, 'fw_') !== false ||
-        strpos($fileName, 'trip') !== false) {
+    // Enhanced travel document keywords
+    $travelKeywords = [
+        'itinerary', 'confirmation', 'boarding', 'flight', 'airline',
+        'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
+        'american airlines', 'delta', 'united', 'southwest', 'jetblue',
+        'marriott', 'hilton', 'hyatt', 'homewood', 'rental', 'car',
+        'avis', 'hertz', 'enterprise', 'budget', 'gmail', 'fw_', 'trip'
+    ];
+    
+    // Check for receipt keywords to avoid false positives
+    $receiptKeywords = [
+        'receipt', 'invoice', 'bill', 'purchase', 'transaction',
+        'grocery', 'restaurant', 'store', 'shop', 'payment'
+    ];
+    
+    $hasReceiptKeywords = false;
+    $hasTravelKeywords = false;
+    
+    foreach ($receiptKeywords as $keyword) {
+        if (strpos($fileName, $keyword) !== false) {
+            $hasReceiptKeywords = true;
+            break;
+        }
+    }
+    
+    foreach ($travelKeywords as $keyword) {
+        if (strpos($fileName, $keyword) !== false) {
+            $hasTravelKeywords = true;
+            break;
+        }
+    }
+    
+    // If it has travel keywords and no receipt keywords, mark as travel doc
+    if ($hasTravelKeywords && !$hasReceiptKeywords) {
         $documentType = 'travel_document';
     }
     

@@ -366,14 +366,35 @@ function updateProcessingStep(stepId, status) {
 async function detectFileTypes() {
     // Analyze files to detect travel documents vs receipts
     for (const file of tripData.files) {
-        // Simple heuristic: PDFs with certain keywords are likely travel docs
-        if (file.name.toLowerCase().includes('itinerary') || 
-            file.name.toLowerCase().includes('confirmation') ||
-            file.name.toLowerCase().includes('boarding') ||
-            file.name.toLowerCase().includes('flight')) {
+        // Enhanced heuristic for travel document detection
+        const fileName = file.name.toLowerCase();
+        
+        // Check for travel document keywords
+        const travelKeywords = [
+            'itinerary', 'confirmation', 'boarding', 'flight', 'airline',
+            'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
+            'american airlines', 'delta', 'united', 'southwest', 'jetblue',
+            'marriott', 'hilton', 'hyatt', 'homewood', 'rental', 'car',
+            'avis', 'hertz', 'enterprise', 'budget'
+        ];
+        
+        // Check for receipt keywords to avoid false positives
+        const receiptKeywords = [
+            'receipt', 'invoice', 'bill', 'purchase', 'transaction',
+            'grocery', 'restaurant', 'store', 'shop', 'payment'
+        ];
+        
+        const hasReceiptKeywords = receiptKeywords.some(keyword => fileName.includes(keyword));
+        const hasTravelKeywords = travelKeywords.some(keyword => fileName.includes(keyword));
+        
+        // If it has travel keywords and no receipt keywords, mark as travel doc
+        if (hasTravelKeywords && !hasReceiptKeywords) {
             file.documentType = 'travel_document';
             tripData.travelDocuments.push(file);
             tripData.hasItinerary = true;
+        } else {
+            // Default to receipt for processing
+            file.documentType = 'receipt';
         }
     }
 }
@@ -400,12 +421,20 @@ async function extractTripDetailsFromUploads() {
                 // Update trip metadata with extracted details
                 const oldName = tripData.metadata.name;
                 
+                // Create proper trip name from destination
+                let tripName = result.tripDetails.trip_name || 'Trip';
+                if (result.tripDetails.destination) {
+                    // Extract city name from full destination (e.g., "Austin, TX" -> "Austin")
+                    tripName = result.tripDetails.destination.split(',')[0].trim();
+                }
+                
                 tripData.metadata = {
-                    name: result.tripDetails.destination || result.tripDetails.trip_name || 'Austin Trip',
+                    name: tripName,
+                    trip_name: tripName,
+                    destination: result.tripDetails.destination || tripName,
                     start_date: result.tripDetails.start_date || result.tripDetails.departure_date || '',
                     end_date: result.tripDetails.end_date || result.tripDetails.return_date || '',
-                    notes: result.tripDetails.notes || result.tripDetails.description || '',
-                    destination: result.tripDetails.destination || 'Austin'
+                    notes: result.tripDetails.notes || result.tripDetails.description || ''
                 };
                 
                 // If we got a better trip name, we should move files to the correct directory

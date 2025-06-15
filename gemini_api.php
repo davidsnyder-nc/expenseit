@@ -56,6 +56,96 @@ function callGeminiAPI($prompt) {
 }
 
 /**
+ * Call Gemini Vision API for travel document analysis
+ */
+function callGeminiVisionAPI($prompt, $filePath) {
+    $apiKey = getenv('GEMINI_API_KEY');
+    
+    if (!$apiKey) {
+        throw new Exception('Gemini API key not configured');
+    }
+    
+    // Read and encode file
+    $fileData = file_get_contents($filePath);
+    if ($fileData === false) {
+        throw new Exception('Failed to read file');
+    }
+    
+    $base64Data = base64_encode($fileData);
+    
+    // Determine MIME type based on file extension
+    $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+    $mimeType = match($extension) {
+        'pdf' => 'application/pdf',
+        'jpg', 'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        default => 'application/octet-stream'
+    };
+    
+    // Prepare API request
+    $requestData = [
+        'contents' => [
+            [
+                'parts' => [
+                    ['text' => $prompt],
+                    [
+                        'inline_data' => [
+                            'mime_type' => $mimeType,
+                            'data' => $base64Data
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        'generationConfig' => [
+            'temperature' => 0.1,
+            'maxOutputTokens' => 1024
+        ]
+    ];
+    
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+    if (curl_error($ch)) {
+        curl_close($ch);
+        throw new Exception('API request failed: ' . curl_error($ch));
+    }
+    
+    curl_close($ch);
+    
+    if ($httpCode !== 200) {
+        error_log("Gemini API HTTP Error $httpCode: $response");
+        return ['success' => false, 'error' => "API request failed with HTTP $httpCode"];
+    }
+    
+    $responseData = json_decode($response, true);
+    
+    if (!isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+        error_log("Invalid Gemini API response: $response");
+        return ['success' => false, 'error' => 'Invalid API response format'];
+    }
+    
+    $content = $responseData['candidates'][0]['content']['parts'][0]['text'];
+    
+    return [
+        'success' => true,
+        'content' => $content
+    ];
+}
+
+/**
  * Process file with Gemini Vision API
  */
 function processWithGemini($filePath, $fileName, $mimeType, $apiKey) {
