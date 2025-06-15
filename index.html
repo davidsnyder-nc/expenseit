@@ -15,16 +15,19 @@
         </header>
 
         <div class="dashboard">
-            <div class="actions">
-                <button class="btn btn-primary" onclick="createNewTrip()">
-                    <i data-feather="plus"></i> New Trip
-                </button>
-                <button class="btn btn-secondary" onclick="refreshTrips()">
-                    <i data-feather="refresh-cw"></i> Refresh
-                </button>
+            <div class="dashboard-actions">
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="createNewTrip()">
+                        <i data-feather="plus"></i> New Trip
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshTrips()">
+                        <i data-feather="refresh-cw"></i> Refresh
+                    </button>
+                </div>
             </div>
 
-            <div class="trips-grid" id="tripsGrid">
+            <div class="trips-section">
+                <div class="trips-grid" id="tripsGrid">
                 <div class="loading" id="loadingState">
                     <div class="spinner"></div>
                     <p>Loading trips...</p>
@@ -36,6 +39,7 @@
                     <button class="btn btn-primary" onclick="createNewTrip()">
                         <i data-feather="plus"></i> New Trip
                     </button>
+                </div>
                 </div>
             </div>
         </div>
