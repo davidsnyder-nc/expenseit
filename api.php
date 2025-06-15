@@ -341,15 +341,19 @@ try {
                     $filename = basename($file);
                     $isPdf = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
                     
+                    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                    $isHeicTiff = in_array($extension, ['heic', 'tiff', 'tif']);
+                    
                     $receipts[] = [
                         'filename' => $filename,
                         'name' => $filename,
                         'path' => $file,
                         'fullUrl' => $file,
-                        'displayUrl' => $file,
+                        'displayUrl' => $isHeicTiff ? "convert_image.php?file=" . urlencode($filename) . "&trip=" . urlencode($tripName) : $file,
                         'size' => filesize($file),
                         'modified' => filemtime($file),
-                        'isPdf' => $isPdf
+                        'isPdf' => $isPdf,
+                        'isHeicTiff' => $isHeicTiff
                     ];
                 }
             }

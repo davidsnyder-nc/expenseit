@@ -15,6 +15,104 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+/**
+ * Sanitize name for use as directory name
+ */
+function sanitizeName($name) {
+    // Remove or replace invalid characters
+    $name = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $name);
+    // Replace spaces with underscores
+    $name = str_replace(' ', '_', $name);
+    // Remove multiple underscores
+    $name = preg_replace('/_+/', '_', $name);
+    // Trim underscores from start and end
+    $name = trim($name, '_');
+    
+    return $name ?: 'untitled';
+}
+
+/**
+ * Generate unique filename to avoid conflicts
+ */
+function generateUniqueFilename($originalName, $directory, $extension) {
+    $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+    $baseName = sanitizeName($baseName);
+    
+    $filename = $baseName . '.' . $extension;
+    $counter = 1;
+    
+    while (file_exists($directory . '/' . $filename)) {
+        $filename = $baseName . '_' . $counter . '.' . $extension;
+        $counter++;
+    }
+    
+    return $filename;
+}
+
+/**
+ * Convert uploaded image to JPEG format
+ */
+function convertToJpeg($sourcePath, $targetPath, $sourceExtension) {
+    // Try ImageMagick first
+    if (extension_loaded('imagick') && class_exists('Imagick')) {
+        try {
+            $imagick = new Imagick();
+            $imagick->readImage($sourcePath);
+            $imagick->setImageFormat('jpeg');
+            $imagick->setImageCompressionQuality(85);
+            
+            // Resize if image is too large (max 2048px on longest side)
+            $width = $imagick->getImageWidth();
+            $height = $imagick->getImageHeight();
+            $maxDimension = 2048;
+            
+            if ($width > $maxDimension || $height > $maxDimension) {
+                if ($width > $height) {
+                    $newWidth = $maxDimension;
+                    $newHeight = ($height * $maxDimension) / $width;
+                } else {
+                    $newHeight = $maxDimension;
+                    $newWidth = ($width * $maxDimension) / $height;
+                }
+                $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
+            }
+            
+            $imagick->writeImage($targetPath);
+            $imagick->clear();
+            return true;
+        } catch (Exception $e) {
+            error_log("ImageMagick conversion failed: " . $e->getMessage());
+        }
+    }
+    
+    // Fallback to GD for basic formats
+    if (extension_loaded('gd') && in_array($sourceExtension, ['png', 'jpg', 'jpeg'])) {
+        try {
+            switch ($sourceExtension) {
+                case 'png':
+                    $sourceImage = imagecreatefrompng($sourcePath);
+                    break;
+                case 'jpg':
+                case 'jpeg':
+                    $sourceImage = imagecreatefromjpeg($sourcePath);
+                    break;
+                default:
+                    return false;
+            }
+            
+            if ($sourceImage) {
+                $result = imagejpeg($sourceImage, $targetPath, 85);
+                imagedestroy($sourceImage);
+                return $result;
+            }
+        } catch (Exception $e) {
+            error_log("GD conversion failed: " . $e->getMessage());
+        }
+    }
+    
+    return false;
+}
+
 try {
     // Check if file was uploaded
     if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
@@ -49,14 +147,26 @@ try {
         }
     }
     
-    // Generate unique filename
-    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $filename = generateUniqueFilename($file['name'], $receiptsDir, $extension);
-    $targetPath = $receiptsDir . '/' . $filename;
+    // Convert all images to JPEG, keep PDFs as-is
+    $originalExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $baseName = pathinfo($file['name'], PATHINFO_FILENAME);
     
-    // Move uploaded file
-    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-        throw new Exception('Failed to save uploaded file');
+    if ($originalExtension === 'pdf') {
+        // Keep PDFs as-is
+        $filename = generateUniqueFilename($file['name'], $receiptsDir, $originalExtension);
+        $targetPath = $receiptsDir . '/' . $filename;
+        
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            throw new Exception('Failed to save uploaded file');
+        }
+    } else {
+        // Convert all image formats to JPEG
+        $filename = generateUniqueFilename($baseName . '.jpg', $receiptsDir, 'jpg');
+        $targetPath = $receiptsDir . '/' . $filename;
+        
+        if (!convertToJpeg($file['tmp_name'], $targetPath, $originalExtension)) {
+            throw new Exception('Failed to convert and save image file');
+        }
     }
     
     // Return success response
@@ -108,5 +218,69 @@ function generateUniqueFilename($originalName, $directory, $extension) {
     }
     
     return $filename;
+}
+
+/**
+ * Convert uploaded image to JPEG format
+ */
+function convertToJpeg($sourcePath, $targetPath, $sourceExtension) {
+    // Try ImageMagick first
+    if (extension_loaded('imagick') && class_exists('Imagick')) {
+        try {
+            $imagick = new Imagick();
+            $imagick->readImage($sourcePath);
+            $imagick->setImageFormat('jpeg');
+            $imagick->setImageCompressionQuality(85);
+            
+            // Resize if image is too large (max 2048px on longest side)
+            $width = $imagick->getImageWidth();
+            $height = $imagick->getImageHeight();
+            $maxDimension = 2048;
+            
+            if ($width > $maxDimension || $height > $maxDimension) {
+                if ($width > $height) {
+                    $newWidth = $maxDimension;
+                    $newHeight = ($height * $maxDimension) / $width;
+                } else {
+                    $newHeight = $maxDimension;
+                    $newWidth = ($width * $maxDimension) / $height;
+                }
+                $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
+            }
+            
+            $imagick->writeImage($targetPath);
+            $imagick->clear();
+            return true;
+        } catch (Exception $e) {
+            error_log("ImageMagick conversion failed: " . $e->getMessage());
+        }
+    }
+    
+    // Fallback to GD for basic formats
+    if (extension_loaded('gd') && in_array($sourceExtension, ['png', 'jpg', 'jpeg'])) {
+        try {
+            switch ($sourceExtension) {
+                case 'png':
+                    $sourceImage = imagecreatefrompng($sourcePath);
+                    break;
+                case 'jpg':
+                case 'jpeg':
+                    $sourceImage = imagecreatefromjpeg($sourcePath);
+                    break;
+                default:
+                    return false;
+            }
+            
+            if ($sourceImage) {
+                $result = imagejpeg($sourceImage, $targetPath, 85);
+                imagedestroy($sourceImage);
+                return $result;
+            }
+        } catch (Exception $e) {
+            error_log("GD conversion failed: " . $e->getMessage());
+        }
+    }
+    
+    return false;
 }
 ?>

@@ -86,16 +86,21 @@ if (extension_loaded('imagick') && class_exists('Imagick')) {
     }
 }
 
-// Method 2: Try Ghostscript if Imagick failed
+// Method 2: Try Ghostscript for PDFs or fallback for other formats
 if (!$thumbnailCreated && function_exists('exec')) {
     try {
-        $tempImagePath = sys_get_temp_dir() . '/pdf_thumb_' . uniqid() . '.jpg';
-        $escapedPdfPath = escapeshellarg($filePath);
-        $escapedImagePath = escapeshellarg($tempImagePath);
-        
-        // Use Ghostscript to convert PDF to JPEG
-        $gsCommand = "gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -dJPEGQ=85 -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile=$escapedImagePath $escapedPdfPath 2>/dev/null";
-        exec($gsCommand, $output, $returnCode);
+        if ($extension === 'pdf') {
+            $tempImagePath = sys_get_temp_dir() . '/pdf_thumb_' . uniqid() . '.jpg';
+            $escapedPdfPath = escapeshellarg($filePath);
+            $escapedImagePath = escapeshellarg($tempImagePath);
+            
+            // Use Ghostscript to convert PDF to JPEG
+            $gsCommand = "gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -dJPEGQ=85 -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile=$escapedImagePath $escapedPdfPath 2>/dev/null";
+            exec($gsCommand, $output, $returnCode);
+        } else {
+            // For HEIC/TIFF files that failed ImageMagick, try to create a placeholder
+            $returnCode = 1; // Skip processing for now
+        }
         
         if ($returnCode === 0 && file_exists($tempImagePath)) {
             // Resize using GD if available
