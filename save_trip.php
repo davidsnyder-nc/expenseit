@@ -56,6 +56,12 @@ try {
         case 'delete_trip':
             $result = deleteTrip($data['tripName']);
             break;
+        case 'archive_trip':
+            $result = archiveTrip($data['tripName']);
+            break;
+        case 'export_all_trips':
+            $result = exportAllTrips();
+            break;
         default:
             throw new Exception('Invalid action');
     }
@@ -378,5 +384,190 @@ function generateUniqueFilename($originalName, $directory, $extension) {
     }
     
     return $filename;
+}
+
+/**
+ * Archive a trip by moving it to archive folder and creating a zip file
+ */
+function archiveTrip($tripName) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    $archiveDir = "data/archive";
+    
+    if (!is_dir($tripDir)) {
+        throw new Exception('Trip not found');
+    }
+    
+    // Create archive directory if it doesn't exist
+    if (!is_dir($archiveDir)) {
+        mkdir($archiveDir, 0755, true);
+    }
+    
+    // Load trip metadata for archive info
+    $metadataPath = $tripDir . '/metadata.json';
+    $expensesPath = $tripDir . '/expenses.json';
+    
+    $metadata = [];
+    $expenseCount = 0;
+    $total = 0;
+    
+    if (file_exists($metadataPath)) {
+        $metadata = json_decode(file_get_contents($metadataPath), true) ?: [];
+    }
+    
+    if (file_exists($expensesPath)) {
+        $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
+        $expenseCount = count($expenses);
+        $total = array_sum(array_column($expenses, 'amount'));
+    }
+    
+    // Create archive metadata
+    $archiveMetadata = [
+        'metadata' => $metadata,
+        'expenseCount' => $expenseCount,
+        'total' => number_format($total, 2),
+        'archivedDate' => date('Y-m-d H:i:s')
+    ];
+    
+    // Save metadata separately for quick loading
+    $metadataFile = $archiveDir . '/' . $tripName . '_metadata.json';
+    file_put_contents($metadataFile, json_encode($archiveMetadata, JSON_PRETTY_PRINT));
+    
+    // Create zip file
+    $zipPath = $archiveDir . '/' . $tripName . '.zip';
+    $zip = new ZipArchive();
+    
+    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+        // Add all files and directories to zip
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($tripDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        
+        foreach ($iterator as $file) {
+            $filePath = $file->getRealPath();
+            $relativePath = substr($filePath, strlen($tripDir) + 1);
+            
+            if ($file->isDir()) {
+                $zip->addEmptyDir($relativePath);
+            } else {
+                $zip->addFile($filePath, $relativePath);
+            }
+        }
+        
+        $zip->close();
+        
+        // Delete original trip directory after successful archiving
+        if (deleteDirectory($tripDir)) {
+            return ['success' => true, 'message' => 'Trip archived successfully'];
+        } else {
+            // Clean up zip file if directory deletion failed
+            unlink($zipPath);
+            unlink($metadataFile);
+            throw new Exception('Failed to remove original trip after archiving');
+        }
+    } else {
+        throw new Exception('Failed to create archive zip file');
+    }
+}
+
+/**
+ * Export all trips as a downloadable zip file
+ */
+function exportAllTrips() {
+    $tripsDir = 'data/trips';
+    $archiveDir = 'data/archive';
+    $tempDir = sys_get_temp_dir() . '/expense_export_' . uniqid();
+    
+    // Create temporary directory
+    if (!mkdir($tempDir, 0755, true)) {
+        throw new Exception('Failed to create temporary directory');
+    }
+    
+    try {
+        // Create active trips folder in temp
+        $activeDir = $tempDir . '/active_trips';
+        mkdir($activeDir, 0755, true);
+        
+        // Copy active trips
+        if (is_dir($tripsDir)) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($tripsDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach ($iterator as $file) {
+                $sourceFile = $file->getRealPath();
+                $relativePath = substr($sourceFile, strlen($tripsDir) + 1);
+                $destFile = $activeDir . '/' . $relativePath;
+                
+                if ($file->isDir()) {
+                    mkdir($destFile, 0755, true);
+                } else {
+                    copy($sourceFile, $destFile);
+                }
+            }
+        }
+        
+        // Copy archived trips
+        if (is_dir($archiveDir)) {
+            $archivedDir = $tempDir . '/archived_trips';
+            mkdir($archivedDir, 0755, true);
+            
+            $files = glob($archiveDir . '/*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    copy($file, $archivedDir . '/' . basename($file));
+                }
+            }
+        }
+        
+        // Create export zip
+        $exportZip = sys_get_temp_dir() . '/all_trips_export_' . date('Y-m-d_H-i-s') . '.zip';
+        $zip = new ZipArchive();
+        
+        if ($zip->open($exportZip, ZipArchive::CREATE) === TRUE) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($tempDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach ($iterator as $file) {
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($tempDir) + 1);
+                
+                if ($file->isDir()) {
+                    $zip->addEmptyDir($relativePath);
+                } else {
+                    $zip->addFile($filePath, $relativePath);
+                }
+            }
+            
+            $zip->close();
+            
+            // Clean up temp directory
+            deleteDirectory($tempDir);
+            
+            // Set headers for download
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="all_trips_export_' . date('Y-m-d_H-i-s') . '.zip"');
+            header('Content-Length: ' . filesize($exportZip));
+            
+            // Output file and clean up
+            readfile($exportZip);
+            unlink($exportZip);
+            exit;
+            
+        } else {
+            throw new Exception('Failed to create export zip file');
+        }
+        
+    } catch (Exception $e) {
+        // Clean up temp directory on error
+        if (is_dir($tempDir)) {
+            deleteDirectory($tempDir);
+        }
+        throw $e;
+    }
 }
 ?>
