@@ -169,7 +169,13 @@ try {
     
     // Create directory structure
     $tripDir = "data/trips/" . sanitizeName($tripName);
-    $targetDir = $documentType === 'travel_document' ? $tripDir . "/travel_documents" : $tripDir . "/receipts";
+    
+    // Determine target directory based on document type
+    if ($documentType === 'travel_document') {
+        $targetDir = $tripDir . "/travel_documents";
+    } else {
+        $targetDir = $tripDir . "/receipts";
+    }
     
     if (!is_dir($targetDir)) {
         if (!mkdir($targetDir, 0755, true)) {
@@ -195,7 +201,16 @@ try {
         $targetPath = $targetDir . '/' . $filename;
         
         if (!convertToJpeg($file['tmp_name'], $targetPath, $originalExtension)) {
-            throw new Exception('Failed to convert and save image file');
+            // If conversion fails, try to save original file
+            $originalFilename = generateUniqueFilename($file['name'], $targetDir, $originalExtension);
+            $originalTargetPath = $targetDir . '/' . $originalFilename;
+            
+            if (!move_uploaded_file($file['tmp_name'], $originalTargetPath)) {
+                throw new Exception('Failed to convert and save image file');
+            }
+            
+            $filename = $originalFilename;
+            $targetPath = $originalTargetPath;
         }
     }
     
