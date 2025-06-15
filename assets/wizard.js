@@ -812,8 +812,15 @@ async function processReceipts() {
     
     feather.replace();
     
-    // Auto-advance to step 2 (review) if we have processed expenses
-    if (processedCount > 0) {
+    // Auto-advance to completion step if processing was successful
+    if (processedCount > 0 && errors === 0) {
+        setTimeout(() => {
+            currentStep = 3;
+            updateWizard();
+            setupCompletionStep();
+        }, 2000);
+    } else if (errors > 0) {
+        // Only show review step if there were errors
         setTimeout(() => {
             currentStep = 2;
             updateWizard();
@@ -1000,7 +1007,7 @@ function setupCompletionStep() {
             <i data-feather="check-circle"></i>
         </div>
         <h3>Trip Created Successfully!</h3>
-        <p>Your trip "${tripData.metadata.name}" has been created with ${expenseCount} expenses totaling $${total.toFixed(2)}.</p>
+        <p>Your trip "${tripData.metadata.name}" has been created successfully!</p>
         <div class="completion-actions">
             <button class="btn btn-primary" onclick="viewTrip()">
                 <i data-feather="eye"></i> View Trip
