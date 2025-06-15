@@ -292,12 +292,23 @@ function displayUploadedFile(file, path) {
     
     const fileItem = document.createElement('div');
     fileItem.className = 'file-item';
+    fileItem.dataset.path = path;
     
     const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
     const fileSize = formatFileSize(file.size);
     
+    let preview = '';
+    if (isImage) {
+        preview = `<img src="${path}" alt="${file.name}">`;
+    } else if (isPdf) {
+        preview = `<div class="file-icon"><i data-feather="file-text"></i></div>`;
+    } else {
+        preview = `<div class="file-icon"><i data-feather="file"></i></div>`;
+    }
+    
     fileItem.innerHTML = `
-        ${isImage ? `<img src="${path}" alt="${file.name}">` : `<div class="file-icon"><i data-feather="file"></i></div>`}
+        ${preview}
         <div class="file-name">${file.name}</div>
         <div class="file-size">${fileSize}</div>
         <button class="btn btn-small btn-danger" onclick="removeFile('${path}')">
@@ -324,8 +335,7 @@ function removeFile(path) {
     // Remove from UI
     const fileItems = document.querySelectorAll('.file-item');
     fileItems.forEach(item => {
-        const img = item.querySelector('img');
-        if (img && img.src.includes(path)) {
+        if (item.dataset.path === path) {
             item.remove();
         }
     });
@@ -378,7 +388,7 @@ async function processReceipts() {
     const processingResults = document.getElementById('processingResults');
     
     if (tripData.files.length === 0) {
-        alert('Please upload some receipts first');
+        showErrorMessage('Please upload some receipts first');
         return;
     }
     
@@ -434,10 +444,18 @@ async function processReceipts() {
     processBtn.innerHTML = '<i data-feather="refresh-cw"></i> Process Again';
     processingStatus.innerHTML = `
         <p>Processing complete! ${processedCount} receipts processed successfully, ${errors} errors.</p>
-        ${processedCount > 0 ? '<p>You can review and edit the extracted data in the next step.</p>' : ''}
+        ${processedCount > 0 ? '<p>Automatically advancing to review step...</p>' : ''}
     `;
     
     feather.replace();
+    
+    // Auto-advance to step 4 if we have processed expenses
+    if (processedCount > 0) {
+        setTimeout(() => {
+            currentStep = 4;
+            updateWizard();
+        }, 2000);
+    }
 }
 
 function displayProcessingResult(fileName, expense, success, error = null) {
@@ -670,3 +688,34 @@ nextStep = function() {
         originalNextStep();
     }
 };
+
+// Notification functions
+function showSuccessMessage(message) {
+    createToast(message, 'success');
+}
+
+function showErrorMessage(message) {
+    createToast(message, 'error');
+}
+
+function createToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+    feather.replace();
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
