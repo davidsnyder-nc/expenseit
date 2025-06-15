@@ -339,17 +339,30 @@ try {
             foreach ($receiptFiles as $file) {
                 if (is_file($file)) {
                     $filename = basename($file);
-                    $isPdf = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
+                    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                    
+                    // Skip TIFF files as they're not supported
+                    if (in_array($extension, ['tiff', 'tif'])) {
+                        continue;
+                    }
+                    
+                    $isPdf = $extension === 'pdf';
+                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'heic']);
+                    
+                    // Use relative web-accessible paths
+                    $webPath = $targetDir . '/' . $filename;
                     
                     $receipts[] = [
                         'filename' => $filename,
                         'name' => $filename,
-                        'path' => $file,
-                        'fullUrl' => $file,
-                        'displayUrl' => $file,
+                        'path' => $webPath,
+                        'fullUrl' => $webPath,
+                        'displayUrl' => $webPath,
                         'size' => filesize($file),
                         'modified' => filemtime($file),
-                        'isPdf' => $isPdf
+                        'isPdf' => $isPdf,
+                        'isImage' => $isImage,
+                        'extension' => $extension
                     ];
                 }
             }

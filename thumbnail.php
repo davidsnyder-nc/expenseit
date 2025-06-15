@@ -20,7 +20,7 @@ $filePath = "data/trips/$trip/receipts/$file";
 $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
 // Check if file exists and is a supported format
-$supportedFormats = ['pdf', 'png', 'jpg', 'jpeg', 'heic', 'tiff', 'tif'];
+$supportedFormats = ['pdf', 'png', 'jpg', 'jpeg', 'heic'];
 if (!file_exists($filePath) || !in_array($extension, $supportedFormats)) {
     http_response_code(404);
     exit('File not found or unsupported format');
@@ -53,8 +53,8 @@ if (extension_loaded('imagick') && class_exists('Imagick')) {
         if ($extension === 'pdf') {
             $imagick->setResolution(150, 150);
             $imagick->readImage($filePath . '[0]'); // First page only
-        } elseif (in_array($extension, ['heic', 'tiff', 'tif'])) {
-            // For HEIC and TIFF files, read directly
+        } elseif ($extension === 'heic') {
+            // For HEIC files, read directly
             $imagick->readImage($filePath);
         } else {
             // For PNG, JPG, JPEG
