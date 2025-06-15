@@ -113,7 +113,7 @@
             
             try {
                 const action = currentTab === 'active' ? 'trips' : 'archived_trips';
-                const response = await fetch(`load.php?action=${action}`);
+                const response = await fetch(`api.php?action=${action}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
