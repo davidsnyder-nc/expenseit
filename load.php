@@ -254,12 +254,31 @@ function getTripReceipts($tripName) {
     
     foreach ($files as $file) {
         if (is_file($file)) {
-            $receipts[] = [
-                'filename' => basename($file),
+            $filename = basename($file);
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif']);
+            $isPdf = $extension === 'pdf';
+            
+            $receipt = [
+                'filename' => $filename,
                 'path' => $file,
                 'size' => filesize($file),
-                'modified' => filemtime($file)
+                'modified' => filemtime($file),
+                'isImage' => $isImage,
+                'isPdf' => $isPdf,
+                'extension' => $extension
             ];
+            
+            // Add display URL - for PDFs use thumbnail service, for images use direct path
+            if ($isPdf) {
+                $receipt['displayUrl'] = "thumbnail.php?file=" . urlencode($filename) . "&trip=" . urlencode($tripName);
+                $receipt['fullUrl'] = $file;
+            } else {
+                $receipt['displayUrl'] = $file;
+                $receipt['fullUrl'] = $file;
+            }
+            
+            $receipts[] = $receipt;
         }
     }
     

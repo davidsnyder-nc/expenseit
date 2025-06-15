@@ -361,20 +361,22 @@
                 receiptsGrid.innerHTML = receipts.map(receipt => `
                     <div class="receipt-item">
                         <div class="receipt-preview">
-                            ${receipt.filename.toLowerCase().includes('.pdf') ? 
-                                `<div class="file-icon"><i data-feather="file-text"></i></div>` :
-                                `<img src="data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${receipt.filename}" alt="${receipt.filename}">`
+                            ${receipt.isPdf ? 
+                                `<img src="${receipt.displayUrl}" alt="${receipt.filename}" class="receipt-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" loading="lazy">
+                                 <div class="file-icon" style="display: none;"><i data-feather="file-text"></i></div>` :
+                                `<img src="${receipt.displayUrl}" alt="${receipt.filename}" class="receipt-thumbnail" loading="lazy">`
                             }
                         </div>
                         <div class="receipt-info">
                             <div class="receipt-name">${receipt.filename}</div>
                             <div class="receipt-size">${formatFileSize(receipt.size)}</div>
+                            ${receipt.isPdf ? '<div class="receipt-type">PDF Document</div>' : ''}
                         </div>
                         <div class="receipt-actions">
-                            <button class="btn btn-small" onclick="viewReceipt('${receipt.filename}', '${receipt.filename}')">
+                            <button class="btn btn-small" onclick="viewReceipt('${receipt.filename}', '${receipt.fullUrl}', ${receipt.isPdf})">
                                 <i data-feather="eye"></i> View
                             </button>
-                            <a href="data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${receipt.filename}" download class="btn btn-small btn-secondary">
+                            <a href="${receipt.fullUrl}" download class="btn btn-small btn-secondary">
                                 <i data-feather="download"></i> Download
                             </a>
                         </div>
@@ -404,47 +406,14 @@
         }
 
         // Modal functions
-        function viewReceipt(receiptPath, title = 'Receipt') {
+        function viewReceipt(filename, fullPath, isPdf = false) {
             const modal = document.getElementById('receiptModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
             
-            modalTitle.textContent = title;
+            modalTitle.textContent = filename;
             
-            // Fix the file path - remove duplicated 'receipts/' and handle URL encoding
-            let cleanPath = receiptPath;
-            if (cleanPath.startsWith('receipts/')) {
-                cleanPath = cleanPath.substring(9);
-            }
-            
-            // Fix problematic file paths with incorrect extensions or encoding
-            cleanPath = cleanPath.replace(/\.png\.pdf$/, '.png'); // Remove .pdf suffix from .png files
-            cleanPath = cleanPath.replace(/\u202f/g, ' '); // Replace non-breaking thin space
-            
-            // Convert filename format from "Screenshot 2025-06-15 at 4.05.38 AM.png" 
-            // to "Screenshot_2025-06-15_at_40538AM.png" to match actual file names
-            if (cleanPath.includes('Screenshot') && cleanPath.includes(' at ')) {
-                // Extract the extension first
-                const extension = cleanPath.split('.').pop();
-                let nameWithoutExt = cleanPath.replace(/\.[^.]+$/, '');
-                
-                // Transform: "Screenshot 2025-06-15 at 4.05.38 AM" -> "Screenshot_2025-06-15_at_40538AM"
-                nameWithoutExt = nameWithoutExt
-                    .replace(/^Screenshot\s+/, 'Screenshot_')
-                    .replace(/\s+at\s+/, '_at_')
-                    .replace(/(\d)\.(\d{2})\.(\d{2})\s+(AM|PM)$/, '$1$2$3$4');
-                
-                cleanPath = nameWithoutExt + '.' + extension;
-            }
-            
-            const fullPath = `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(cleanPath)}`;
-            
-            // Determine file type and display accordingly
-            const fileExtension = cleanPath.toLowerCase().split('.').pop();
-            
-            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
-                modalContent.innerHTML = `<img src="${fullPath}" alt="${title}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='; this.onerror=null;">`;
-            } else if (fileExtension === 'pdf') {
+            if (isPdf) {
                 modalContent.innerHTML = `
                     <iframe src="${fullPath}" 
                             style="width: 100%; height: 70vh; border: none; border-radius: 8px;" 
@@ -461,7 +430,7 @@
                         </a>
                     </div>`;
             } else {
-                modalContent.innerHTML = `<p>File type not supported for preview. <a href="${fullPath}" target="_blank" download>Click here to download</a></p>`;
+                modalContent.innerHTML = `<img src="${fullPath}" alt="${filename}" style="max-width: 100%; height: auto;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='; this.onerror=null;">`;
             }
             
             modal.style.display = 'flex';
