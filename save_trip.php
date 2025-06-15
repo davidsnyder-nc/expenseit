@@ -53,6 +53,9 @@ try {
         case 'delete_expense':
             $result = deleteExpense($data['tripName'], $data['expenseId']);
             break;
+        case 'delete_trip':
+            $result = deleteTrip($data['tripName']);
+            break;
         default:
             throw new Exception('Invalid action');
     }
@@ -300,6 +303,47 @@ function deleteExpense($tripName, $expenseId) {
     }
     
     return ['success' => true];
+}
+
+/**
+ * Delete entire trip
+ */
+function deleteTrip($tripName) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    
+    if (!is_dir($tripDir)) {
+        throw new Exception('Trip not found');
+    }
+    
+    // Recursively delete trip directory and all contents
+    if (!deleteDirectory($tripDir)) {
+        throw new Exception('Failed to delete trip directory');
+    }
+    
+    return ['success' => true];
+}
+
+/**
+ * Recursively delete a directory and all its contents
+ */
+function deleteDirectory($dir) {
+    if (!is_dir($dir)) {
+        return false;
+    }
+    
+    $files = array_diff(scandir($dir), ['.', '..']);
+    
+    foreach ($files as $file) {
+        $path = $dir . '/' . $file;
+        if (is_dir($path)) {
+            deleteDirectory($path);
+        } else {
+            unlink($path);
+        }
+    }
+    
+    return rmdir($dir);
 }
 
 /**
