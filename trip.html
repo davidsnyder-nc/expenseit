@@ -309,19 +309,20 @@
                 const allFiles = [];
                 
                 // Add receipts with type
-                if (receiptsData.success && receiptsData.files) {
-                    receiptsData.files.forEach(file => {
+                if (receiptsData.success && receiptsData.receipts) {
+                    receiptsData.receipts.forEach(file => {
                         allFiles.push({...file, type: 'receipt'});
                     });
                 }
                 
                 // Add travel documents with type
-                if (docsData.success && docsData.files) {
-                    docsData.files.forEach(file => {
+                if (docsData.success && docsData.documents) {
+                    docsData.documents.forEach(file => {
                         allFiles.push({...file, type: 'travel_document'});
                     });
                 }
                 
+                console.log('Loaded files:', allFiles); // Debug log
                 displayAllFiles(allFiles);
                 
             } catch (error) {
@@ -348,30 +349,36 @@
             // Show bulk download button if there are files
             bulkBtn.style.display = 'inline-flex';
             
-            grid.innerHTML = files.map(file => `
-                <div class="receipt-item">
-                    <div class="receipt-preview">
-                        ${file.path.toLowerCase().includes('.pdf') ? 
-                            `<div class="pdf-icon"><i data-feather="file-text"></i></div>` :
-                            `<img src="data/trips/${currentTrip.name}/${file.path}" alt="${file.filename}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                             <div class="pdf-icon" style="display: none;"><i data-feather="image"></i></div>`
-                        }
-                    </div>
-                    <div class="receipt-info">
-                        <h4>${file.filename}</h4>
-                        <p class="file-type">${file.type === 'travel_document' ? 'Travel Document' : 'Receipt'}</p>
-                        <p class="file-size">${formatFileSize(file.size || 0)}</p>
-                        <div class="receipt-actions">
-                            <a href="data/trips/${currentTrip.name}/${file.path}" target="_blank" class="btn btn-small">
-                                <i data-feather="eye"></i> View
-                            </a>
-                            <a href="data/trips/${currentTrip.name}/${file.path}" download="${file.filename}" class="btn btn-small btn-secondary">
-                                <i data-feather="download"></i> Download
-                            </a>
+            grid.innerHTML = files.map(file => {
+                // Use the correct path structure from API response
+                const filePath = file.fullUrl || file.displayUrl || file.path;
+                const isPdf = file.isPdf || file.filename.toLowerCase().endsWith('.pdf');
+                
+                return `
+                    <div class="receipt-item">
+                        <div class="receipt-preview">
+                            ${isPdf ? 
+                                `<div class="pdf-icon"><i data-feather="file-text"></i></div>` :
+                                `<img src="${filePath}" alt="${file.filename}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                 <div class="pdf-icon" style="display: none;"><i data-feather="image"></i></div>`
+                            }
+                        </div>
+                        <div class="receipt-info">
+                            <h4>${file.filename}</h4>
+                            <p class="file-type">${file.type === 'travel_document' ? 'Travel Document' : 'Receipt'}</p>
+                            <p class="file-size">${formatFileSize(file.size || 0)}</p>
+                            <div class="receipt-actions">
+                                <a href="${filePath}" target="_blank" class="btn btn-small">
+                                    <i data-feather="eye"></i> View
+                                </a>
+                                <a href="${filePath}" download="${file.filename}" class="btn btn-small btn-secondary">
+                                    <i data-feather="download"></i> Download
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             
             feather.replace();
         }

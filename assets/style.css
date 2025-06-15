@@ -1049,6 +1049,100 @@ body {
     color: #d69e2e;
 }
 
+/* Expenses Section Styles */
+.expenses-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.expenses-section h2 {
+    margin: 0 0 1.5rem 0;
+    color: #1a202c;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category-section {
+    margin-bottom: 2rem;
+}
+
+.category-title {
+    background: #f7fafc;
+    padding: 1rem;
+    margin: 0 0 1rem 0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-total {
+    font-size: 1rem;
+    color: #38a169;
+    font-weight: 700;
+}
+
+.expenses-table-container {
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.expenses-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 800px;
+    background: white;
+}
+
+.expenses-table th {
+    background: #f7fafc;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.expenses-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.expenses-table tbody tr:hover {
+    background: #f7fafc;
+}
+
+.expenses-table .amount {
+    text-align: right;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.excluded-expense {
+    opacity: 0.6;
+    background: #fef5e7 !important;
+}
+
+.excluded-expense td {
+    text-decoration: line-through;
+}
+
 /* Hotel Daily Breakdown Styles */
 .hotel-breakdown-row {
     background: #f8f9fa;
@@ -1097,6 +1191,168 @@ body {
 .daily-breakdown-table .amount {
     text-align: right;
     font-weight: 500;
+}
+
+/* Files/Receipts Section */
+.receipts-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.receipts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.receipt-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.receipt-item:hover {
+    border-color: #e53e3e;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.receipt-preview {
+    height: 150px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.receipt-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pdf-icon {
+    font-size: 3rem;
+    color: #e53e3e;
+}
+
+.receipt-info {
+    padding: 1rem;
+}
+
+.receipt-info h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a202c;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-type {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.75rem;
+    color: #718096;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.file-size {
+    margin: 0 0 1rem 0;
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+.receipt-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #718096;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #4a5568;
+    font-size: 1.25rem;
+}
+
+.empty-state p {
+    margin: 0 0 1.5rem 0;
+    color: #718096;
+}
+
+/* Button Layout Fixes */
+.expenses-table td:last-child {
+    white-space: nowrap;
+}
+
+.expenses-table .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-radius: 4px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.expenses-table .btn-small {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+}
+
+.expenses-table .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expenses-table .btn i {
+    font-size: 0.8rem;
+}
+
+.stat-icon.tax {
+    background: #e6fffa;
+    color: #319795;
 }
 
 /* Button Layout Fixes */
