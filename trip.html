@@ -202,7 +202,7 @@
                                                 <td>${expense.note || '-'}</td>
                                                 <td>
                                                     ${expense.source ? `
-                                                        <button class="btn btn-small" onclick="viewReceipt('${expense.source}', '${expense.merchant || 'Receipt'}')">
+                                                        <button class="btn btn-small" onclick="viewReceipt('data/trips/${currentTrip.name}/${expense.source}', '${expense.merchant || 'Receipt'}', ${expense.source.toLowerCase().endsWith('.pdf')})">
                                                             <i data-feather="eye"></i> View
                                                         </button>
                                                     ` : '-'}

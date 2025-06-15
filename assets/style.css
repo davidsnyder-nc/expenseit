@@ -25,14 +25,18 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 1.5rem 0;
+    padding: 1.5rem 2rem;
     border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
 }
 
 .header h1 {
     font-size: 2rem;
     font-weight: 700;
-    color: #1a202c;
+    color: white;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -45,11 +49,11 @@ body {
 }
 
 .header h1 i {
-    color: #4299e1;
+    color: white;
 }
 
 .subtitle {
-    color: #718096;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 1.1rem;
     margin-top: 0.25rem;
 }
