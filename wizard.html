@@ -48,6 +48,33 @@
                             <p class="file-types">Supports PDF, JPEG, PNG, HEIC, TIFF, WebP, BMP, GIF</p>
                             <input type="file" id="fileInput" multiple accept=".pdf,.png,.jpg,.jpeg,.heic,.tiff,.tif,.webp,.bmp,.gif" style="display: none;">
                         </div>
+                        
+                        <!-- Mobile Camera Capture -->
+                        <div class="mobile-camera-section" id="mobileCameraSection" style="display: none;">
+                            <button class="btn btn-camera" id="cameraBtn" onclick="openCamera()">
+                                <i data-feather="camera"></i> Take Photo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Camera Modal -->
+                    <div class="camera-modal" id="cameraModal" style="display: none;">
+                        <div class="camera-container">
+                            <div class="camera-header">
+                                <h3>Capture Receipt</h3>
+                                <button class="btn btn-close" onclick="closeCamera()">
+                                    <i data-feather="x"></i>
+                                </button>
+                            </div>
+                            <video id="cameraVideo" autoplay playsinline></video>
+                            <canvas id="cameraCanvas" style="display: none;"></canvas>
+                            <div class="camera-controls">
+                                <button class="btn btn-outline" onclick="closeCamera()">Cancel</button>
+                                <button class="btn btn-primary btn-capture" id="captureBtn" onclick="capturePhoto()">
+                                    <i data-feather="camera"></i> Capture
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Processing Progress at Top -->

@@ -23,6 +23,7 @@ function initializeWizard() {
     updateProgressBar();
     updateStepVisibility();
     updateNavigationButtons();
+    setupMobileCamera();
 }
 
 // Navigation functions
