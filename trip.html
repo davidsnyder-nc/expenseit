@@ -421,26 +421,23 @@
             cleanPath = cleanPath.replace(/\.png\.pdf$/, '.png'); // Remove .pdf suffix from .png files
             cleanPath = cleanPath.replace(/\u202f/g, ' '); // Replace non-breaking thin space
             
-            // Try multiple possible file paths to find the correct file
-            const possiblePaths = [
-                cleanPath,
-                cleanPath.replace(/\s+/g, '_'), // Replace spaces with underscores
-                cleanPath.replace(/\s+/g, ''), // Remove all spaces
-                cleanPath.replace(/\s+at\s+/g, '_at_') // Replace " at " with "_at_"
-            ];
-            
-            let foundPath = null;
-            for (const testPath of possiblePaths) {
-                const fullTestPath = `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(testPath)}`;
-                // We'll try the first path that seems reasonable
-                if (testPath.includes('_at_') && !testPath.includes(' ')) {
-                    foundPath = fullTestPath;
-                    cleanPath = testPath;
-                    break;
-                }
+            // Convert filename format from "Screenshot 2025-06-15 at 4.05.38 AM.png" 
+            // to "Screenshot_2025-06-15_at_40538AM.png" to match actual file names
+            if (cleanPath.includes('Screenshot') && cleanPath.includes(' at ')) {
+                // Extract the extension first
+                const extension = cleanPath.split('.').pop();
+                let nameWithoutExt = cleanPath.replace(/\.[^.]+$/, '');
+                
+                // Transform: "Screenshot 2025-06-15 at 4.05.38 AM" -> "Screenshot_2025-06-15_at_40538AM"
+                nameWithoutExt = nameWithoutExt
+                    .replace(/^Screenshot\s+/, 'Screenshot_')
+                    .replace(/\s+at\s+/, '_at_')
+                    .replace(/(\d)\.(\d{2})\.(\d{2})\s+(AM|PM)$/, '$1$2$3$4');
+                
+                cleanPath = nameWithoutExt + '.' + extension;
             }
             
-            const fullPath = foundPath || `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(cleanPath)}`;
+            const fullPath = `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(cleanPath)}`;
             
             // Determine file type and display accordingly
             const fileExtension = cleanPath.toLowerCase().split('.').pop();
@@ -448,7 +445,21 @@
             if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
                 modalContent.innerHTML = `<img src="${fullPath}" alt="${title}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='; this.onerror=null;">`;
             } else if (fileExtension === 'pdf') {
-                modalContent.innerHTML = `<iframe src="${fullPath}" onload="this.style.display='block'" onerror="this.innerHTML='<p>PDF could not be loaded. <a href=&quot;${fullPath}&quot; target=&quot;_blank&quot;>Click here to download</a></p>'"></iframe>`;
+                modalContent.innerHTML = `
+                    <iframe src="${fullPath}" 
+                            style="width: 100%; height: 70vh; border: none; border-radius: 8px;" 
+                            onload="console.log('PDF loaded successfully')" 
+                            onerror="console.error('PDF failed to load')">
+                        <p>Your browser doesn't support PDF viewing. <a href="${fullPath}" target="_blank" download>Download the PDF</a></p>
+                    </iframe>
+                    <div style="margin-top: 10px; text-align: center;">
+                        <a href="${fullPath}" target="_blank" class="btn btn-secondary" style="display: inline-block; padding: 8px 16px; text-decoration: none;">
+                            <i data-feather="external-link"></i> Open in New Tab
+                        </a>
+                        <a href="${fullPath}" download class="btn btn-primary" style="display: inline-block; padding: 8px 16px; text-decoration: none; margin-left: 8px;">
+                            <i data-feather="download"></i> Download
+                        </a>
+                    </div>`;
             } else {
                 modalContent.innerHTML = `<p>File type not supported for preview. <a href="${fullPath}" target="_blank" download>Click here to download</a></p>`;
             }

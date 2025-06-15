@@ -1,0 +1,38 @@
+[
+    {
+        "id": "7v9ysp21o",
+        "date": "2023-10-16",
+        "merchant": "THE GOURMET BISTRO",
+        "amount": 120,
+        "category": "Meals",
+        "note": "Dinner for multiple people including Grilled Salmon, Caesar Salad, Truffle Mac & Cheese, Lobster Bisque, Chocolate Lava Cake, and House Red Wine.",
+        "source": "receipts\/Screenshot 2025-06-15 at 4.05.18\u202fAM.png"
+    },
+    {
+        "id": "tu841654s",
+        "date": "2023-10-17",
+        "merchant": "Unknown",
+        "amount": 200,
+        "category": "Other",
+        "note": "Purchase of four custom items.",
+        "source": "receipts\/Screenshot 2025-06-15 at 4.05.38\u202fAM.png"
+    },
+    {
+        "id": "ynav8elax",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
+        "source": "receipts\/Screenshot 2025-06-15 at 4.05.57\u202fAM.png"
+    },
+    {
+        "id": "h5lr8owxv",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Purchase of groceries including apples, bread, milk, eggs, yogurt, granola bars, spinach, chicken breast, rice, chocolate, tea, honey, and mixed nuts.",
+        "source": "receipts\/Screenshot 2025-06-15 at 4.05.57\u202fAM.png.pdf"
+    }
+]
