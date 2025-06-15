@@ -1076,10 +1076,12 @@ body {
     cursor: help;
     border-bottom: 1px dotted #666;
     position: relative;
+    text-decoration: none;
 }
 
 .note-preview:hover {
     color: #e53e3e;
+    border-bottom-color: #e53e3e;
 }
 
 /* Wizard Styles */

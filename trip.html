@@ -676,20 +676,30 @@
         function formatExpenseNote(note) {
             if (!note || note === '-') return '-';
             
-            // Split by newlines and common delimiters
-            const items = note.split(/[\n\r]+|(?:\d+\.)|Items Purchased:/)
-                .filter(item => item.trim().length > 0)
-                .map(item => item.trim().replace(/^[\d\.\s]*/, ''));
-            
-            if (items.length <= 3) {
+            // Check if note is long enough to truncate
+            if (note.length <= 100) {
                 return escapeHtml(note);
             }
             
-            // Show first 3 items with tooltip for full content
-            const previewItems = items.slice(0, 3);
-            const preview = previewItems.join(', ') + '...';
+            // Split by newlines and common delimiters for structured notes
+            const items = note.split(/[\n\r]+/)
+                .filter(item => item.trim().length > 0)
+                .map(item => item.trim());
             
-            return `<span class="note-preview" title="${escapeHtml(note)}">${escapeHtml(preview)}</span>`;
+            let preview;
+            if (items.length > 3) {
+                // Show first 3 items for structured lists
+                preview = items.slice(0, 3).join(', ') + '...';
+            } else {
+                // For long unstructured text, show first 100 characters
+                preview = note.substring(0, 100) + '...';
+            }
+            
+            // Use proper HTML escaping for both preview and tooltip
+            const escapedNote = escapeHtml(note).replace(/"/g, '&quot;');
+            const escapedPreview = escapeHtml(preview);
+            
+            return `<span class="note-preview" title="${escapedNote}">${escapedPreview}</span>`;
         }
 
         function escapeHtml(text) {
