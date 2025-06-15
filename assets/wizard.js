@@ -1374,6 +1374,7 @@ function setupMobileCamera() {
     const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const cameraSection = document.getElementById('mobileCameraSection');
     const desktopTip = document.getElementById('desktopMobileTip');
+    const cameraBtn = document.getElementById('cameraBtn');
     
     if (isMobile) {
         // Show camera button on mobile
@@ -1383,6 +1384,11 @@ function setupMobileCamera() {
         // Hide desktop tip on mobile
         if (desktopTip) {
             desktopTip.style.display = 'none';
+        }
+        // Add click event to camera button
+        if (cameraBtn) {
+            cameraBtn.addEventListener('click', openCamera);
+            console.log('Camera button event listener added');
         }
     } else {
         // Show desktop tip on desktop
@@ -1403,24 +1409,61 @@ async function openCamera() {
     const modal = document.getElementById('cameraModal');
     const video = document.getElementById('cameraVideo');
     
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showErrorMessage('Camera not supported on this device');
+        return;
+    }
+    
     try {
-        // Request camera access with back camera preference for mobile
-        const constraints = {
+        // First try with back camera
+        let constraints = {
             video: {
-                facingMode: { ideal: 'environment' }, // Back camera
-                width: { ideal: 1920 },
-                height: { ideal: 1080 }
+                facingMode: 'environment', // Back camera
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             }
         };
         
-        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (backCameraError) {
+            console.log('Back camera failed, trying front camera:', backCameraError);
+            // Fallback to front camera or any camera
+            constraints = {
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        }
+        
         video.srcObject = cameraStream;
         modal.style.display = 'flex';
+        
+        // Wait for video to be ready
+        video.addEventListener('loadedmetadata', () => {
+            video.play();
+        });
+        
         feather.replace();
         
     } catch (error) {
         console.error('Camera access error:', error);
-        showErrorMessage('Unable to access camera. Please check permissions.');
+        let errorMessage = 'Unable to access camera. ';
+        
+        if (error.name === 'NotAllowedError') {
+            errorMessage += 'Please allow camera permissions and try again.';
+        } else if (error.name === 'NotFoundError') {
+            errorMessage += 'No camera found on this device.';
+        } else if (error.name === 'NotSupportedError') {
+            errorMessage += 'Camera not supported in this browser.';
+        } else {
+            errorMessage += 'Please check camera permissions.';
+        }
+        
+        showErrorMessage(errorMessage);
     }
 }
 
@@ -1442,6 +1485,12 @@ async function capturePhoto() {
     const canvas = document.getElementById('cameraCanvas');
     const ctx = canvas.getContext('2d');
     
+    // Check if video is ready
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+        showErrorMessage('Camera not ready. Please wait a moment and try again.');
+        return;
+    }
+    
     // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -1453,21 +1502,28 @@ async function capturePhoto() {
     canvas.toBlob(async (blob) => {
         if (blob) {
             // Create a file object from the blob
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const timestamp = Date.now();
             const filename = `receipt-${timestamp}.jpg`;
             const file = new File([blob], filename, { type: 'image/jpeg' });
+            
+            console.log('Photo captured:', filename, 'Size:', blob.size);
             
             // Close camera first
             closeCamera();
             
+            // Show capturing status
+            showSuccessMessage('Photo captured! Uploading...');
+            
             // Add to upload queue
             try {
                 await uploadFileOnly(file);
-                showSuccessMessage('Photo captured and uploaded successfully!');
+                showSuccessMessage('Photo uploaded successfully!');
             } catch (error) {
                 console.error('Upload error:', error);
                 showErrorMessage('Failed to upload photo. Please try again.');
             }
+        } else {
+            showErrorMessage('Failed to capture photo. Please try again.');
         }
-    }, 'image/jpeg', 0.9);
+    }, 'image/jpeg', 0.8);
 }
