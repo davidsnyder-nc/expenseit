@@ -142,22 +142,22 @@ function validateTripInfo() {
     const endDate = document.getElementById('endDate').value;
     
     if (!tripName) {
-        alert('Please enter a trip name');
+        showErrorMessage('Please enter a trip name');
         return false;
     }
     
     if (!startDate) {
-        alert('Please select a start date');
+        showErrorMessage('Please select a start date');
         return false;
     }
     
     if (!endDate) {
-        alert('Please select an end date');
+        showErrorMessage('Please select an end date');
         return false;
     }
     
     if (new Date(startDate) > new Date(endDate)) {
-        alert('End date must be after start date');
+        showErrorMessage('End date must be after start date');
         return false;
     }
     
@@ -244,7 +244,7 @@ function handleFiles(files) {
         if (isValidFile(file)) {
             uploadFile(file);
         } else {
-            alert(`Invalid file type: ${file.name}. Please upload PDF or image files.`);
+            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF or image files.`);
         }
     });
 }
@@ -279,11 +279,11 @@ async function uploadFile(file) {
             // Automatically process the uploaded receipt
             await processSingleReceipt(file, result.path);
         } else {
-            alert(`Upload failed: ${result.error}`);
+            showErrorMessage(`Upload failed: ${result.error}`);
         }
     } catch (error) {
         console.error('Upload error:', error);
-        alert('Upload failed. Please try again.');
+        showErrorMessage('Upload failed. Please try again.');
     }
 }
 
@@ -589,11 +589,11 @@ async function completeTrip() {
             updateWizard();
             setupCompletionStep();
         } else {
-            alert('Error creating trip: ' + (result.error || 'Unknown error'));
+            showErrorMessage('Error creating trip: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error completing trip:', error);
-        alert('Error creating trip. Please try again.');
+        showErrorMessage('Error creating trip. Please try again.');
     }
 }
 
@@ -639,11 +639,11 @@ async function downloadReport() {
             a.click();
             window.URL.revokeObjectURL(url);
         } else {
-            alert('Error generating PDF report');
+            showErrorMessage('Error generating PDF report');
         }
     } catch (error) {
         console.error('Error downloading report:', error);
-        alert('Error downloading report');
+        showErrorMessage('Error downloading report');
     }
 }
 
