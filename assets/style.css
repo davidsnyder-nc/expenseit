@@ -1319,11 +1319,12 @@ body {
 /* Button Layout Fixes */
 .expenses-table td:last-child {
     white-space: nowrap;
-    min-width: 200px;
+    min-width: 120px;
+    width: 120px;
 }
 
 .expenses-table .btn {
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
     gap: 0.125rem;
@@ -1333,37 +1334,52 @@ body {
     margin-bottom: 0.125rem;
     border-radius: 3px;
     text-decoration: none;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 32px;
+    min-width: 28px;
+    width: 28px;
     height: 28px;
+    background-color: #f7fafc;
+    color: #4a5568;
+    vertical-align: top;
 }
 
 .expenses-table .btn-small {
-    padding: 0.25rem 0.375rem;
+    display: inline-flex !important;
+    padding: 0.25rem;
     font-size: 0.7rem;
-    min-width: 32px;
+    min-width: 28px;
+    width: 28px;
     height: 28px;
 }
 
 .expenses-table .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #e2e8f0;
 }
 
 .expenses-table .btn i {
     font-size: 0.7rem;
 }
 
-.expenses-table .btn span {
-    display: none;
+.expenses-table .btn-warning {
+    background-color: #fed7c3;
+    color: #c05621;
+    border-color: #f6ad55;
 }
 
-/* Show text on hover for better UX */
-.expenses-table .btn:hover span {
-    display: inline;
-    margin-left: 0.25rem;
+.expenses-table .btn-success {
+    background-color: #c6f6d5;
+    color: #276749;
+    border-color: #68d391;
+}
+
+.expenses-table .btn-danger {
+    background-color: #fed7d7;
+    color: #c53030;
+    border-color: #fc8181;
 }
 
 .stat-icon.tax {
