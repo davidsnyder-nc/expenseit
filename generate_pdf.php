@@ -238,40 +238,53 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [],
             }
             .receipts-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-                gap: 30px;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 12px;
                 margin-top: 15px;
+                max-width: 100%;
             }
             .receipt-attachment {
                 border: 1px solid #e9ecef;
                 border-radius: 8px;
-                padding: 15px;
+                padding: 10px;
                 background: #f8f9fa;
                 text-align: center;
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
             .receipt-info {
-                margin-bottom: 10px;
+                margin-bottom: 8px;
+                font-size: 10px;
             }
             .receipt-info strong {
                 display: block;
-                margin-bottom: 5px;
+                margin-bottom: 3px;
                 color: #333;
+                font-size: 11px;
             }
             .receipt-info small {
                 color: #666;
+                font-size: 9px;
             }
             .receipt-image img {
                 border-radius: 4px;
                 border: 1px solid #ddd;
                 max-width: 100%;
+                max-height: 200px;
                 height: auto;
+                object-fit: contain;
             }
             .receipt-file {
-                padding: 20px;
+                padding: 15px;
                 background: #fff;
                 border: 2px dashed #ccc;
                 border-radius: 4px;
                 color: #666;
+                font-size: 10px;
+                min-height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             .footer {
                 margin-top: 40px;
