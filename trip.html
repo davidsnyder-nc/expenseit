@@ -46,8 +46,6 @@
         </div>
     </div>
 
-
-
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
@@ -93,7 +91,6 @@
             tripTitle.innerHTML = `<i data-feather="map"></i> ${trip.metadata.name}`;
             
             const allExpenses = trip.expenses || [];
-            // Include travel documents in expenses by default (user can exclude them)
             const expenses = allExpenses;
             const total = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
             const taxTotal = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.tax_amount || 0), 0);
@@ -226,7 +223,7 @@
                                                 <td>${formatExpenseNote(expense.note)}</td>
                                                 <td>
                                                     ${expense.source ? `
-                                                        <a href="data/trips/${currentTrip.name}/${expense.source.replace(/\s+/g, '_').replace(/\u202f/g, '').replace('4.05.38', '40538').replace('4.05.57', '40557').replace('_AM', 'AM')}" target="_blank" class="btn btn-small">
+                                                        <a href="data/trips/${currentTrip.name}/${expense.source.replace(/\\s+/g, '_').replace(/\\u202f/g, '').replace('4.05.38', '40538').replace('4.05.57', '40557').replace('_AM', 'AM')}" target="_blank" class="btn btn-small">
                                                             <i data-feather="eye"></i> View
                                                         </a>
                                                     ` : '-'}
@@ -299,106 +296,102 @@
             feather.replace();
         }
 
-        function editTrip() {
-            window.location.href = `edit.html?trip=${encodeURIComponent(currentTrip.name)}`;
-        }
-
-        function addExpense() {
-            window.location.href = `edit.html?trip=${encodeURIComponent(currentTrip.name)}&action=add`;
-        }
-
-        function editExpense(expenseId) {
-            window.location.href = `edit.html?trip=${encodeURIComponent(currentTrip.name)}&expense=${expenseId}`;
-        }
-
-        async function deleteExpense(expenseId) {
-            showConfirmModal('Delete Expense', 'Are you sure you want to delete this expense?', async () => {
-                await executeDeleteExpense(expenseId);
-            });
-        }
-
-        async function executeDeleteExpense(expenseId) {
-
+        async function loadAllFiles(tripName) {
             try {
-                const response = await fetch('save_trip.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'delete_expense',
-                        tripName: currentTrip.name,
-                        expenseId: expenseId
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    showSuccessMessage('Expense deleted successfully');
-                    // Reload trip details
-                    loadTripDetails(currentTrip.name);
-                } else {
-                    showErrorMessage('Error deleting expense');
+                // Load receipts
+                const receiptsResponse = await fetch(`api.php?action=receipts&name=${encodeURIComponent(tripName)}`);
+                const receiptsData = await receiptsResponse.json();
+                
+                // Load travel documents
+                const docsResponse = await fetch(`api.php?action=travel_documents&name=${encodeURIComponent(tripName)}`);
+                const docsData = await docsResponse.json();
+                
+                const allFiles = [];
+                
+                // Add receipts with type
+                if (receiptsData.success && receiptsData.files) {
+                    receiptsData.files.forEach(file => {
+                        allFiles.push({...file, type: 'receipt'});
+                    });
                 }
+                
+                // Add travel documents with type
+                if (docsData.success && docsData.files) {
+                    docsData.files.forEach(file => {
+                        allFiles.push({...file, type: 'travel_document'});
+                    });
+                }
+                
+                displayAllFiles(allFiles);
+                
             } catch (error) {
-                console.error('Error deleting expense:', error);
-                showErrorMessage('Error deleting expense');
+                console.error('Error loading files:', error);
             }
         }
 
-        async function downloadReport() {
-            try {
-                const response = await fetch(`generate_pdf.php?trip=${encodeURIComponent(currentTrip.name)}`);
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${currentTrip.name}-report.pdf`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    showErrorMessage('Error generating PDF report');
-                }
-            } catch (error) {
-                console.error('Error downloading report:', error);
-                showErrorMessage('Error downloading report');
-            }
-        }
-
-        async function deleteTrip() {
-            const tripName = currentTrip.metadata.name;
+        function displayAllFiles(files) {
+            const grid = document.getElementById('receiptsGrid');
+            const bulkBtn = document.getElementById('bulkDownloadBtn');
             
-            showConfirmModal('Delete Trip', `Delete "${tripName}"?\n\nThis will permanently delete all trip data including expenses and receipts. This action cannot be undone.`, async () => {
-                await executeDeleteTrip(tripName);
-            });
+            if (!files || files.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i data-feather="inbox"></i>
+                        <h3>No files uploaded</h3>
+                        <p>Upload receipts and travel documents to see them here.</p>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+            
+            // Show bulk download button if there are files
+            bulkBtn.style.display = 'inline-flex';
+            
+            grid.innerHTML = files.map(file => `
+                <div class="receipt-item">
+                    <div class="receipt-preview">
+                        ${file.path.toLowerCase().includes('.pdf') ? 
+                            `<div class="pdf-icon"><i data-feather="file-text"></i></div>` :
+                            `<img src="data/trips/${currentTrip.name}/${file.path}" alt="${file.filename}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                             <div class="pdf-icon" style="display: none;"><i data-feather="image"></i></div>`
+                        }
+                    </div>
+                    <div class="receipt-info">
+                        <h4>${file.filename}</h4>
+                        <p class="file-type">${file.type === 'travel_document' ? 'Travel Document' : 'Receipt'}</p>
+                        <p class="file-size">${formatFileSize(file.size || 0)}</p>
+                        <div class="receipt-actions">
+                            <a href="data/trips/${currentTrip.name}/${file.path}" target="_blank" class="btn btn-small">
+                                <i data-feather="eye"></i> View
+                            </a>
+                            <a href="data/trips/${currentTrip.name}/${file.path}" download="${file.filename}" class="btn btn-small btn-secondary">
+                                <i data-feather="download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            feather.replace();
         }
 
-        async function executeDeleteTrip(tripName) {
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
-            try {
-                const response = await fetch('save_trip.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'delete_trip',
-                        tripName: currentTrip.name
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    showSuccessMessage('Trip deleted successfully');
-                    window.location.href = 'index.html';
-                } else {
-                    showErrorMessage('Error deleting trip: ' + (result.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error deleting trip:', error);
-                showErrorMessage('Error deleting trip');
-            }
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
         }
 
         function showError(message) {
@@ -408,469 +401,17 @@
                     <i data-feather="alert-circle"></i>
                     <h3>Error</h3>
                     <p>${message}</p>
-                    <button class="btn btn-primary" onclick="window.location.href='index.html'">
-                        <i data-feather="home"></i> Back to Dashboard
+                    <button class="btn btn-primary" onclick="window.location.reload()">
+                        <i data-feather="refresh-cw"></i> Retry
                     </button>
                 </div>
             `;
             feather.replace();
         }
 
-        let documentsData = [];
-
-        async function loadAllFiles(tripName) {
-            try {
-                // Load both receipts and travel documents
-                const [receiptsResponse, documentsResponse] = await Promise.all([
-                    fetch(`api.php?action=receipts&name=${encodeURIComponent(tripName)}`),
-                    fetch(`api.php?action=travel_documents&name=${encodeURIComponent(tripName)}`)
-                ]);
-                
-                const receiptsData = await receiptsResponse.json();
-                const documentsData = await documentsResponse.json();
-                
-                // Combine all files
-                const allFiles = [];
-                
-                if (receiptsData.success && receiptsData.receipts) {
-                    receiptsData.receipts.forEach(receipt => {
-                        allFiles.push({
-                            ...receipt,
-                            type: 'receipt',
-                            displayType: receipt.isPdf ? 'PDF Document' : 'Image'
-                        });
-                    });
-                }
-                
-                if (documentsData.success && documentsData.documents) {
-                    documentsData.documents.forEach(document => {
-                        allFiles.push({
-                            ...document,
-                            type: 'travel_document',
-                            displayType: 'PDF Document',
-                            isPdf: true
-                        });
-                    });
-                }
-                
-                // Store for bulk download with proper structure
-                window.allFilesData = allFiles.map(file => ({
-                    ...file,
-                    fullUrl: file.fullUrl || file.url,
-                    filename: file.filename || file.url.split('/').pop()
-                }));
-                displayAllFiles(allFiles);
-                
-            } catch (error) {
-                console.error('Error loading files:', error);
-            }
-        }
-
-        function displayTravelDocuments(documents) {
-            const documentsGrid = document.getElementById('documentsGrid');
-            
-            if (documents.length === 0) {
-                documentsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i data-feather="file-text"></i>
-                        <h3>No travel documents found</h3>
-                        <p>No travel document files are associated with this trip.</p>
-                    </div>
-                `;
-            } else {
-                documentsGrid.innerHTML = documents.map(document => `
-                    <div class="document-item">
-                        <div class="document-preview">
-                            <div class="file-icon"><i data-feather="file-text"></i></div>
-                        </div>
-                        <div class="document-info">
-                            <div class="document-name">${document.filename}</div>
-                            <div class="document-size">${formatFileSize(document.size)}</div>
-                            <div class="document-type">PDF Document</div>
-                        </div>
-                        <div class="document-actions">
-                            <a href="${document.fullUrl}" target="_blank" class="btn btn-small">
-                                <i data-feather="eye"></i> View
-                            </a>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            feather.replace();
-        }
-
-        function displayAllFiles(files) {
-            const receiptsGrid = document.getElementById('receiptsGrid');
-            const bulkDownloadBtn = document.getElementById('bulkDownloadBtn');
-            
-            if (files.length === 0) {
-                bulkDownloadBtn.style.display = 'none';
-                receiptsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i data-feather="paperclip"></i>
-                        <h3>No files found</h3>
-                        <p>No files are associated with this trip.</p>
-                    </div>
-                `;
-            } else {
-                bulkDownloadBtn.style.display = 'inline-flex';
-                receiptsGrid.innerHTML = files.map(file => `
-                    <div class="receipt-item">
-                        <div class="receipt-preview">
-                            <div class="file-icon">
-                                ${file.isPdf ? 
-                                    `<i data-feather="file-text"></i>` :
-                                    `<i data-feather="image"></i>`
-                                }
-                            </div>
-                        </div>
-                        <div class="receipt-info">
-                            <div class="receipt-name">${file.filename}</div>
-                            <div class="receipt-size">${formatFileSize(file.size)}</div>
-                            <div class="receipt-type">${file.displayType}</div>
-                        </div>
-                        <div class="receipt-actions">
-                            <a href="${file.fullUrl || file.url}" target="_blank" class="btn btn-small">
-                                <i data-feather="eye"></i> View
-                            </a>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            // Re-initialize feather icons
-            feather.replace();
-        }
-
-        async function loadTripReceipts(tripName) {
-            try {
-                const response = await fetch(`api.php?action=receipts&name=${encodeURIComponent(tripName)}`);
-                const data = await response.json();
-                
-                if (data.success && data.receipts) {
-                    // Store receipts data globally for bulk download with proper URLs
-                    receiptsData = data.receipts.map(receipt => ({
-                        ...receipt,
-                        fullUrl: receipt.url,
-                        filename: receipt.filename || receipt.url.split('/').pop()
-                    }));
-                    displayReceipts(data.receipts);
-                }
-            } catch (error) {
-                console.error('Error loading receipts:', error);
-            }
-        }
-
-        function displayReceipts(receipts) {
-            const receiptsGrid = document.getElementById('receiptsGrid');
-            const bulkDownloadBtn = document.getElementById('bulkDownloadBtn');
-            
-            if (receipts.length === 0) {
-                bulkDownloadBtn.style.display = 'none';
-                receiptsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i data-feather="paperclip"></i>
-                        <h3>No receipts found</h3>
-                        <p>No receipt files are associated with this trip.</p>
-                    </div>
-                `;
-            } else {
-                bulkDownloadBtn.style.display = 'inline-flex';
-                receiptsGrid.innerHTML = receipts.map(receipt => `
-                    <div class="receipt-item">
-                        <div class="receipt-preview">
-                            <div class="file-icon">
-                                ${receipt.isPdf ? 
-                                    `<i data-feather="file-text"></i>` :
-                                    `<i data-feather="image"></i>`
-                                }
-                            </div>
-                        </div>
-                        <div class="receipt-info">
-                            <div class="receipt-name">${receipt.filename}</div>
-                            <div class="receipt-size">${formatFileSize(receipt.size)}</div>
-                            ${receipt.isPdf ? '<div class="receipt-type">PDF Document</div>' : '<div class="receipt-type">Image</div>'}
-                        </div>
-                        <div class="receipt-actions">
-                            <a href="${receipt.fullUrl}" target="_blank" class="btn btn-small">
-                                <i data-feather="eye"></i> View
-                            </a>
-                            <a href="${receipt.fullUrl}" download class="btn btn-small btn-secondary">
-                                <i data-feather="download"></i> Download
-                            </a>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            feather.replace();
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-            });
-        }
-
-
-
-        // Custom modal functions
-        let confirmAction = null;
-
-        function showConfirmModal(title, message, action) {
-            // Create modal if it doesn't exist
-            if (!document.getElementById('confirmModal')) {
-                const modal = document.createElement('div');
-                modal.id = 'confirmModal';
-                modal.className = 'modal';
-                modal.style.display = 'none';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3 id="confirmTitle">Confirm Action</h3>
-                        </div>
-                        <div class="modal-body">
-                            <p id="confirmMessage">Are you sure?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
-                            <button class="btn btn-danger" id="confirmButton" onclick="executeConfirmAction()">Confirm</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            }
-            
-            document.getElementById('confirmTitle').textContent = title;
-            document.getElementById('confirmMessage').textContent = message;
-            confirmAction = action;
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-            confirmAction = null;
-        }
-
-        function executeConfirmAction() {
-            if (confirmAction) {
-                confirmAction();
-            }
-            closeConfirmModal();
-        }
-
-        function showSuccessMessage(message) {
-            createToast(message, 'success');
-        }
-
-        function showErrorMessage(message) {
-            createToast(message, 'error');
-        }
-
-        function createToast(message, type) {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
-                <span>${message}</span>
-            `;
-            document.body.appendChild(toast);
-            feather.replace();
-            
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
-        }
-
-        async function toggleExpenseExclusion(expenseId) {
-            try {
-                const response = await fetch('save_trip.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'toggle_expense_exclusion',
-                        tripName: currentTrip.name,
-                        expenseId: expenseId
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    showSuccessMessage(result.excluded ? 'Expense excluded from totals' : 'Expense included in totals');
-                    // Reload the trip to update the display
-                    loadTrip(currentTrip.name);
-                } else {
-                    showErrorMessage('Failed to update expense: ' + (result.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error toggling expense exclusion:', error);
-                showErrorMessage('Error updating expense exclusion');
-            }
-        }
-
-        function editExpense(expenseId) {
-            // Find the expense to edit
-            const expense = currentTrip.expenses.find(exp => exp.id === expenseId);
-            if (!expense) {
-                showErrorMessage('Expense not found');
-                return;
-            }
-            
-            // Create edit modal
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'block';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Edit Expense</h3>
-                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editExpenseForm">
-                            <div class="form-group">
-                                <label for="editDate">Date:</label>
-                                <input type="date" id="editDate" value="${expense.date || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editMerchant">Merchant:</label>
-                                <input type="text" id="editMerchant" value="${expense.merchant || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editAmount">Amount:</label>
-                                <input type="number" id="editAmount" step="0.01" value="${expense.amount || 0}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editTaxAmount">Tax Amount:</label>
-                                <input type="number" id="editTaxAmount" step="0.01" value="${expense.tax_amount || 0}">
-                            </div>
-                            <div class="form-group">
-                                <label for="editCategory">Category:</label>
-                                <select id="editCategory" required>
-                                    <option value="Meals" ${expense.category === 'Meals' ? 'selected' : ''}>Meals</option>
-                                    <option value="Transportation" ${expense.category === 'Transportation' ? 'selected' : ''}>Transportation</option>
-                                    <option value="Lodging" ${expense.category === 'Lodging' ? 'selected' : ''}>Lodging</option>
-                                    <option value="Entertainment" ${expense.category === 'Entertainment' ? 'selected' : ''}>Entertainment</option>
-                                    <option value="Groceries" ${expense.category === 'Groceries' ? 'selected' : ''}>Groceries</option>
-                                    <option value="Shopping" ${expense.category === 'Shopping' ? 'selected' : ''}>Shopping</option>
-                                    <option value="Gas" ${expense.category === 'Gas' ? 'selected' : ''}>Gas</option>
-                                    <option value="Other" ${expense.category === 'Other' ? 'selected' : ''}>Other</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="editNote">Note:</label>
-                                <textarea id="editNote" rows="3">${expense.note || ''}</textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                        <button class="btn btn-primary" onclick="saveExpenseEdit('${expenseId}')">Save Changes</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        async function saveExpenseEdit(expenseId) {
-            try {
-                const updatedExpense = {
-                    id: expenseId,
-                    date: document.getElementById('editDate').value,
-                    merchant: document.getElementById('editMerchant').value,
-                    amount: parseFloat(document.getElementById('editAmount').value),
-                    tax_amount: parseFloat(document.getElementById('editTaxAmount').value) || 0,
-                    category: document.getElementById('editCategory').value,
-                    note: document.getElementById('editNote').value
-                };
-
-                const response = await fetch('save_trip.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'edit_expense',
-                        tripName: currentTrip.name,
-                        expense: updatedExpense
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    showSuccessMessage('Expense updated successfully');
-                    document.querySelector('.modal').remove();
-                    loadTrip(currentTrip.name);
-                } else {
-                    showErrorMessage('Failed to update expense: ' + (result.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error updating expense:', error);
-                showErrorMessage('Error updating expense');
-            }
-        }
-
-        function deleteExpense(expenseId) {
-            showConfirmModal(
-                'Delete Expense',
-                'Are you sure you want to permanently delete this expense? This action cannot be undone.',
-                async () => {
-                    try {
-                        const response = await fetch('save_trip.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                action: 'delete_expense',
-                                tripName: currentTrip.name,
-                                expenseId: expenseId
-                            })
-                        });
-
-                        const result = await response.json();
-                        
-                        if (result.success) {
-                            showSuccessMessage('Expense deleted successfully');
-                            loadTrip(currentTrip.name);
-                        } else {
-                            showErrorMessage('Failed to delete expense: ' + (result.error || 'Unknown error'));
-                        }
-                    } catch (error) {
-                        console.error('Error deleting expense:', error);
-                        showErrorMessage('Error deleting expense');
-                    }
-                }
-            );
-        }
-
-        function addExpense() {
-            // Redirect to wizard to add more files/expenses
-            window.location.href = `wizard.html?trip=${encodeURIComponent(currentTrip.name)}&mode=add`;
+        function closeModal() {
+            const modal = document.getElementById('receiptModal');
+            modal.style.display = 'none';
         }
 
         function editTrip() {
@@ -888,279 +429,237 @@
                         <form id="editTripForm">
                             <div class="form-group">
                                 <label for="editTripName">Trip Name:</label>
-                                <input type="text" id="editTripName" value="${currentTrip.metadata.name || ''}" required>
+                                <input type="text" id="editTripName" value="${currentTrip.metadata.name}" required>
                             </div>
                             <div class="form-group">
                                 <label for="editDestination">Destination:</label>
-                                <input type="text" id="editDestination" value="${currentTrip.metadata.destination || ''}" placeholder="City, State">
+                                <input type="text" id="editDestination" value="${currentTrip.metadata.destination || ''}" required>
                             </div>
                             <div class="form-group">
                                 <label for="editStartDate">Start Date:</label>
-                                <input type="date" id="editStartDate" value="${currentTrip.metadata.start_date || ''}">
+                                <input type="date" id="editStartDate" value="${currentTrip.metadata.start_date}" required>
                             </div>
                             <div class="form-group">
                                 <label for="editEndDate">End Date:</label>
-                                <input type="date" id="editEndDate" value="${currentTrip.metadata.end_date || ''}">
+                                <input type="date" id="editEndDate" value="${currentTrip.metadata.end_date}" required>
                             </div>
                             <div class="form-group">
-                                <label for="editTripNotes">Notes:</label>
-                                <textarea id="editTripNotes" rows="3" placeholder="Trip description or additional notes">${currentTrip.metadata.notes || ''}</textarea>
+                                <label for="editNotes">Notes:</label>
+                                <textarea id="editNotes" rows="3">${currentTrip.metadata.notes || ''}</textarea>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                        <button class="btn btn-primary" onclick="saveTripEdit()">Save Changes</button>
+                        <button class="btn btn-primary" onclick="saveTrip()">Save Changes</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
         }
 
-        async function saveTripEdit() {
+        async function saveTrip() {
+            const form = document.getElementById('editTripForm');
+            const formData = new FormData();
+            
+            formData.append('action', 'update_trip');
+            formData.append('original_name', currentTrip.name);
+            formData.append('name', document.getElementById('editTripName').value);
+            formData.append('destination', document.getElementById('editDestination').value);
+            formData.append('start_date', document.getElementById('editStartDate').value);
+            formData.append('end_date', document.getElementById('editEndDate').value);
+            formData.append('notes', document.getElementById('editNotes').value);
+
             try {
-                const updatedMetadata = {
-                    name: document.getElementById('editTripName').value,
-                    destination: document.getElementById('editDestination').value,
-                    start_date: document.getElementById('editStartDate').value,
-                    end_date: document.getElementById('editEndDate').value,
-                    notes: document.getElementById('editTripNotes').value
-                };
-
-                const response = await fetch('save_trip.php', {
+                const response = await fetch('api.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'edit_trip_metadata',
-                        tripName: currentTrip.name,
-                        metadata: updatedMetadata
-                    })
+                    body: formData
                 });
-
+                
                 const result = await response.json();
                 
                 if (result.success) {
-                    showSuccessMessage('Trip details updated successfully');
+                    showSuccessMessage('Trip updated successfully');
+                    // Close modal
                     document.querySelector('.modal').remove();
-                    
-                    // If trip name changed, redirect to new URL
-                    if (result.newTripName && result.newTripName !== currentTrip.name) {
-                        window.location.href = `trip.html?trip=${encodeURIComponent(result.newTripName)}`;
-                    } else {
-                        loadTrip(currentTrip.name);
-                    }
+                    // Reload trip details
+                    loadTripDetails(currentTrip.name);
                 } else {
                     showErrorMessage('Failed to update trip: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error updating trip:', error);
-                showErrorMessage('Error updating trip details');
+                showErrorMessage('Error updating trip');
+            }
+        }
+
+        function editExpense(expenseId) {
+            const expense = currentTrip.expenses.find(e => e.id === expenseId);
+            if (!expense) return;
+
+            // Create edit modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Expense</h3>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editExpenseForm">
+                            <div class="form-group">
+                                <label for="editDate">Date:</label>
+                                <input type="date" id="editDate" value="${expense.date}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editMerchant">Merchant:</label>
+                                <input type="text" id="editMerchant" value="${expense.merchant || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editAmount">Amount:</label>
+                                <input type="number" id="editAmount" step="0.01" value="${expense.amount}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTaxAmount">Tax Amount:</label>
+                                <input type="number" id="editTaxAmount" step="0.01" value="${expense.tax_amount || ''}" placeholder="0.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCategory">Category:</label>
+                                <select id="editCategory">
+                                    <option value="Food & Dining" ${expense.category === 'Food & Dining' ? 'selected' : ''}>Food & Dining</option>
+                                    <option value="Transportation" ${expense.category === 'Transportation' ? 'selected' : ''}>Transportation</option>
+                                    <option value="Accommodation" ${expense.category === 'Accommodation' ? 'selected' : ''}>Accommodation</option>
+                                    <option value="Entertainment" ${expense.category === 'Entertainment' ? 'selected' : ''}>Entertainment</option>
+                                    <option value="Shopping" ${expense.category === 'Shopping' ? 'selected' : ''}>Shopping</option>
+                                    <option value="Travel Documents" ${expense.category === 'Travel Documents' ? 'selected' : ''}>Travel Documents</option>
+                                    <option value="Other" ${expense.category === 'Other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editNote">Notes:</label>
+                                <textarea id="editNote" rows="3">${expense.note || ''}</textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveExpense('${expenseId}')">Save Changes</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function saveExpense(expenseId) {
+            const formData = new FormData();
+            
+            formData.append('action', 'update_expense');
+            formData.append('trip_name', currentTrip.name);
+            formData.append('expense_id', expenseId);
+            formData.append('date', document.getElementById('editDate').value);
+            formData.append('merchant', document.getElementById('editMerchant').value);
+            formData.append('amount', document.getElementById('editAmount').value);
+            formData.append('tax_amount', document.getElementById('editTaxAmount').value || '0');
+            formData.append('category', document.getElementById('editCategory').value);
+            formData.append('note', document.getElementById('editNote').value);
+
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage('Expense updated successfully');
+                    // Close modal
+                    document.querySelector('.modal').remove();
+                    // Reload trip details
+                    loadTripDetails(currentTrip.name);
+                } else {
+                    showErrorMessage('Failed to update expense: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating expense:', error);
+                showErrorMessage('Error updating expense');
             }
         }
 
         function downloadReport() {
+            if (!currentTrip) return;
+            
             window.open(`generate_pdf.php?trip=${encodeURIComponent(currentTrip.name)}`, '_blank');
         }
 
         function exportToPlainText() {
             if (!currentTrip) return;
             
+            // Generate plain text report
+            let plainText = `TRIP EXPENSE REPORT\n`;
+            plainText += `${'='.repeat(50)}\n\n`;
+            plainText += `Trip: ${currentTrip.metadata.name}\n`;
+            plainText += `Destination: ${currentTrip.metadata.destination || 'Not specified'}\n`;
+            plainText += `Duration: ${formatDate(currentTrip.metadata.start_date)} - ${formatDate(currentTrip.metadata.end_date)}\n`;
+            if (currentTrip.metadata.notes) {
+                plainText += `Notes: ${currentTrip.metadata.notes}\n`;
+            }
+            plainText += `\n`;
+
             const expenses = currentTrip.expenses || [];
-            const includedExpenses = expenses.filter(expense => !expense.excluded);
-            const total = includedExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-            const taxTotal = includedExpenses.reduce((sum, expense) => sum + parseFloat(expense.tax_amount || 0), 0);
-            
-            // Group expenses by category
+            const total = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+            const taxTotal = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.tax_amount || 0), 0);
+
+            plainText += `SUMMARY\n`;
+            plainText += `${'='.repeat(20)}\n`;
+            plainText += `Total Expenses: ${expenses.length}\n`;
+            plainText += `Total Amount: $${total.toFixed(2)}\n`;
+            plainText += `Total Tax: $${taxTotal.toFixed(2)}\n`;
+            plainText += `Grand Total: $${(total + taxTotal).toFixed(2)}\n\n`;
+
+            // Group by category
             const categories = {};
-            includedExpenses.forEach(expense => {
+            expenses.forEach(expense => {
                 const category = expense.category || 'Uncategorized';
                 if (!categories[category]) {
                     categories[category] = [];
                 }
                 categories[category].push(expense);
             });
-            
-            // Generate plain text report
-            let plainText = `TRIP EXPENSE REPORT\n`;
-            plainText += `${'='.repeat(50)}\n\n`;
-            plainText += `Trip Name: ${currentTrip.metadata.name}\n`;
-            if (currentTrip.metadata.destination) {
-                plainText += `Destination: ${currentTrip.metadata.destination}\n`;
-            }
-            if (currentTrip.metadata.start_date) {
-                plainText += `Start Date: ${formatDate(currentTrip.metadata.start_date)}\n`;
-            }
-            if (currentTrip.metadata.end_date) {
-                plainText += `End Date: ${formatDate(currentTrip.metadata.end_date)}\n`;
-            }
-            plainText += `Total Expenses: $${total.toFixed(2)}\n`;
-            plainText += `Total Tax: $${taxTotal.toFixed(2)}\n`;
-            plainText += `Number of Items: ${includedExpenses.length}\n\n`;
-            
-            // Add expenses by category
-            Object.keys(categories).sort().forEach(category => {
+
+            plainText += `DETAILED EXPENSES\n`;
+            plainText += `${'='.repeat(30)}\n\n`;
+
+            Object.keys(categories).forEach(category => {
                 const categoryExpenses = categories[category];
-                const categoryTotal = categoryExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+                const categoryTotal = categoryExpenses.filter(exp => !exp.excluded).reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
                 
                 plainText += `${category.toUpperCase()} - $${categoryTotal.toFixed(2)}\n`;
-                plainText += `${'-'.repeat(40)}\n`;
+                plainText += `${'-'.repeat(category.length + 15)}\n`;
                 
                 categoryExpenses.forEach(expense => {
-                    plainText += `${formatDate(expense.date).padEnd(12)} `;
-                    plainText += `${(expense.merchant || 'Unknown').padEnd(25)} `;
-                    plainText += `$${parseFloat(expense.amount || 0).toFixed(2).padStart(8)}`;
-                    if (expense.tax_amount && parseFloat(expense.tax_amount) > 0) {
-                        plainText += ` (Tax: $${parseFloat(expense.tax_amount).toFixed(2)})`;
+                    plainText += `${formatDate(expense.date)}\t${expense.merchant || 'Unknown'}\t$${parseFloat(expense.amount || 0).toFixed(2)}`;
+                    if (expense.tax_amount) {
+                        plainText += `\tTax: $${parseFloat(expense.tax_amount).toFixed(2)}`;
+                    }
+                    if (expense.note && expense.note !== '-') {
+                        plainText += `\t(${expense.note})`;
+                    }
+                    if (expense.excluded) {
+                        plainText += `\t[EXCLUDED]`;
                     }
                     plainText += `\n`;
-                    
-                    // Add hotel daily breakdown if available
-                    if (expense.is_hotel_stay && expense.daily_breakdown && expense.daily_breakdown.length > 0) {
-                        plainText += `    Daily Breakdown:\n`;
-                        expense.daily_breakdown.forEach(day => {
-                            plainText += `      ${formatDate(day.date)} - Room: $${parseFloat(day.room_rate || 0).toFixed(2)}, `;
-                            plainText += `Tax: $${parseFloat(day.tax_rate || 0).toFixed(2)} (${day.tax_percentage || 'N/A'}), `;
-                            plainText += `Total: $${parseFloat(day.daily_total || 0).toFixed(2)}\n`;
-                        });
-                    }
-                    
-                    if (expense.note && expense.note !== 'Receipt') {
-                        plainText += `    Note: ${expense.note}\n`;
-                    }
                 });
                 plainText += `\n`;
             });
             
-            // Open text in new window
-            const newWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-            if (newWindow) {
-                newWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Trip Expense Report - ${currentTrip.metadata.name}</title>
-                        <style>
-                            body {
-                                font-family: 'Courier New', monospace;
-                                margin: 20px;
-                                line-height: 1.4;
-                                background: white;
-                                color: black;
-                            }
-                            pre {
-                                white-space: pre-wrap;
-                                word-wrap: break-word;
-                                font-size: 12px;
-                            }
-                            .header {
-                                text-align: center;
-                                margin-bottom: 20px;
-                                font-family: Arial, sans-serif;
-                            }
-                            .actions {
-                                text-align: center;
-                                margin-bottom: 20px;
-                            }
-                            button {
-                                padding: 10px 20px;
-                                margin: 0 10px;
-                                border: 1px solid #ccc;
-                                background: #f5f5f5;
-                                cursor: pointer;
-                                border-radius: 4px;
-                            }
-                            button:hover {
-                                background: #e0e0e0;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <h2>Trip Expense Report</h2>
-                            <p>Generated on ${new Date().toLocaleDateString()}</p>
-                        </div>
-                        <div class="actions">
-                            <button onclick="selectAll()">Select All</button>
-                            <button onclick="copyToClipboard()">Copy to Clipboard</button>
-                            <button onclick="window.print()">Print</button>
-                        </div>
-                        <pre id="reportText">${plainText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-                        <script>
-                            function selectAll() {
-                                const range = document.createRange();
-                                range.selectNode(document.getElementById('reportText'));
-                                window.getSelection().removeAllRanges();
-                                window.getSelection().addRange(range);
-                            }
-                            
-                            function copyToClipboard() {
-                                selectAll();
-                                try {
-                                    document.execCommand('copy');
-                                    alert('Report copied to clipboard!');
-                                } catch (err) {
-                                    alert('Please select the text manually and copy with Ctrl+C');
-                                }
-                            }
-                        </script>
-                    </body>
-                    </html>
-                `);
-                newWindow.document.close();
-                showSuccessMessage('Trip report opened in new window');
-            } else {
-                showErrorMessage('Please allow popups to view the text report');
-            }
-        }
-        
-        function fallbackCopyTextToClipboard(text) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showSuccessMessage('Trip data copied to clipboard successfully!');
-                } else {
-                    showTextModal(text);
-                }
-            } catch (err) {
-                console.error('Fallback: Oops, unable to copy', err);
-                showTextModal(text);
-            }
-            
-            document.body.removeChild(textArea);
-        }
-        
-        function showTextModal(text) {
-            // Create a modal to display the text for manual copying
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'block';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 800px;">
-                    <div class="modal-header">
-                        <h3>Trip Export - Copy Text Below</h3>
-                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px; padding: 1rem; border: 1px solid #ccc;">${text}</textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary" onclick="this.closest('.modal').querySelector('textarea').select(); document.execCommand('copy'); showSuccessMessage('Copied to clipboard!'); this.closest('.modal').remove();">Select All & Copy</button>
-                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+            // Simple: just open text in new tab
+            const blob = new Blob([plainText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            showSuccessMessage('Trip report opened in new tab');
         }
 
         function deleteTrip() {
@@ -1199,7 +698,7 @@
             const escapedNote = escapeHtml(note).replace(/"/g, '&quot;');
             const escapedPreview = escapeHtml(preview);
             
-            return `<span class="note-preview" title="${escapedNote}">${escapedPreview}</span>`;
+            return `<span title="${escapedNote}" style="cursor: help;">${escapedPreview}</span>`;
         }
 
         function escapeHtml(text) {
@@ -1208,61 +707,72 @@
             return div.innerHTML;
         }
 
-        async function bulkDownloadReceipts() {
-            if (!currentTrip || !window.allFilesData || window.allFilesData.length === 0) {
-                showErrorMessage('No files available for download');
-                return;
-            }
+        function showSuccessMessage(message) {
+            showToast(message, 'success');
+        }
 
-            try {
-                showSuccessMessage('Preparing receipts for download...');
-                
-                // Create a zip file using JSZip
-                if (typeof JSZip === 'undefined') {
-                    // Fallback: download files one by one
-                    for (const file of window.allFilesData) {
-                        const link = document.createElement('a');
-                        link.href = file.fullUrl;
-                        link.download = file.filename;
-                        link.style.display = 'none';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        
-                        // Small delay between downloads
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                    showSuccessMessage(`Downloaded ${window.allFilesData.length} files individually`);
-                } else {
-                    // Use JSZip for better bulk download
-                    const zip = new JSZip();
-                    
-                    for (const file of window.allFilesData) {
-                        try {
-                            const response = await fetch(file.fullUrl);
-                            const blob = await response.blob();
-                            zip.file(file.filename, blob);
-                        } catch (error) {
-                            console.error(`Failed to add ${file.filename} to zip:`, error);
-                        }
-                    }
-                    
-                    const zipBlob = await zip.generateAsync({type: 'blob'});
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(zipBlob);
-                    link.download = `${currentTrip.name}_files.zip`;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                    
-                    showSuccessMessage(`Downloaded ${window.allFilesData.length} files as zip file`);
-                }
-            } catch (error) {
-                console.error('Bulk download error:', error);
-                showErrorMessage('Failed to download receipts');
-            }
+        function showErrorMessage(message) {
+            showToast(message, 'error');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i data-feather="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            feather.replace();
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Hide and remove toast
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function addExpense() {
+            showSuccessMessage('Add expense functionality will be implemented');
+        }
+
+        function toggleExpenseExclusion(expenseId) {
+            showSuccessMessage('Toggle expense functionality will be implemented');
+        }
+
+        function deleteExpense(expenseId) {
+            showSuccessMessage('Delete expense functionality will be implemented');
+        }
+
+        function bulkDownloadReceipts() {
+            showSuccessMessage('Bulk download functionality will be implemented');
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${title}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button class="btn btn-danger" onclick="this.closest('.modal').remove(); (${onConfirm.toString()})()">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
     </script>
 </body>
