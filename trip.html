@@ -457,6 +457,49 @@
             feather.replace();
         }
 
+        function displayAllFiles(files) {
+            const receiptsGrid = document.getElementById('receiptsGrid');
+            const bulkDownloadBtn = document.getElementById('bulkDownloadBtn');
+            
+            if (files.length === 0) {
+                bulkDownloadBtn.style.display = 'none';
+                receiptsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i data-feather="paperclip"></i>
+                        <h3>No files found</h3>
+                        <p>No files are associated with this trip.</p>
+                    </div>
+                `;
+            } else {
+                bulkDownloadBtn.style.display = 'inline-flex';
+                receiptsGrid.innerHTML = files.map(file => `
+                    <div class="receipt-item">
+                        <div class="receipt-preview">
+                            <div class="file-icon">
+                                ${file.isPdf ? 
+                                    `<i data-feather="file-text"></i>` :
+                                    `<i data-feather="image"></i>`
+                                }
+                            </div>
+                        </div>
+                        <div class="receipt-info">
+                            <div class="receipt-name">${file.filename}</div>
+                            <div class="receipt-size">${formatFileSize(file.size)}</div>
+                            <div class="receipt-type">${file.displayType}</div>
+                        </div>
+                        <div class="receipt-actions">
+                            <a href="${file.fullUrl || file.url}" target="_blank" class="btn btn-small">
+                                <i data-feather="eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Re-initialize feather icons
+            feather.replace();
+        }
+
         async function loadTripReceipts(tripName) {
             try {
                 const response = await fetch(`api.php?action=receipts&name=${encodeURIComponent(tripName)}`);
