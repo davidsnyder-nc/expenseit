@@ -1,0 +1,20 @@
+[
+    {
+        "id": "3moxv6f6g",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Purchase of groceries including organic apples, bread, milk, eggs, yogurt, granola bars, spinach, chicken breast, rice, chocolate, tea, honey, and nuts.",
+        "source": "receipts\/3 (2).heic"
+    },
+    {
+        "id": "jic777otz",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
+        "source": "receipts\/1.jpg"
+    }
+]
