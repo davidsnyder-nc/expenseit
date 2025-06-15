@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Expense Tracker</title>
+    <title>Expense Wizard</title>
     <link rel="stylesheet" href="assets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
@@ -11,14 +11,13 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1><i data-feather="credit-card"></i> Personal Expense Tracker</h1>
-            <p class="subtitle">Track expenses across trips and projects</p>
+            <h1><i data-feather="credit-card"></i> Expense Wizard</h1>
         </header>
 
         <div class="dashboard">
             <div class="actions">
                 <button class="btn btn-primary" onclick="createNewTrip()">
-                    <i data-feather="plus"></i> Expense Wizard
+                    <i data-feather="plus"></i> New Trip
                 </button>
                 <button class="btn btn-secondary" onclick="refreshTrips()">
                     <i data-feather="refresh-cw"></i> Refresh
@@ -35,7 +34,7 @@
                     <h3>No trips found</h3>
                     <p>Create your first trip to start tracking expenses</p>
                     <button class="btn btn-primary" onclick="createNewTrip()">
-                        <i data-feather="plus"></i> Expense Wizard
+                        <i data-feather="plus"></i> New Trip
                     </button>
                 </div>
             </div>

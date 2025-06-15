@@ -100,7 +100,7 @@ function generateTripPDF($metadata, $expenses, $receipts = []) {
     
     // Set document info
     $mpdf->SetTitle($metadata['name'] . ' - Expense Report');
-    $mpdf->SetAuthor('Personal Expense Tracker');
+    $mpdf->SetAuthor('Expense Wizard');
     
     // Build HTML content
     $html = buildPDFHTML($metadata, $expenses, $categories, $total, $receipts);
@@ -415,7 +415,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
     
     $html .= '
         <div class="footer">
-            <p>Generated on ' . date('F j, Y \a\t g:i A') . ' by Personal Expense Tracker</p>
+            <p>Generated on ' . date('F j, Y \a\t g:i A') . ' by Expense Wizard</p>
         </div>
     </body>
     </html>';
