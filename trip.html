@@ -468,10 +468,12 @@
                 receiptsGrid.innerHTML = receipts.map(receipt => `
                     <div class="receipt-item">
                         <div class="receipt-preview">
-                            ${receipt.isPdf ? 
-                                `<div class="file-icon"><i data-feather="file-text"></i></div>` :
-                                `<img src="${receipt.fullUrl}" alt="${receipt.filename}" class="receipt-thumbnail" loading="lazy">`
-                            }
+                            <div class="file-icon">
+                                ${receipt.isPdf ? 
+                                    `<i data-feather="file-text"></i>` :
+                                    `<i data-feather="image"></i>`
+                                }
+                            </div>
                         </div>
                         <div class="receipt-info">
                             <div class="receipt-name">${receipt.filename}</div>
