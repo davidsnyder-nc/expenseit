@@ -23,6 +23,9 @@
                 <p>Loading...</p>
             </div>
         </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="toast-container"></div>
     </div>
 
     <script src="https://unpkg.com/feather-icons"></script>
@@ -235,11 +238,11 @@
                     // Redirect to trip view with updated name
                     window.location.href = `trip.html?trip=${encodeURIComponent(tripName)}`;
                 } else {
-                    alert('Error saving trip information');
+                    showErrorMessage('Error saving trip information');
                 }
             } catch (error) {
                 console.error('Error saving trip:', error);
-                alert('Error saving trip information');
+                showErrorMessage('Error saving trip information');
             }
         }
 
@@ -278,11 +281,11 @@
                 if (result.success) {
                     window.location.href = `trip.html?trip=${encodeURIComponent(currentTrip.name)}`;
                 } else {
-                    alert('Error saving expense');
+                    showErrorMessage('Error saving expense');
                 }
             } catch (error) {
                 console.error('Error saving expense:', error);
-                alert('Error saving expense');
+                showErrorMessage('Error saving expense');
             }
         }
 
@@ -292,6 +295,40 @@
 
         function generateId() {
             return Math.random().toString(36).substr(2, 9);
+        }
+
+        function showSuccessMessage(message) {
+            createToast(message, 'success');
+        }
+
+        function showErrorMessage(message) {
+            createToast(message, 'error');
+        }
+
+        function createToast(message, type) {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+                    <span>${message}</span>
+                    <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            feather.replace();
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 5000);
         }
 
         function showError(message) {

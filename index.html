@@ -66,6 +66,9 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- Custom Confirmation Modal -->
     <div id="confirmModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -369,12 +372,12 @@
                     }
                 }
                 
-                alert(`${tripNames.length} trip${tripNames.length > 1 ? 's' : ''} archived successfully`);
+                showSuccessMessage(`${tripNames.length} trip${tripNames.length > 1 ? 's' : ''} archived successfully`);
                 selectedTrips.clear();
                 await loadTrips();
             } catch (error) {
                 console.error('Error archiving trips:', error);
-                alert('Error archiving trips: ' + error.message);
+                showErrorMessage('Error archiving trips: ' + error.message);
             }
         }
 
