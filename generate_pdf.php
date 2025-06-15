@@ -150,7 +150,8 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                 width: 100%;
                 border-collapse: separate;
                 border-spacing: 10px;
-                margin-bottom: 20px;
+                margin: 20px auto;
+                table-layout: fixed;
             }
             .summary-card {
                 text-align: center;
