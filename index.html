@@ -89,6 +89,7 @@
         }
 
         function switchTab(tab) {
+            console.log('Switching to tab:', tab);
             currentTab = tab;
             document.getElementById('activeTab').classList.toggle('active', tab === 'active');
             document.getElementById('archivedTab').classList.toggle('active', tab === 'archived');
@@ -105,12 +106,15 @@
             const emptyState = document.getElementById('emptyState');
             const tripsContainer = document.getElementById('tripsContainer');
             
+            console.log('Loading trips for tab:', currentTab);
+            
             // Show loading state
             loadingState.style.display = 'block';
             emptyState.style.display = 'none';
             
             try {
                 const action = currentTab === 'active' ? 'trips' : 'archived_trips';
+                console.log('Fetching with action:', action);
                 const response = await fetch(`load.php?action=${action}`);
                 
                 if (!response.ok) {
@@ -118,6 +122,7 @@
                 }
                 
                 const data = await response.json();
+                console.log('Received data:', data);
                 
                 loadingState.style.display = 'none';
                 
@@ -125,6 +130,9 @@
                     allTrips = data.trips;
                     displayTripsTable(data.trips);
                 } else {
+                    // Clear the allTrips array when no trips are found
+                    allTrips = [];
+                    
                     // Show appropriate empty state message based on tab
                     const emptyMessage = currentTab === 'active' 
                         ? 'No active trips found' 
