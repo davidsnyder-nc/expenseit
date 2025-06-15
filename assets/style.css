@@ -1099,6 +1099,27 @@ body {
     font-weight: 500;
 }
 
+/* Button Layout Fixes */
+.expenses-table td:last-child {
+    white-space: nowrap;
+    min-width: 180px;
+}
+
+.btn-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.5rem;
+    margin-right: 0.25rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+.btn-small:last-child {
+    margin-right: 0;
+}
+
 .stat-content {
     flex: 1;
     min-width: 0;

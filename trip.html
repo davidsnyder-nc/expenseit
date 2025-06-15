@@ -119,6 +119,10 @@
                             <i data-feather="download"></i>
                             <span>Download PDF</span>
                         </button>
+                        <button class="action-card btn-secondary" onclick="exportToPlainText()">
+                            <i data-feather="clipboard"></i>
+                            <span>Copy as Text</span>
+                        </button>
                         <button class="action-card btn-outline" onclick="addExpense()">
                             <i data-feather="plus"></i>
                             <span>Add Expense</span>
@@ -784,6 +788,136 @@
 
         function downloadReport() {
             window.open(`generate_pdf.php?trip=${encodeURIComponent(currentTrip.name)}`, '_blank');
+        }
+
+        function exportToPlainText() {
+            if (!currentTrip) return;
+            
+            const expenses = currentTrip.expenses || [];
+            const includedExpenses = expenses.filter(expense => !expense.excluded);
+            const total = includedExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+            const taxTotal = includedExpenses.reduce((sum, expense) => sum + parseFloat(expense.tax_amount || 0), 0);
+            
+            // Group expenses by category
+            const categories = {};
+            includedExpenses.forEach(expense => {
+                const category = expense.category || 'Uncategorized';
+                if (!categories[category]) {
+                    categories[category] = [];
+                }
+                categories[category].push(expense);
+            });
+            
+            // Generate plain text report
+            let plainText = `TRIP EXPENSE REPORT\n`;
+            plainText += `${'='.repeat(50)}\n\n`;
+            plainText += `Trip Name: ${currentTrip.metadata.name}\n`;
+            if (currentTrip.metadata.destination) {
+                plainText += `Destination: ${currentTrip.metadata.destination}\n`;
+            }
+            if (currentTrip.metadata.start_date) {
+                plainText += `Start Date: ${formatDate(currentTrip.metadata.start_date)}\n`;
+            }
+            if (currentTrip.metadata.end_date) {
+                plainText += `End Date: ${formatDate(currentTrip.metadata.end_date)}\n`;
+            }
+            plainText += `Total Expenses: $${total.toFixed(2)}\n`;
+            plainText += `Total Tax: $${taxTotal.toFixed(2)}\n`;
+            plainText += `Number of Items: ${includedExpenses.length}\n\n`;
+            
+            // Add expenses by category
+            Object.keys(categories).sort().forEach(category => {
+                const categoryExpenses = categories[category];
+                const categoryTotal = categoryExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+                
+                plainText += `${category.toUpperCase()} - $${categoryTotal.toFixed(2)}\n`;
+                plainText += `${'-'.repeat(40)}\n`;
+                
+                categoryExpenses.forEach(expense => {
+                    plainText += `${formatDate(expense.date).padEnd(12)} `;
+                    plainText += `${(expense.merchant || 'Unknown').padEnd(25)} `;
+                    plainText += `$${parseFloat(expense.amount || 0).toFixed(2).padStart(8)}`;
+                    if (expense.tax_amount && parseFloat(expense.tax_amount) > 0) {
+                        plainText += ` (Tax: $${parseFloat(expense.tax_amount).toFixed(2)})`;
+                    }
+                    plainText += `\n`;
+                    
+                    // Add hotel daily breakdown if available
+                    if (expense.is_hotel_stay && expense.daily_breakdown && expense.daily_breakdown.length > 0) {
+                        plainText += `    Daily Breakdown:\n`;
+                        expense.daily_breakdown.forEach(day => {
+                            plainText += `      ${formatDate(day.date)} - Room: $${parseFloat(day.room_rate || 0).toFixed(2)}, `;
+                            plainText += `Tax: $${parseFloat(day.tax_rate || 0).toFixed(2)} (${day.tax_percentage || 'N/A'}), `;
+                            plainText += `Total: $${parseFloat(day.daily_total || 0).toFixed(2)}\n`;
+                        });
+                    }
+                    
+                    if (expense.note && expense.note !== 'Receipt') {
+                        plainText += `    Note: ${expense.note}\n`;
+                    }
+                });
+                plainText += `\n`;
+            });
+            
+            // Copy to clipboard using modern API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(plainText).then(() => {
+                    showSuccessMessage('Trip data copied to clipboard successfully!');
+                }).catch(err => {
+                    console.error('Failed to copy to clipboard:', err);
+                    fallbackCopyTextToClipboard(plainText);
+                });
+            } else {
+                fallbackCopyTextToClipboard(plainText);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showSuccessMessage('Trip data copied to clipboard successfully!');
+                } else {
+                    showTextModal(text);
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                showTextModal(text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function showTextModal(text) {
+            // Create a modal to display the text for manual copying
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h3>Trip Export - Copy Text Below</h3>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px; padding: 1rem; border: 1px solid #ccc;">${text}</textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" onclick="this.closest('.modal').querySelector('textarea').select(); document.execCommand('copy'); showSuccessMessage('Copied to clipboard!'); this.closest('.modal').remove();">Select All & Copy</button>
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         function deleteTrip() {
