@@ -192,6 +192,13 @@ body {
     gap: 1.5rem;
 }
 
+.trips-grid .empty-state,
+.trips-grid .loading {
+    grid-column: 1 / -1;
+    margin: 0 auto;
+    max-width: 500px;
+}
+
 .trip-card {
     background: white;
     border-radius: 12px;
