@@ -373,13 +373,6 @@
             if (selectedTrips.size === 0) return;
             
             const tripNames = Array.from(selectedTrips);
-            const message = `Are you sure you want to archive ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}? Archived trips will be moved to a separate section and compressed into zip files.`;
-            
-            showConfirmModal('Archive Trips', message, performArchive);
-        }
-
-        async function performArchive() {
-            const tripNames = Array.from(selectedTrips);
             
             try {
                 for (const tripName of tripNames) {
