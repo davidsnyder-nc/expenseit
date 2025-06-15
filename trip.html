@@ -139,7 +139,9 @@
                             </div>
                             <div class="stat-content">
                                 <h3>Duration</h3>
-                                <p>${formatDate(trip.metadata.start_date)} - ${formatDate(trip.metadata.end_date)}</p>
+                                <p>${trip.metadata.start_date && trip.metadata.end_date ? 
+                                    `${formatDate(trip.metadata.start_date)} - ${formatDate(trip.metadata.end_date)}` : 
+                                    'Not specified'}</p>
                             </div>
                         </div>
                         <div class="stat-item">
