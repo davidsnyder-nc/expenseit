@@ -61,8 +61,25 @@ sudo chmod -R 755 data/
 # Create environment file from example
 if [ ! -f .env ]; then
     echo -e "${GREEN}Creating environment file...${NC}"
-    cp .env.example .env
-    echo -e "${YELLOW}Please edit .env file and add your GEMINI_API_KEY${NC}"
+    if [ -f .env.example ]; then
+        cp .env.example .env
+        echo -e "${YELLOW}Environment file created from .env.example${NC}"
+        echo -e "${YELLOW}Please edit .env file and add your GEMINI_API_KEY${NC}"
+    else
+        echo -e "${YELLOW}.env.example not found, creating basic .env file...${NC}"
+        cat > .env <<EOF
+# Gemini AI API Key (required)
+# Get your API key from: https://makersuite.google.com/app/apikey
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Application Environment
+APP_ENV=production
+DEBUG=false
+EOF
+        echo -e "${YELLOW}Please edit .env file and add your GEMINI_API_KEY${NC}"
+    fi
+else
+    echo -e "${GREEN}.env file already exists${NC}"
 fi
 
 # Create Apache virtual host configuration
