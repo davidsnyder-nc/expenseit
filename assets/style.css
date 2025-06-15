@@ -51,7 +51,7 @@ body {
 }
 
 .brand-it {
-    color: #4299e1;
+    color: #e53e3e;
     font-weight: 600;
 }
 
@@ -821,6 +821,98 @@ body {
     margin-bottom: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
+}
+
+.trip-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 2rem;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.trip-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.trip-stat .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.trip-stat .icon.duration {
+    background: #ebf8ff;
+    color: #4299e1;
+}
+
+.trip-stat .icon.expenses {
+    background: #f0fff4;
+    color: #48bb78;
+}
+
+.trip-stat .icon.total {
+    background: #fef5e7;
+    color: #d69e2e;
+}
+
+.trip-stat .details h3 {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.trip-stat .details p {
+    margin: 0.25rem 0 0 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.trip-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.trip-actions .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    min-width: auto;
+}
+
+.trip-actions .btn-primary {
+    background: #4299e1;
+    color: white;
+    border: none;
+}
+
+.trip-actions .btn-secondary {
+    background: #edf2f7;
+    color: #4a5568;
+    border: none;
+}
+
+.trip-actions .btn-danger {
+    background: #e53e3e;
+    color: white;
+    border: none;
+}
+
+.trip-actions .btn-outline {
+    background: transparent;
+    color: #4299e1;
+    border: 1px solid #4299e1;
 }
 
 .receipts-section {

@@ -99,33 +99,47 @@
 
             tripContent.innerHTML = `
                 <div class="trip-summary">
-                    <div class="summary-cards">
-                        <div class="summary-card">
-                            <div class="card-icon">
+                    <div class="trip-summary-grid">
+                        <div class="trip-stat">
+                            <div class="icon duration">
                                 <i data-feather="calendar"></i>
                             </div>
-                            <div class="card-content">
+                            <div class="details">
                                 <h3>Duration</h3>
                                 <p>${formatDate(trip.metadata.start_date)} - ${formatDate(trip.metadata.end_date)}</p>
                             </div>
                         </div>
-                        <div class="summary-card">
-                            <div class="card-icon">
+                        <div class="trip-stat">
+                            <div class="icon expenses">
                                 <i data-feather="file-text"></i>
                             </div>
-                            <div class="card-content">
+                            <div class="details">
                                 <h3>Expenses</h3>
                                 <p>${expenses.length} items</p>
                             </div>
                         </div>
-                        <div class="summary-card">
-                            <div class="card-icon">
+                        <div class="trip-stat">
+                            <div class="icon total">
                                 <i data-feather="dollar-sign"></i>
                             </div>
-                            <div class="card-content">
+                            <div class="details">
                                 <h3>Total</h3>
-                                <p class="amount">$${total.toFixed(2)}</p>
+                                <p>$${total.toFixed(2)}</p>
                             </div>
+                        </div>
+                        <div class="trip-actions">
+                            <button class="btn btn-primary" onclick="editTrip()">
+                                <i data-feather="edit"></i> Edit Trip
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadReport()">
+                                <i data-feather="download"></i> Download PDF
+                            </button>
+                            <button class="btn btn-outline" onclick="addExpense()">
+                                <i data-feather="plus"></i> Add Expense
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteTrip()">
+                                <i data-feather="trash-2"></i> Delete Trip
+                            </button>
                         </div>
                     </div>
                     
@@ -135,21 +149,6 @@
                             <p>${trip.metadata.notes}</p>
                         </div>
                     ` : ''}
-                    
-                    <div class="trip-actions">
-                        <button class="btn btn-primary" onclick="editTrip()">
-                            <i data-feather="edit"></i> Edit Trip
-                        </button>
-                        <button class="btn btn-secondary" onclick="downloadReport()">
-                            <i data-feather="download"></i> Download PDF
-                        </button>
-                        <button class="btn btn-outline" onclick="addExpense()">
-                            <i data-feather="plus"></i> Add Expense
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteTrip()">
-                            <i data-feather="trash-2"></i> Delete Trip
-                        </button>
-                    </div>
                 </div>
 
                 <div class="receipts-section">
