@@ -50,6 +50,11 @@ body {
     object-fit: contain;
 }
 
+.brand-it {
+    color: #4299e1;
+    font-weight: 600;
+}
+
 .header h1 i {
     color: white;
 }
