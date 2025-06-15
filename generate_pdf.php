@@ -32,8 +32,25 @@ try {
     $metadata = json_decode(file_get_contents($metadataPath), true);
     $expenses = file_exists($expensesPath) ? json_decode(file_get_contents($expensesPath), true) : [];
     
+    // Load receipts
+    $receiptsDir = $tripDir . "/receipts";
+    $receipts = [];
+    if (is_dir($receiptsDir)) {
+        $files = glob($receiptsDir . '/*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $receipts[] = [
+                    'filename' => basename($file),
+                    'path' => $file,
+                    'size' => filesize($file),
+                    'isImage' => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg'])
+                ];
+            }
+        }
+    }
+    
     // Generate PDF
-    $pdf = generateTripPDF($metadata, $expenses);
+    $pdf = generateTripPDF($metadata, $expenses, $receipts);
     
     // Save PDF to trip directory
     $pdfPath = $tripDir . "/report.pdf";
@@ -53,7 +70,7 @@ try {
 /**
  * Generate trip PDF report
  */
-function generateTripPDF($metadata, $expenses) {
+function generateTripPDF($metadata, $expenses, $receipts = []) {
     // Calculate totals
     $total = 0;
     $categories = [];
@@ -86,7 +103,7 @@ function generateTripPDF($metadata, $expenses) {
     $mpdf->SetAuthor('Personal Expense Tracker');
     
     // Build HTML content
-    $html = buildPDFHTML($metadata, $expenses, $categories, $total);
+    $html = buildPDFHTML($metadata, $expenses, $categories, $total, $receipts);
     
     // Write HTML to PDF
     $mpdf->WriteHTML($html);
@@ -97,7 +114,7 @@ function generateTripPDF($metadata, $expenses) {
 /**
  * Build HTML content for PDF
  */
-function buildPDFHTML($metadata, $expenses, $categories, $total) {
+function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = []) {
     $startDate = formatDate($metadata['start_date'] ?? '');
     $endDate = formatDate($metadata['end_date'] ?? '');
     $duration = calculateDuration($metadata['start_date'] ?? '', $metadata['end_date'] ?? '');
@@ -353,6 +370,46 @@ function buildPDFHTML($metadata, $expenses, $categories, $total) {
         $html .= '
                 </tbody>
             </table>
+        </div>';
+    }
+    
+    // Add receipts section if receipts exist
+    if (!empty($receipts)) {
+        $html .= '
+        <div class="section">
+            <h2>Receipt Attachments</h2>
+            <div class="receipts-grid">';
+        
+        foreach ($receipts as $receipt) {
+            $html .= '
+                <div class="receipt-attachment">
+                    <div class="receipt-info">
+                        <strong>' . htmlspecialchars($receipt['filename']) . '</strong><br>
+                        <small>' . formatFileSize($receipt['size']) . '</small>
+                    </div>';
+            
+            // Embed images in PDF, show filename for PDFs
+            if ($receipt['isImage']) {
+                $imageData = base64_encode(file_get_contents($receipt['path']));
+                $extension = strtolower(pathinfo($receipt['filename'], PATHINFO_EXTENSION));
+                $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
+                
+                $html .= '
+                    <div class="receipt-image">
+                        <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
+                    </div>';
+            } else {
+                $html .= '
+                    <div class="receipt-file">
+                        <p style="color: #666; font-style: italic; margin-top: 10px;">PDF attachment: ' . htmlspecialchars($receipt['filename']) . '</p>
+                    </div>';
+            }
+            
+            $html .= '</div>';
+        }
+        
+        $html .= '
+            </div>
         </div>';
     }
     

@@ -29,6 +29,13 @@ try {
             }
             $result = loadTrip($tripName);
             break;
+        case 'receipts':
+            $tripName = $_GET['name'] ?? '';
+            if (empty($tripName)) {
+                throw new Exception('Trip name is required');
+            }
+            $result = loadTripReceipts($tripName);
+            break;
         default:
             throw new Exception('Invalid action');
     }
@@ -217,6 +224,18 @@ function sanitizeName($name) {
     $name = trim($name, '_');
     
     return $name ?: 'untitled';
+}
+
+/**
+ * Load trip receipts for API
+ */
+function loadTripReceipts($tripName) {
+    $receipts = getTripReceipts($tripName);
+    
+    return [
+        'success' => true,
+        'receipts' => $receipts
+    ];
 }
 
 /**
