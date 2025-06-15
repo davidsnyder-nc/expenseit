@@ -456,6 +456,36 @@ function deleteDirectory($dir) {
 }
 
 /**
+ * Archive a trip by adding archived flag to metadata
+ */
+function archiveTrip($tripName) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    $metadataPath = $tripDir . "/metadata.json";
+    
+    if (!is_dir($tripDir)) {
+        throw new Exception('Trip not found');
+    }
+    
+    // Load existing metadata
+    $metadata = [];
+    if (file_exists($metadataPath)) {
+        $metadata = json_decode(file_get_contents($metadataPath), true) ?: [];
+    }
+    
+    // Add archived flag
+    $metadata['archived'] = true;
+    $metadata['archived_date'] = date('Y-m-d H:i:s');
+    
+    // Save updated metadata
+    if (!file_put_contents($metadataPath, json_encode($metadata, JSON_PRETTY_PRINT))) {
+        throw new Exception('Failed to save metadata');
+    }
+    
+    return ['success' => true];
+}
+
+/**
  * Sanitize name for use as directory name
  */
 function sanitizeName($name) {
@@ -748,4 +778,6 @@ function editTripMetadata($tripName, $metadata) {
     
     return $result;
 }
+
+
 ?>
