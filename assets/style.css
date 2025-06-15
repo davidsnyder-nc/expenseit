@@ -29,7 +29,7 @@ body {
     margin-bottom: 2rem;
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e2e8f0;
-    background: linear-gradient(90deg, #f56565 0%, #fed7d7 50%, #fefefe 100%);
+    background: linear-gradient(90deg, #f56565 0%, #fed7d7 50%, #f56565 100%);
     border-radius: 12px;
     color: #2d3748;
     box-shadow: 0 4px 16px rgba(245, 101, 101, 0.25);
