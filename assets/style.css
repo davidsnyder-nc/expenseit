@@ -29,16 +29,16 @@ body {
     margin-bottom: 2rem;
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e2e8f0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, #f56565 0%, #fed7d7 50%, #fefefe 100%);
     border-radius: 12px;
-    color: white;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+    color: #2d3748;
+    box-shadow: 0 4px 16px rgba(245, 101, 101, 0.25);
 }
 
 .header h1 {
     font-size: 2rem;
     font-weight: 700;
-    color: white;
+    color: #2d3748;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -56,11 +56,11 @@ body {
 }
 
 .header h1 i {
-    color: white;
+    color: #2d3748;
 }
 
 .subtitle {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(45, 55, 72, 0.8);
     font-size: 1.1rem;
     margin-top: 0.25rem;
 }
@@ -69,18 +69,18 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: white;
+    color: #2d3748;
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     transition: background-color 0.2s;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(45, 55, 72, 0.1);
+    border: 1px solid rgba(45, 55, 72, 0.2);
 }
 
 .back-link:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(45, 55, 72, 0.2);
 }
 
 /* Button Styles */
