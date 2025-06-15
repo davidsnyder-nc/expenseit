@@ -440,30 +440,85 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                         <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
                     </div>';
             } else {
-                // For PDFs, try to convert first page to image using Imagick if available
+                // For PDFs, convert to image using multiple methods
                 $thumbnailCreated = false;
+                $thumbnailData = null;
+                
+                // Method 1: Try Imagick
                 if (extension_loaded('imagick') && class_exists('Imagick')) {
                     try {
                         $imagick = new Imagick();
-                        $imagick->setResolution(150, 150);
+                        $imagick->setResolution(200, 200);
                         $imagick->readImage($receipt['path'] . '[0]'); // First page only
                         $imagick->setImageFormat('jpeg');
+                        $imagick->setImageCompressionQuality(85);
                         $imagick->scaleImage(200, 150, true);
                         
                         $thumbnailData = base64_encode($imagick->getImageBlob());
-                        $html .= '
-                            <div class="receipt-image">
-                                <img src="data:image/jpeg;base64,' . $thumbnailData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
-                                <p style="font-size: 10px; color: #666; margin-top: 5px;">PDF Preview</p>
-                            </div>';
                         $thumbnailCreated = true;
                         $imagick->clear();
                     } catch (Exception $e) {
-                        // Fall back to text representation
+                        error_log("Imagick PDF conversion failed: " . $e->getMessage());
                     }
                 }
                 
-                if (!$thumbnailCreated) {
+                // Method 2: Try Ghostscript if Imagick failed
+                if (!$thumbnailCreated && function_exists('exec')) {
+                    try {
+                        $tempImagePath = sys_get_temp_dir() . '/pdf_thumb_' . uniqid() . '.jpg';
+                        $escapedPdfPath = escapeshellarg($receipt['path']);
+                        $escapedImagePath = escapeshellarg($tempImagePath);
+                        
+                        // Try gs (Ghostscript) command
+                        $gsCommand = "gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -dJPEGQ=85 -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile=$escapedImagePath $escapedPdfPath 2>/dev/null";
+                        exec($gsCommand, $output, $returnCode);
+                        
+                        if ($returnCode === 0 && file_exists($tempImagePath)) {
+                            // Resize the image
+                            if (extension_loaded('gd')) {
+                                $sourceImage = imagecreatefromjpeg($tempImagePath);
+                                if ($sourceImage) {
+                                    $sourceWidth = imagesx($sourceImage);
+                                    $sourceHeight = imagesy($sourceImage);
+                                    
+                                    // Calculate new dimensions
+                                    $maxWidth = 200;
+                                    $maxHeight = 150;
+                                    $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight);
+                                    $newWidth = round($sourceWidth * $ratio);
+                                    $newHeight = round($sourceHeight * $ratio);
+                                    
+                                    $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+                                    imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
+                                    
+                                    ob_start();
+                                    imagejpeg($resizedImage, null, 85);
+                                    $thumbnailData = base64_encode(ob_get_contents());
+                                    ob_end_clean();
+                                    
+                                    imagedestroy($sourceImage);
+                                    imagedestroy($resizedImage);
+                                    $thumbnailCreated = true;
+                                }
+                            } else {
+                                // Use original image if GD not available
+                                $thumbnailData = base64_encode(file_get_contents($tempImagePath));
+                                $thumbnailCreated = true;
+                            }
+                            unlink($tempImagePath);
+                        }
+                    } catch (Exception $e) {
+                        error_log("Ghostscript PDF conversion failed: " . $e->getMessage());
+                    }
+                }
+                
+                if ($thumbnailCreated && $thumbnailData) {
+                    $html .= '
+                        <div class="receipt-image">
+                            <img src="data:image/jpeg;base64,' . $thumbnailData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
+                            <p style="font-size: 10px; color: #666; margin-top: 5px;">PDF Preview</p>
+                        </div>';
+                } else {
                     $html .= '
                         <div class="receipt-file">
                             <div style="background: #f8f9fa; border: 2px dashed #dee2e6; padding: 20px; text-align: center; margin-top: 10px; border-radius: 8px;">

@@ -2,6 +2,7 @@ modules = ["php", "php-8.2"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["ghostscript"]
 
 [workflows]
 runButton = "Project"
