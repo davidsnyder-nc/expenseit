@@ -616,6 +616,53 @@ body {
     margin-bottom: 2rem;
 }
 
+.wizard-content .expenses-table {
+    overflow-x: visible;
+}
+
+.wizard-content .expenses-table table {
+    width: 100%;
+    min-width: auto;
+    table-layout: fixed;
+}
+
+.wizard-content .expenses-table th:nth-child(1),
+.wizard-content .expenses-table td:nth-child(1) {
+    width: 15%;
+}
+
+.wizard-content .expenses-table th:nth-child(2),
+.wizard-content .expenses-table td:nth-child(2) {
+    width: 25%;
+}
+
+.wizard-content .expenses-table th:nth-child(3),
+.wizard-content .expenses-table td:nth-child(3) {
+    width: 12%;
+}
+
+.wizard-content .expenses-table th:nth-child(4),
+.wizard-content .expenses-table td:nth-child(4) {
+    width: 18%;
+}
+
+.wizard-content .expenses-table th:nth-child(5),
+.wizard-content .expenses-table td:nth-child(5) {
+    width: 22%;
+}
+
+.wizard-content .expenses-table th:nth-child(6),
+.wizard-content .expenses-table td:nth-child(6) {
+    width: 8%;
+}
+
+.wizard-content .expenses-table td {
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: none;
+}
+
 .expenses-table table {
     width: 100%;
     min-width: 800px;
@@ -627,7 +674,12 @@ body {
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
-    white-space: nowrap;
+}
+
+.expenses-table td {
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 200px;
 }
 
 .expenses-table td input,
@@ -944,6 +996,15 @@ body {
     
     .expenses-table table {
         min-width: 600px;
+    }
+    
+    .expenses-table td {
+        max-width: 120px;
+    }
+    
+    .expenses-table th:nth-child(4),
+    .expenses-table td:nth-child(4) {
+        max-width: 80px;
     }
 }
 
