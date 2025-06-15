@@ -411,7 +411,7 @@
                 }
                 
                 // Store for bulk download with proper structure
-                receiptsData = allFiles.map(file => ({
+                window.allFilesData = allFiles.map(file => ({
                     ...file,
                     fullUrl: file.fullUrl || file.url,
                     filename: file.filename || file.url.split('/').pop()
@@ -735,7 +735,8 @@
         }
 
         function addExpense() {
-            showSuccessMessage('Add expense functionality will be implemented');
+            // Redirect to wizard to add more files/expenses
+            window.location.href = `wizard.html?trip=${encodeURIComponent(currentTrip.name)}&mode=add`;
         }
 
         function editTrip() {
@@ -792,8 +793,8 @@
         }
 
         async function bulkDownloadReceipts() {
-            if (!currentTrip || !receiptsData || receiptsData.length === 0) {
-                showErrorMessage('No receipts available for download');
+            if (!currentTrip || !window.allFilesData || window.allFilesData.length === 0) {
+                showErrorMessage('No files available for download');
                 return;
             }
 
@@ -802,11 +803,11 @@
                 
                 // Create a zip file using JSZip
                 if (typeof JSZip === 'undefined') {
-                    // Fallback: download receipts one by one
-                    for (const receipt of receiptsData) {
+                    // Fallback: download files one by one
+                    for (const file of window.allFilesData) {
                         const link = document.createElement('a');
-                        link.href = receipt.fullUrl;
-                        link.download = receipt.filename;
+                        link.href = file.fullUrl;
+                        link.download = file.filename;
                         link.style.display = 'none';
                         document.body.appendChild(link);
                         link.click();
@@ -815,32 +816,32 @@
                         // Small delay between downloads
                         await new Promise(resolve => setTimeout(resolve, 100));
                     }
-                    showSuccessMessage(`Downloaded ${receiptsData.length} receipts individually`);
+                    showSuccessMessage(`Downloaded ${window.allFilesData.length} files individually`);
                 } else {
                     // Use JSZip for better bulk download
                     const zip = new JSZip();
                     
-                    for (const receipt of receiptsData) {
+                    for (const file of window.allFilesData) {
                         try {
-                            const response = await fetch(receipt.fullUrl);
+                            const response = await fetch(file.fullUrl);
                             const blob = await response.blob();
-                            zip.file(receipt.filename, blob);
+                            zip.file(file.filename, blob);
                         } catch (error) {
-                            console.error(`Failed to add ${receipt.filename} to zip:`, error);
+                            console.error(`Failed to add ${file.filename} to zip:`, error);
                         }
                     }
                     
                     const zipBlob = await zip.generateAsync({type: 'blob'});
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(zipBlob);
-                    link.download = `${currentTrip.name}_receipts.zip`;
+                    link.download = `${currentTrip.name}_files.zip`;
                     link.style.display = 'none';
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
                     
-                    showSuccessMessage(`Downloaded ${receiptsData.length} receipts as zip file`);
+                    showSuccessMessage(`Downloaded ${window.allFilesData.length} files as zip file`);
                 }
             } catch (error) {
                 console.error('Bulk download error:', error);
