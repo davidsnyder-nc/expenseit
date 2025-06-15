@@ -270,10 +270,15 @@ try {
             $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
         }
         
-        // Calculate statistics
+        // Calculate statistics (exclude travel documents from totals)
         $total = 0;
         $categories = [];
         foreach ($expenses as $expense) {
+            // Skip travel documents in total calculations
+            if (isset($expense['is_travel_document']) && $expense['is_travel_document'] === true) {
+                continue;
+            }
+            
             $amount = floatval($expense['amount'] ?? 0);
             $total += $amount;
             $category = $expense['category'] ?? 'Other';

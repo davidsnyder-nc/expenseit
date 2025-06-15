@@ -35,14 +35,20 @@ try {
     
     // Prepare the prompt for Gemini
     $prompt = "Analyze this travel document and extract trip information. Look for:
-- Destination city (if you see AUS airport code, that's Austin, TX)
+- Destination city (AUS = Austin TX, LAX = Los Angeles, JFK/LGA = New York, etc.)
 - Travel dates (departure and return dates)
-- Trip details
+- Trip details and purpose
+
+Important: 
+- Extract the actual destination city name, not airport codes
+- Create a proper trip name using the destination
+- Ensure dates are in YYYY-MM-DD format
+- If you see Austin, Texas or AUS airport code, the destination is \"Austin, TX\"
 
 Return ONLY a valid JSON object with these exact fields:
 {
-    \"destination\": \"destination city name (e.g. Austin, New York)\",
-    \"trip_name\": \"descriptive trip name (destination + Trip, e.g. Austin Trip)\",
+    \"destination\": \"destination city, state (e.g. Austin, TX)\",
+    \"trip_name\": \"destination without state (e.g. Austin)\",
     \"start_date\": \"YYYY-MM-DD\",
     \"end_date\": \"YYYY-MM-DD\",
     \"departure_date\": \"YYYY-MM-DD\",

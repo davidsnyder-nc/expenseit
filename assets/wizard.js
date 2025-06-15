@@ -541,10 +541,20 @@ async function processSingleReceipt(file, path) {
         const result = await response.json();
         
         if (result.success && result.expense) {
+            // Check if this is a travel document based on filename or content
+            const isTravelDoc = file.name.toLowerCase().includes('itinerary') || 
+                              file.name.toLowerCase().includes('itenary') ||
+                              file.name.toLowerCase().includes('confirmation') ||
+                              file.name.toLowerCase().includes('boarding') ||
+                              file.name.toLowerCase().includes('flight') ||
+                              file.name.toLowerCase().includes('hotel') ||
+                              (result.expense.category && result.expense.category.toLowerCase() === 'travel');
+            
             const expense = {
                 id: generateId(),
                 ...result.expense,
-                source: 'receipts/' + file.name
+                source: 'receipts/' + file.name,
+                is_travel_document: isTravelDoc
             };
             tripData.expenses.push(expense);
             
@@ -604,11 +614,21 @@ async function processReceipts() {
             const result = await response.json();
             
             if (result.success && result.expense) {
+                // Check if this is a travel document based on filename or content
+                const isTravelDoc = file.name.toLowerCase().includes('itinerary') || 
+                                  file.name.toLowerCase().includes('itenary') ||
+                                  file.name.toLowerCase().includes('confirmation') ||
+                                  file.name.toLowerCase().includes('boarding') ||
+                                  file.name.toLowerCase().includes('flight') ||
+                                  file.name.toLowerCase().includes('hotel') ||
+                                  (result.expense.category && result.expense.category.toLowerCase() === 'travel');
+                
                 // Add processed expense to tripData
                 const expense = {
                     id: generateId(),
                     ...result.expense,
-                    source: 'receipts/' + file.name
+                    source: 'receipts/' + file.name,
+                    is_travel_document: isTravelDoc
                 };
                 tripData.expenses.push(expense);
                 

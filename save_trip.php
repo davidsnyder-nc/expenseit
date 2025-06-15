@@ -81,7 +81,20 @@ try {
  * Create a new trip
  */
 function createTrip($tripData) {
-    $tripName = sanitizeName($tripData['metadata']['name']);
+    // Use trip_name from extracted details if available, otherwise fall back to metadata name
+    $extractedTripName = $tripData['metadata']['trip_name'] ?? null;
+    $metadataName = $tripData['metadata']['name'] ?? null;
+    
+    // Prefer extracted trip name, but fall back to metadata name
+    $tripName = $extractedTripName ?: $metadataName;
+    
+    // If still empty, use destination or fallback
+    if (empty($tripName)) {
+        $destination = $tripData['metadata']['destination'] ?? 'Trip';
+        $tripName = $destination;
+    }
+    
+    $tripName = sanitizeName($tripName);
     $tripDir = "data/trips/" . $tripName;
     
     // Create directory structure
