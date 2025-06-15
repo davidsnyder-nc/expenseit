@@ -91,7 +91,9 @@
             
             tripTitle.innerHTML = `<i data-feather="map"></i> ${trip.metadata.name}`;
             
-            const expenses = trip.expenses || [];
+            const allExpenses = trip.expenses || [];
+            // Filter out travel documents from expenses
+            const expenses = allExpenses.filter(expense => !expense.is_travel_document);
             const total = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
             
             // Group expenses by category
