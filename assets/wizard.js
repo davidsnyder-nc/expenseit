@@ -1,6 +1,6 @@
 // Wizard state management
 let currentStep = 1;
-const totalSteps = 4;
+const totalSteps = 3;
 let tripData = {
     metadata: { name: null },
     files: [],
@@ -93,8 +93,8 @@ function updateNavigationButtons() {
         prevBtn.style.display = 'inline-flex';
     }
     
-    // Next button - hide on step 3 since processing is automatic
-    if (currentStep === totalSteps || currentStep === 3) {
+    // Next button - hide on final step
+    if (currentStep === totalSteps) {
         nextBtn.style.display = 'none';
     } else {
         nextBtn.innerHTML = currentStep === totalSteps - 1 ? 
@@ -769,11 +769,12 @@ async function processReceipts() {
     
     feather.replace();
     
-    // Auto-advance to step 4 if we have processed expenses
+    // Auto-advance to step 2 (review) if we have processed expenses
     if (processedCount > 0) {
         setTimeout(() => {
-            currentStep = 4;
+            currentStep = 2;
             updateWizard();
+            setupReviewStep();
         }, 2000);
     }
 }
@@ -934,7 +935,7 @@ async function completeTrip() {
         const result = await response.json();
         
         if (result.success) {
-            currentStep = 4;
+            currentStep = 3;
             updateWizard();
             setupCompletionStep();
         } else {
