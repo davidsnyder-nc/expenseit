@@ -188,7 +188,10 @@ try {
         throw new Exception('Trip name is required');
     }
     
-    $tripName = sanitizeName($tripName);
+    // Don't sanitize temp trip names as they need to match exact directory names
+    if (!preg_match('/^temp_\d+$/', $tripName)) {
+        $tripName = sanitizeName($tripName);
+    }
     $tripDir = "data/trips/" . $tripName;
     
     if (!is_dir($tripDir)) {

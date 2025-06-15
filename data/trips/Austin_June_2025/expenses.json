@@ -1,1 +1,147 @@
-[]
+[
+    {
+        "id": "684edd01dbd07",
+        "date": "2025-06-05",
+        "merchant": "Global Horizons Airways",
+        "amount": 357,
+        "category": "Transportation",
+        "note": "Flight GH218 from Wilmington (ILM) to Austin (AUS). Includes base fare, airport taxes & fees, checked baggage (1), and seat selection.",
+        "source": "receipts\/2025-06-05-global_horizons_airways.pdf",
+        "is_travel_document": false,
+        "tax_amount": 52,
+        "gemini_processed": true,
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
+    },
+    {
+        "id": "684edd038ccdc",
+        "date": "2025-06-05",
+        "merchant": "JetSet Coffee",
+        "amount": 8.25,
+        "category": "Meals",
+        "note": "Receipt",
+        "source": "receipts\/2025-06-05-jetset_coffee.pdf",
+        "is_travel_document": false,
+        "tax_amount": 0,
+        "gemini_processed": true,
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
+    },
+    {
+        "id": "684edd052b9db",
+        "date": "2025-06-06",
+        "merchant": "Wanderlust Deli",
+        "amount": 9.25,
+        "category": "Meals",
+        "note": "Receipt",
+        "source": "receipts\/2025-06-06-wanderlust_deli.pdf",
+        "is_travel_document": false,
+        "tax_amount": 0,
+        "gemini_processed": true,
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
+    },
+    {
+        "id": "684edd06c8f9c",
+        "date": "2025-06-07",
+        "merchant": "Urban Outbound",
+        "amount": 29.24,
+        "category": "Shopping",
+        "note": "Purchase of travel pillow, USB cable, and notebook.",
+        "source": "receipts\/2025-06-07-urban_outbound.pdf",
+        "is_travel_document": false,
+        "tax_amount": 0,
+        "gemini_processed": true,
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
+    },
+    {
+        "id": "684edd087f772",
+        "date": "2025-06-09",
+        "merchant": "SkyMall Express",
+        "amount": 50.49,
+        "category": "Shopping",
+        "note": "Receipt",
+        "source": "receipts\/2025-06-09-skymall_express.pdf",
+        "is_travel_document": false,
+        "tax_amount": 0,
+        "gemini_processed": true,
+        "excluded": false,
+        "is_hotel_stay": false,
+        "daily_breakdown": []
+    },
+    {
+        "id": "684edd0c47439",
+        "date": "2025-06-10",
+        "merchant": "Grand Voyager Inn",
+        "amount": 660,
+        "category": "Lodging",
+        "note": "Hotel stay details",
+        "source": "receipts\/2025-06-10-grand_voyager_inn_detailed.pdf",
+        "is_travel_document": false,
+        "tax_amount": 60,
+        "gemini_processed": true,
+        "excluded": false,
+        "is_hotel_stay": true,
+        "daily_breakdown": [
+            {
+                "date": "2025-06-06",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            },
+            {
+                "date": "2025-06-07",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            },
+            {
+                "date": "2025-06-08",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            },
+            {
+                "date": "2025-06-09",
+                "room_rate": 150,
+                "tax_rate": 15,
+                "tax_percentage": "10%",
+                "daily_total": 165
+            }
+        ]
+    },
+    {
+        "id": "684edd0dd1e8a",
+        "date": "2025-06-08",
+        "merchant": "Flight Fuel Market",
+        "amount": 11.23,
+        "category": "Groceries",
+        "note": "Travel Document",
+        "source": "travel_documents\/2025-06-08-flight_fuel_market.pdf",
+        "is_travel_document": true,
+        "tax_amount": 0,
+        "gemini_processed": true,
+        "excluded": false
+    },
+    {
+        "id": "684edd0fb929a",
+        "date": "2025-06-10",
+        "merchant": "Apex Auto Rentals",
+        "amount": 299.75,
+        "category": "Transportation",
+        "note": "Car rental for David Snyder from June 6 to June 10, 2025. Vehicle: Toyota Corolla, Plate #XYZ1234",
+        "source": "travel_documents\/2025-06-10-apex_auto_rentals.pdf",
+        "is_travel_document": true,
+        "tax_amount": 24.75,
+        "gemini_processed": true,
+        "excluded": false
+    }
+]
