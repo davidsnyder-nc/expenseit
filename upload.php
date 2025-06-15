@@ -150,7 +150,24 @@ try {
 
     $file = $_FILES['file'];
     $tripName = $_POST['tripName'] ?? $_POST['trip'] ?? 'temp';
-    $documentType = $_POST['type'] ?? 'receipt'; // receipt or travel_document
+    
+    // Auto-detect document type based on filename
+    $fileName = strtolower($file['name']);
+    $documentType = 'receipt'; // default
+    
+    if (strpos($fileName, 'itinerary') !== false || 
+        strpos($fileName, 'confirmation') !== false ||
+        strpos($fileName, 'boarding') !== false ||
+        strpos($fileName, 'flight') !== false ||
+        strpos($fileName, 'travel') !== false ||
+        strpos($fileName, 'gmail') !== false ||
+        strpos($fileName, 'fw_') !== false ||
+        strpos($fileName, 'trip') !== false) {
+        $documentType = 'travel_document';
+    }
+    
+    // Allow override from POST data
+    $documentType = $_POST['type'] ?? $documentType;
     
     // Validate file type by extension (more reliable than MIME type for HEIC/TIFF)
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -220,7 +237,8 @@ try {
         'path' => $targetPath,
         'filename' => $filename,
         'size' => $file['size'],
-        'type' => $file['type']
+        'type' => $file['type'],
+        'documentType' => $documentType
     ]);
     
 } catch (Exception $e) {
