@@ -472,11 +472,14 @@ try {
             exit;
         }
         
-        $oldName = sanitizeName($oldName);
-        $newName = sanitizeName($newName);
+        // Convert display names to filesystem names
+        $oldDisplayName = urldecode($oldName);
+        $newDisplayName = urldecode($newName);
+        $oldFilesystemName = getFilesystemName($oldDisplayName);
+        $newFilesystemName = getFilesystemName($newDisplayName);
         
-        $oldDir = 'data/trips/' . $oldName;
-        $newDir = 'data/trips/' . $newName;
+        $oldDir = 'data/trips/' . $oldFilesystemName;
+        $newDir = 'data/trips/' . $newFilesystemName;
         
         if (!is_dir($oldDir)) {
             echo json_encode(['success' => false, 'error' => 'Source trip not found']);
@@ -495,7 +498,8 @@ try {
             if (file_exists($metadataPath)) {
                 $metadata = json_decode(file_get_contents($metadataPath), true);
                 if ($metadata) {
-                    $metadata['name'] = $newName;
+                    $metadata['name'] = $newDisplayName;
+                    $metadata['filesystem_name'] = $newFilesystemName;
                     file_put_contents($metadataPath, json_encode($metadata, JSON_PRETTY_PRINT));
                 }
             }
