@@ -60,7 +60,7 @@
 
         async function loadTripDetails(tripName) {
             try {
-                const response = await fetch(`load.php?action=trip&name=${encodeURIComponent(tripName)}`);
+                const response = await fetch(`api.php?action=trip&name=${encodeURIComponent(tripName)}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -335,7 +335,7 @@
 
         async function loadTripReceipts(tripName) {
             try {
-                const response = await fetch(`load.php?action=receipts&name=${encodeURIComponent(tripName)}`);
+                const response = await fetch(`api.php?action=receipts&name=${encodeURIComponent(tripName)}`);
                 const data = await response.json();
                 
                 if (data.success && data.receipts) {

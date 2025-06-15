@@ -258,6 +258,9 @@ async function uploadFile(file) {
                 type: file.type
             });
             displayUploadedFile(file, result.path);
+            
+            // Automatically process the uploaded receipt
+            await processSingleReceipt(file, result.path);
         } else {
             alert(`Upload failed: ${result.error}`);
         }
@@ -312,6 +315,46 @@ function removeFile(path) {
 }
 
 // Processing functions
+async function processSingleReceipt(file, path) {
+    try {
+        const response = await fetch('gemini.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                filePath: path,
+                fileName: file.name
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.expense) {
+            const expense = {
+                id: generateId(),
+                ...result.expense,
+                source: 'receipts/' + file.name
+            };
+            tripData.expenses.push(expense);
+            
+            // Update processing display if on step 3
+            if (currentStep === 3) {
+                displayProcessingResult(file.name, expense, true);
+            }
+        } else {
+            if (currentStep === 3) {
+                displayProcessingResult(file.name, null, false, result.error);
+            }
+        }
+    } catch (error) {
+        console.error('Processing error:', error);
+        if (currentStep === 3) {
+            displayProcessingResult(file.name, null, false, 'Network error');
+        }
+    }
+}
+
 async function processReceipts() {
     const processBtn = document.getElementById('processBtn');
     const processingStatus = document.getElementById('processingStatus');

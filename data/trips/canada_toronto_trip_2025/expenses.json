@@ -1,0 +1,20 @@
+[
+    {
+        "id": "9241wsdje",
+        "date": "2023-10-17",
+        "merchant": "Unknown",
+        "amount": 200,
+        "category": "Other",
+        "note": "Purchase of four custom items.",
+        "source": "receipts\/Screenshot 2025-06-15 at 4.05.38\u202fAM.png"
+    },
+    {
+        "id": "fqpx2oqqj",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
+        "source": "receipts\/Screenshot 2025-06-15 at 4.05.57\u202fAM.png"
+    }
+]

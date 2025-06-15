@@ -91,6 +91,109 @@ try {
     } elseif ($action === 'archived_trips') {
         echo json_encode(['success' => true, 'trips' => []]);
         
+    } elseif ($action === 'trip') {
+        $tripName = $_GET['name'] ?? '';
+        if (empty($tripName)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name is required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        $tripDir = 'data/trips/' . $tripName;
+        
+        if (!is_dir($tripDir)) {
+            echo json_encode(['success' => false, 'error' => 'Trip not found']);
+            exit;
+        }
+        
+        $metadataPath = $tripDir . '/metadata.json';
+        $expensesPath = $tripDir . '/expenses.json';
+        
+        if (!file_exists($metadataPath)) {
+            echo json_encode(['success' => false, 'error' => 'Trip metadata not found']);
+            exit;
+        }
+        
+        $metadata = json_decode(file_get_contents($metadataPath), true);
+        if (!$metadata) {
+            echo json_encode(['success' => false, 'error' => 'Invalid trip metadata']);
+            exit;
+        }
+        
+        $expenses = [];
+        if (file_exists($expensesPath)) {
+            $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
+        }
+        
+        // Calculate statistics
+        $total = 0;
+        $categories = [];
+        foreach ($expenses as $expense) {
+            $amount = floatval($expense['amount'] ?? 0);
+            $total += $amount;
+            $category = $expense['category'] ?? 'Other';
+            if (!isset($categories[$category])) {
+                $categories[$category] = 0;
+            }
+            $categories[$category] += $amount;
+        }
+        
+        // Sort expenses by date (most recent first)
+        usort($expenses, function($a, $b) {
+            $dateA = $a['date'] ?? '';
+            $dateB = $b['date'] ?? '';
+            return strtotime($dateB) <=> strtotime($dateA);
+        });
+        
+        $reportPath = $tripDir . '/report.pdf';
+        $hasReport = file_exists($reportPath);
+        
+        echo json_encode([
+            'success' => true,
+            'trip' => [
+                'name' => $tripName,
+                'metadata' => $metadata,
+                'expenses' => $expenses,
+                'statistics' => [
+                    'total' => $total,
+                    'expenseCount' => count($expenses),
+                    'categories' => $categories,
+                    'hasReport' => $hasReport
+                ]
+            ]
+        ]);
+        
+    } elseif ($action === 'receipts') {
+        $tripName = $_GET['name'] ?? '';
+        if (empty($tripName)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name is required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        $receiptsDir = 'data/trips/' . $tripName . '/receipts';
+        $receipts = [];
+        
+        if (is_dir($receiptsDir)) {
+            $receiptFiles = glob($receiptsDir . '/*');
+            foreach ($receiptFiles as $file) {
+                if (is_file($file)) {
+                    $receipts[] = [
+                        'name' => basename($file),
+                        'path' => $file,
+                        'url' => $file,
+                        'size' => filesize($file),
+                        'modified' => filemtime($file)
+                    ];
+                }
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'receipts' => $receipts
+        ]);
+        
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
     }
