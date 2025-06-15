@@ -226,16 +226,41 @@ try {
     // Handle trip renaming if we extracted a better name
     $finalTripName = $tripName;
     if (isset($tripMetadata['trip_name']) && $tripMetadata['trip_name'] !== $tripName) {
-        $newTripName = sanitizeName($tripMetadata['trip_name']);
-        $newTripDir = "data/trips/" . $newTripName;
+        $baseName = $tripMetadata['trip_name'];
         
-        if (!is_dir($newTripDir) && $newTripName !== $tripName) {
+        // Create user-friendly trip name based on destination
+        if (preg_match('/^temp_\d+$/', $tripName)) {
+            // Extract city name from destination if available
+            $cityName = $baseName;
+            if (isset($tripMetadata['destination'])) {
+                // Extract city from "City, State" format
+                $parts = explode(',', $tripMetadata['destination']);
+                $cityName = trim($parts[0]);
+            }
+            
+            // Create clean trip name
+            $newTripName = sanitizeName($cityName . "_Trip");
+            
+            // Handle conflicts by adding number
+            $counter = 1;
+            $originalName = $newTripName;
+            while (is_dir("data/trips/" . $newTripName)) {
+                $counter++;
+                $newTripName = sanitizeName($cityName . "_Trip_" . $counter);
+            }
+            
+            $newTripDir = "data/trips/" . $newTripName;
+            
             if (rename($tripDir, $newTripDir)) {
                 $finalTripName = $newTripName;
                 $tripMetadata['name'] = $newTripName;
                 
                 // Update metadata in new location
                 file_put_contents($newTripDir . '/metadata.json', json_encode($tripMetadata, JSON_PRETTY_PRINT));
+                
+                // Update expenses and metadata paths
+                $expensesPath = $newTripDir . '/expenses.json';
+                file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT));
             }
         }
     }
