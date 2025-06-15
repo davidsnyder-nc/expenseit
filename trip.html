@@ -853,11 +853,18 @@
         }
 
         function closeModal() {
-            const modal = document.querySelector('.modal');
-            if (modal) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
                 modal.remove();
-            }
+            });
         }
+
+        // Close modal when clicking outside of modal content
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
 
         async function saveNewExpense() {
             const form = document.getElementById('addExpenseForm');
@@ -896,9 +903,15 @@
                 
                 if (result.success) {
                     showSuccessMessage('Expense added successfully');
-                    closeModal();
+                    // Close modal first, then reload
+                    const modal = document.querySelector('.modal');
+                    if (modal) {
+                        modal.remove();
+                    }
                     // Reload the trip data to show the new expense
-                    loadTrip();
+                    setTimeout(() => {
+                        loadTrip();
+                    }, 100);
                 } else {
                     showErrorMessage('Failed to add expense: ' + (result.error || 'Unknown error'));
                 }
