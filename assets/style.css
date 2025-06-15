@@ -62,16 +62,18 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #4299e1;
+    color: white;
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     transition: background-color 0.2s;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .back-link:hover {
-    background-color: #ebf8ff;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Button Styles */
