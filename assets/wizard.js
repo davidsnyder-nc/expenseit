@@ -281,16 +281,15 @@ function isValidFile(file) {
 }
 
 async function uploadFileOnly(file) {
-    // Use existing trip name or generate one for the first file
-    let tripName = tripData.metadata.name;
-    if (!tripName) {
-        tripName = 'temp_' + Date.now();
-        tripData.metadata.name = tripName;
+    // Use session trip name or generate one for the first file
+    if (!tripData.sessionTripName) {
+        tripData.sessionTripName = 'temp_' + Date.now();
+        tripData.metadata.name = tripData.sessionTripName;
     }
     
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('tripName', tripName);
+    formData.append('tripName', tripData.sessionTripName);
     
     try {
         const response = await fetch('upload.php', {
@@ -488,15 +487,53 @@ async function processAllReceipts() {
 }
 
 async function finalizeTrip() {
-    if (tripData.needsReview || tripData.expenses.length === 0) {
-        // Go to review step
-        currentStep = 3;
-        updateWizard();
-        setupReviewStep();
-    } else {
-        // Skip review, go directly to completion
-        await completeTrip();
+    // Process all uploaded files comprehensively
+    try {
+        const response = await fetch('process_uploads.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                tripName: tripData.sessionTripName || tripData.metadata.name
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Update trip data with processed results
+            tripData.metadata = result.tripDetails;
+            
+            // Load processed expenses
+            const expensesResponse = await fetch(`api.php?action=trip&name=${result.tripName}`);
+            const tripInfo = await expensesResponse.json();
+            
+            if (tripInfo.success) {
+                tripData.expenses = tripInfo.expenses || [];
+                
+                // Update UI with new trip name if changed
+                if (result.tripName !== tripData.sessionTripName) {
+                    tripData.sessionTripName = result.tripName;
+                    tripData.metadata.name = result.tripName;
+                }
+                
+                // Go to completion step
+                currentStep = 4;
+                updateWizard();
+                setupCompletionStep();
+                return;
+            }
+        }
+    } catch (error) {
+        console.error('Processing error:', error);
     }
+    
+    // Fallback to review step if processing fails
+    tripData.needsReview = true;
+    currentStep = 3;
+    updateWizard();
+    setupReviewStep();
 }
 
 function displayUploadedFile(file, path) {
