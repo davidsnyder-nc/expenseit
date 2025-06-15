@@ -68,7 +68,7 @@ body {
 .app-title {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
 }
 
 .app-name {
@@ -89,7 +89,7 @@ body {
     width: 80px;
     height: 80px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.25));
 }
 
 .brand-it {
