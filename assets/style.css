@@ -1049,6 +1049,56 @@ body {
     color: #d69e2e;
 }
 
+/* Hotel Daily Breakdown Styles */
+.hotel-breakdown-row {
+    background: #f8f9fa;
+}
+
+.hotel-breakdown {
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+    background: white;
+}
+
+.hotel-breakdown h4 {
+    margin: 0 0 1rem 0;
+    color: #dc2626;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.daily-breakdown-table {
+    overflow-x: auto;
+}
+
+.daily-breakdown-table table {
+    width: 100%;
+    min-width: 500px;
+    font-size: 0.85rem;
+}
+
+.daily-breakdown-table th {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    font-weight: 600;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.daily-breakdown-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.daily-breakdown-table .amount {
+    text-align: right;
+    font-weight: 500;
+}
+
 .stat-content {
     flex: 1;
     min-width: 0;

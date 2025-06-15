@@ -38,7 +38,30 @@ If RECEIPT/EXPENSE, return:
     \"amount\": 0.00,
     \"tax_amount\": 0.00,
     \"category\": \"Meals|Transportation|Lodging|Entertainment|Groceries|Shopping|Gas|Other\",
-    \"note\": \"description\"
+    \"note\": \"description\",
+    \"is_hotel_stay\": false,
+    \"daily_breakdown\": []
+}
+
+If HOTEL RECEIPT specifically, also include daily breakdown:
+{
+    \"type\": \"receipt\",
+    \"date\": \"YYYY-MM-DD\",
+    \"merchant\": \"hotel name\",
+    \"amount\": 0.00,
+    \"tax_amount\": 0.00,
+    \"category\": \"Lodging\",
+    \"note\": \"Hotel stay details\",
+    \"is_hotel_stay\": true,
+    \"daily_breakdown\": [
+        {
+            \"date\": \"YYYY-MM-DD\",
+            \"room_rate\": 0.00,
+            \"tax_rate\": 0.00,
+            \"tax_percentage\": \"0.0%\",
+            \"daily_total\": 0.00
+        }
+    ]
 }
 
 Analyze the content carefully and return only valid JSON.";
@@ -173,7 +196,9 @@ try {
                     'is_travel_document' => false,
                     'tax_amount' => floatval($analysis['tax_amount'] ?? 0),
                     'gemini_processed' => $analysis['gemini_processed'] ?? false,
-                    'excluded' => false
+                    'excluded' => false,
+                    'is_hotel_stay' => $analysis['is_hotel_stay'] ?? false,
+                    'daily_breakdown' => $analysis['daily_breakdown'] ?? []
                 ];
                 
                 $expenses[] = $expense;
