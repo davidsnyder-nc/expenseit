@@ -50,6 +50,24 @@
                 <!-- Step 1: Trip Information -->
                 <div class="step-content active" id="step1">
                     <h2>Trip Information</h2>
+                    
+                    <!-- Travel Documents Upload -->
+                    <div class="form-group">
+                        <label>Travel Documents (Optional)</label>
+                        <p class="form-help">Upload itineraries, boarding passes, or travel confirmations to auto-fill trip details</p>
+                        <div class="upload-area" id="travelDocsArea">
+                            <div class="upload-dropzone small" id="travelDocsDropzone">
+                                <i data-feather="file-text"></i>
+                                <h4>Drop travel documents here</h4>
+                                <p>PDF, images supported</p>
+                                <input type="file" id="travelDocsInput" multiple accept=".pdf,.png,.jpg,.jpeg,.heic,.tiff,.tif,.webp,.bmp,.gif" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="uploaded-travel-docs" id="uploadedTravelDocs"></div>
+                        <div class="extraction-status" id="extractionStatus"></div>
+                    </div>
+                    
+                    <!-- Trip Details Form -->
                     <div class="form-group">
                         <label for="tripName">Trip Name *</label>
                         <input type="text" id="tripName" placeholder="e.g., Austin Business Trip 2025" required>

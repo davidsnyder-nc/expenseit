@@ -1029,6 +1029,67 @@ body {
     color: #718096;
 }
 
+.upload-dropzone.small {
+    padding: 1.5rem 1rem;
+    border-radius: 8px;
+}
+
+.upload-dropzone.small i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-dropzone.small h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.25rem 0;
+    color: #4a5568;
+}
+
+.upload-dropzone.small p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.form-help {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0 0 0.75rem 0;
+}
+
+.uploaded-travel-docs {
+    margin-top: 1rem;
+}
+
+.extraction-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    display: none;
+}
+
+.extraction-status.processing {
+    display: block;
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    color: #2b6cb0;
+}
+
+.extraction-status.success {
+    display: block;
+    background: #f0fff4;
+    border: 1px solid #9ae6b4;
+    color: #276749;
+}
+
+.extraction-status.error {
+    display: block;
+    background: #fed7d7;
+    border: 1px solid #fc8181;
+    color: #c53030;
+}
+
 .uploaded-files {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

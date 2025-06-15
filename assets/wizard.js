@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     feather.replace();
     initializeWizard();
     setupFileUpload();
+    setupTravelDocumentUpload();
 });
 
 function initializeWizard() {
