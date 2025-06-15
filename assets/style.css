@@ -1090,6 +1090,92 @@ body {
     color: #c53030;
 }
 
+.step-description {
+    font-size: 1.1rem;
+    color: #718096;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.file-types {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    margin-top: 0.5rem;
+}
+
+.processing-progress {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.processing-spinner {
+    font-size: 3rem;
+    color: #4299e1;
+    margin-bottom: 2rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.processing-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.processing-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.processing-step.active {
+    background: #ebf8ff;
+    border-color: #4299e1;
+    color: #2b6cb0;
+}
+
+.processing-step.completed {
+    background: #f0fff4;
+    border-color: #9ae6b4;
+    color: #276749;
+}
+
+.processing-step i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.processing-step span {
+    font-weight: 500;
+    text-align: center;
+}
+
+.review-summary {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.review-summary h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+}
+
 .uploaded-files {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

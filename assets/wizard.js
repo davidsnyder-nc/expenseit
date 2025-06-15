@@ -1,10 +1,13 @@
 // Wizard state management
 let currentStep = 1;
-const totalSteps = 5;
+const totalSteps = 4;
 let tripData = {
     metadata: {},
     files: [],
-    expenses: []
+    expenses: [],
+    travelDocuments: [],
+    hasItinerary: false,
+    needsReview: false
 };
 
 // Initialize wizard
@@ -243,14 +246,28 @@ function setupFileUpload() {
     });
 }
 
-function handleFiles(files) {
-    Array.from(files).forEach(file => {
-        if (isValidFile(file)) {
-            uploadFile(file);
-        } else {
-            showErrorMessage(`Invalid file type: ${file.name}. Please upload PDF or image files (JPEG, PNG, HEIC, TIFF, WebP, BMP, GIF).`);
+async function handleFiles(files) {
+    // Upload all files first
+    const validFiles = Array.from(files).filter(file => isValidFile(file));
+    
+    if (validFiles.length === 0) {
+        showErrorMessage('No valid files selected. Please upload PDF or image files.');
+        return;
+    }
+    
+    // Upload files without processing yet
+    for (const file of validFiles) {
+        try {
+            await uploadFileOnly(file);
+        } catch (error) {
+            showErrorMessage(`Failed to upload ${file.name}: ${error.message}`);
         }
-    });
+    }
+    
+    // Start automatic processing
+    if (tripData.files.length > 0) {
+        await startAutomaticProcessing();
+    }
 }
 
 function isValidFile(file) {
@@ -262,10 +279,10 @@ function isValidFile(file) {
     return validTypes.includes(file.type) || validExtensions.includes(extension);
 }
 
-async function uploadFile(file) {
+async function uploadFileOnly(file) {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('tripName', tripData.metadata.name || 'temp');
+    formData.append('tripName', 'temp_' + Date.now());
     
     try {
         const response = await fetch('upload.php', {
@@ -280,18 +297,133 @@ async function uploadFile(file) {
                 name: file.name,
                 path: result.path,
                 size: file.size,
-                type: file.type
+                type: file.type,
+                documentType: result.documentType || 'receipt'
             });
             displayUploadedFile(file, result.path);
-            
-            // Automatically process the uploaded receipt
-            await processSingleReceipt(file, result.path);
         } else {
-            showErrorMessage(`Upload failed: ${result.error}`);
+            throw new Error(result.error);
         }
     } catch (error) {
         console.error('Upload error:', error);
-        showErrorMessage('Upload failed. Please try again.');
+        throw error;
+    }
+}
+
+async function startAutomaticProcessing() {
+    // Move to processing step
+    currentStep = 2;
+    updateWizard();
+    
+    // Show processing steps
+    const steps = ['step-detect', 'step-extract', 'step-receipts', 'step-complete'];
+    
+    try {
+        // Step 1: Detect file types
+        updateProcessingStep('step-detect', 'active');
+        await detectFileTypes();
+        updateProcessingStep('step-detect', 'completed');
+        
+        // Step 2: Extract trip details if travel document found
+        updateProcessingStep('step-extract', 'active');
+        await extractTripDetailsFromUploads();
+        updateProcessingStep('step-extract', 'completed');
+        
+        // Step 3: Process receipts
+        updateProcessingStep('step-receipts', 'active');
+        await processAllReceipts();
+        updateProcessingStep('step-receipts', 'completed');
+        
+        // Step 4: Complete or review
+        updateProcessingStep('step-complete', 'active');
+        await finalizeTrip();
+        updateProcessingStep('step-complete', 'completed');
+        
+    } catch (error) {
+        console.error('Processing error:', error);
+        showErrorMessage('Processing failed: ' + error.message);
+        tripData.needsReview = true;
+        currentStep = 3; // Go to review step
+        updateWizard();
+    }
+}
+
+function updateProcessingStep(stepId, status) {
+    const step = document.getElementById(stepId);
+    if (step) {
+        step.className = `processing-step ${status}`;
+    }
+}
+
+async function detectFileTypes() {
+    // Analyze files to detect travel documents vs receipts
+    for (const file of tripData.files) {
+        // Simple heuristic: PDFs with certain keywords are likely travel docs
+        if (file.name.toLowerCase().includes('itinerary') || 
+            file.name.toLowerCase().includes('confirmation') ||
+            file.name.toLowerCase().includes('boarding') ||
+            file.name.toLowerCase().includes('flight')) {
+            file.documentType = 'travel_document';
+            tripData.travelDocuments.push(file);
+            tripData.hasItinerary = true;
+        }
+    }
+}
+
+async function extractTripDetailsFromUploads() {
+    if (tripData.hasItinerary && tripData.travelDocuments.length > 0) {
+        try {
+            // Extract from the first travel document
+            const travelDoc = tripData.travelDocuments[0];
+            const response = await fetch('extract_trip_details.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    filePath: travelDoc.path,
+                    fileName: travelDoc.name
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.tripDetails) {
+                tripData.metadata = {
+                    name: result.tripDetails.destination || 'Trip',
+                    start_date: result.tripDetails.start_date || '',
+                    end_date: result.tripDetails.end_date || '',
+                    notes: result.tripDetails.notes || ''
+                };
+            }
+        } catch (error) {
+            console.error('Trip detail extraction failed:', error);
+        }
+    }
+}
+
+async function processAllReceipts() {
+    const receiptFiles = tripData.files.filter(f => f.documentType === 'receipt');
+    
+    for (const file of receiptFiles) {
+        try {
+            await processSingleReceipt(file.file || { name: file.name }, file.path);
+        } catch (error) {
+            console.error(`Failed to process ${file.name}:`, error);
+            tripData.needsReview = true;
+        }
+    }
+}
+
+async function finalizeTrip() {
+    if (tripData.needsReview || tripData.expenses.length === 0) {
+        // Go to review step
+        currentStep = 3;
+        updateWizard();
+        setupReviewStep();
+    } else {
+        // Skip review, go directly to completion
+        await completeTrip();
     }
 }
 
