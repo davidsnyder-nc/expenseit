@@ -86,33 +86,33 @@ function performSearch($query, $includeArchives = false) {
                 }
             }
         
-        // Search in expenses
-        if (file_exists($expensesPath)) {
-            $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
-            
-            foreach ($expenses as $expense) {
-                $searchableExpenseData = [
-                    $expense['merchant'] ?? '',
-                    $expense['category'] ?? '',
-                    $expense['note'] ?? '',
-                    $expense['date'] ?? '',
-                    (string)($expense['amount'] ?? '')
-                ];
+            // Search in expenses
+            if (file_exists($expensesPath)) {
+                $expenses = json_decode(file_get_contents($expensesPath), true) ?: [];
                 
-                foreach ($searchableExpenseData as $field) {
-                    if (stripos($field, $query) !== false) {
-                        $amount = number_format($expense['amount'] ?? 0, 2);
-                        $results[] = [
-                            'tripName' => $tripName,
-                            'type' => 'Expense' . ($isArchived ? ' (Archived)' : ''),
-                            'content' => "Merchant: {$expense['merchant']} | Amount: \${$amount} | Category: {$expense['category']} | Note: {$expense['note']} | Date: {$expense['date']}",
-                            'archived' => $isArchived
-                        ];
-                        break; // Avoid duplicate entries for the same expense
+                foreach ($expenses as $expense) {
+                    $searchableExpenseData = [
+                        $expense['merchant'] ?? '',
+                        $expense['category'] ?? '',
+                        $expense['note'] ?? '',
+                        $expense['date'] ?? '',
+                        (string)($expense['amount'] ?? '')
+                    ];
+                    
+                    foreach ($searchableExpenseData as $field) {
+                        if (stripos($field, $query) !== false) {
+                            $amount = number_format($expense['amount'] ?? 0, 2);
+                            $results[] = [
+                                'tripName' => $tripName,
+                                'type' => 'Expense' . ($isArchived ? ' (Archived)' : ''),
+                                'content' => "Merchant: {$expense['merchant']} | Amount: \${$amount} | Category: {$expense['category']} | Note: {$expense['note']} | Date: {$expense['date']}",
+                                'archived' => $isArchived
+                            ];
+                            break; // Avoid duplicate entries for the same expense
+                        }
                     }
                 }
             }
-        }
         }
     }
     
@@ -236,8 +236,17 @@ try {
         
         $tripName = sanitizeName($tripName);
         $tripDir = 'data/trips/' . $tripName;
+        $archiveDir = 'data/archive/' . $tripName;
         
-        if (!is_dir($tripDir)) {
+        // Check both active and archived locations
+        if (is_dir($tripDir)) {
+            // Active trip
+            $isArchived = false;
+        } elseif (is_dir($archiveDir)) {
+            // Archived trip
+            $tripDir = $archiveDir;
+            $isArchived = true;
+        } else {
             echo json_encode(['success' => false, 'error' => 'Trip not found']);
             exit;
         }
@@ -284,6 +293,9 @@ try {
         $reportPath = $tripDir . '/report.pdf';
         $hasReport = file_exists($reportPath);
         
+        // Add archived status to metadata for frontend
+        $metadata['isArchived'] = $isArchived;
+        
         echo json_encode([
             'success' => true,
             'trip' => [
@@ -308,10 +320,22 @@ try {
         
         $tripName = sanitizeName($tripName);
         $receiptsDir = 'data/trips/' . $tripName . '/receipts';
+        $archiveReceiptsDir = 'data/archive/' . $tripName . '/receipts';
+        
+        // Check both active and archived locations
+        if (is_dir($receiptsDir)) {
+            $targetDir = $receiptsDir;
+        } elseif (is_dir($archiveReceiptsDir)) {
+            $targetDir = $archiveReceiptsDir;
+        } else {
+            echo json_encode(['success' => true, 'receipts' => []]);
+            exit;
+        }
+        
         $receipts = [];
         
-        if (is_dir($receiptsDir)) {
-            $receiptFiles = glob($receiptsDir . '/*');
+        if (is_dir($targetDir)) {
+            $receiptFiles = glob($targetDir . '/*');
             foreach ($receiptFiles as $file) {
                 if (is_file($file)) {
                     $filename = basename($file);
