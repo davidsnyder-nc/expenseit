@@ -1684,24 +1684,27 @@ body {
 .trip-actions {
     display: flex;
     gap: 1rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     padding: 1.5rem 0 0 0;
     border-top: 1px solid #e2e8f0;
     margin-top: 1.5rem;
+    overflow-x: auto;
 }
 
 @media (max-width: 768px) {
     .trip-actions {
-        flex-wrap: wrap;
         gap: 0.5rem;
         padding: 1rem 0 0 0;
+        justify-content: flex-start;
     }
     
     .trip-actions .btn {
-        min-width: calc(50% - 0.25rem);
-        padding: 0.625rem 1rem;
+        min-width: auto;
+        padding: 0.625rem 0.875rem;
         font-size: 0.8rem;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 }
 
