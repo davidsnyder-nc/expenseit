@@ -24,9 +24,12 @@ try {
     $file = $_FILES['file'];
     $tripName = $_POST['tripName'] ?? 'temp';
     
-    // Validate file type
-    $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/tiff', 'image/tif'];
-    if (!in_array($file['type'], $allowedTypes)) {
+    // Validate file type by extension (more reliable than MIME type for HEIC/TIFF)
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'heic', 'tiff', 'tif'];
+    $allowedMimeTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/tiff', 'image/tif'];
+    
+    if (!in_array($extension, $allowedExtensions) && !in_array($file['type'], $allowedMimeTypes)) {
         throw new Exception('Invalid file type. Only PDF, JPEG, PNG, HEIC, and TIFF files are allowed.');
     }
     

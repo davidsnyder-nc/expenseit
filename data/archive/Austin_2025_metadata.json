@@ -1,0 +1,12 @@
+{
+    "metadata": {
+        "name": "Austin 2025",
+        "start_date": "2025-06-03",
+        "end_date": "2025-06-09",
+        "notes": "Example trip details, blah blah, blah, blah, blah, blah blah blah",
+        "destination": "Austin"
+    },
+    "expenseCount": 4,
+    "total": "470.00",
+    "archivedDate": "2025-06-15 10:20:18"
+}

@@ -43,7 +43,7 @@ try {
                     'filename' => basename($file),
                     'path' => $file,
                     'size' => filesize($file),
-                    'isImage' => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg'])
+                    'isImage' => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg', 'heic', 'tiff', 'tif'])
                 ];
             }
         }
@@ -231,8 +231,8 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
             }
             .receipts-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
+                grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+                gap: 30px;
                 margin-top: 15px;
             }
             .receipt-attachment {
@@ -431,14 +431,46 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
             
             // Embed images and create thumbnails for PDFs
             if ($receipt['isImage']) {
-                $imageData = base64_encode(file_get_contents($receipt['path']));
                 $extension = strtolower(pathinfo($receipt['filename'], PATHINFO_EXTENSION));
-                $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
                 
-                $html .= '
-                    <div class="receipt-image">
-                        <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="max-width: 200px; max-height: 150px; margin-top: 10px;">
-                    </div>';
+                // For HEIC and TIFF, convert to JPEG using ImageMagick
+                if (in_array($extension, ['heic', 'tiff', 'tif'])) {
+                    $imageData = null;
+                    if (extension_loaded('imagick') && class_exists('Imagick')) {
+                        try {
+                            $imagick = new Imagick();
+                            $imagick->readImage($receipt['path']);
+                            $imagick->setImageFormat('jpeg');
+                            $imagick->setImageCompressionQuality(85);
+                            $imageData = base64_encode($imagick->getImageBlob());
+                            $imagick->clear();
+                        } catch (Exception $e) {
+                            error_log("HEIC/TIFF conversion failed: " . $e->getMessage());
+                        }
+                    }
+                    
+                    if ($imageData) {
+                        $html .= '
+                            <div class="receipt-image">
+                                <img src="data:image/jpeg;base64,' . $imageData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
+                            </div>';
+                    } else {
+                        $html .= '
+                            <div class="receipt-file">
+                                <strong>Image File</strong><br>
+                                Format not supported for display
+                            </div>';
+                    }
+                } else {
+                    // For PNG, JPG, JPEG - embed directly
+                    $imageData = base64_encode(file_get_contents($receipt['path']));
+                    $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
+                    
+                    $html .= '
+                        <div class="receipt-image">
+                            <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="max-width: 400px; max-height: 300px; margin-top: 10px;">
+                        </div>';
+                }
             } else {
                 // For PDFs, convert to image using multiple methods
                 $thumbnailCreated = false;
@@ -452,7 +484,7 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                         $imagick->readImage($receipt['path'] . '[0]'); // First page only
                         $imagick->setImageFormat('jpeg');
                         $imagick->setImageCompressionQuality(85);
-                        $imagick->scaleImage(200, 150, true);
+                        $imagick->scaleImage(400, 300, true);
                         
                         $thumbnailData = base64_encode($imagick->getImageBlob());
                         $thumbnailCreated = true;
@@ -482,8 +514,8 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                                     $sourceHeight = imagesy($sourceImage);
                                     
                                     // Calculate new dimensions
-                                    $maxWidth = 200;
-                                    $maxHeight = 150;
+                                    $maxWidth = 400;
+                                    $maxHeight = 300;
                                     $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight);
                                     $newWidth = round($sourceWidth * $ratio);
                                     $newHeight = round($sourceHeight * $ratio);

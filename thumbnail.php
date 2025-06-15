@@ -45,12 +45,22 @@ if (file_exists($cachePath) && filemtime($cachePath) >= filemtime($filePath)) {
 // Generate thumbnail
 $thumbnailCreated = false;
 
-// Method 1: Try Imagick
+// Method 1: Try Imagick for all formats
 if (extension_loaded('imagick') && class_exists('Imagick')) {
     try {
         $imagick = new Imagick();
-        $imagick->setResolution(150, 150);
-        $imagick->readImage($filePath . '[0]'); // First page only
+        
+        if ($extension === 'pdf') {
+            $imagick->setResolution(150, 150);
+            $imagick->readImage($filePath . '[0]'); // First page only
+        } elseif (in_array($extension, ['heic', 'tiff', 'tif'])) {
+            // For HEIC and TIFF files, read directly
+            $imagick->readImage($filePath);
+        } else {
+            // For PNG, JPG, JPEG
+            $imagick->readImage($filePath);
+        }
+        
         $imagick->setImageFormat('jpeg');
         $imagick->setImageCompressionQuality(85);
         
@@ -72,7 +82,7 @@ if (extension_loaded('imagick') && class_exists('Imagick')) {
         
         $thumbnailCreated = true;
     } catch (Exception $e) {
-        error_log("Imagick thumbnail generation failed: " . $e->getMessage());
+        error_log("Imagick thumbnail generation failed for $extension: " . $e->getMessage());
     }
 }
 
