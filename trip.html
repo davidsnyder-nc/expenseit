@@ -417,7 +417,30 @@
                 cleanPath = cleanPath.substring(9);
             }
             
-            const fullPath = `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(cleanPath)}`;
+            // Fix problematic file paths with incorrect extensions or encoding
+            cleanPath = cleanPath.replace(/\.png\.pdf$/, '.png'); // Remove .pdf suffix from .png files
+            cleanPath = cleanPath.replace(/\u202f/g, ' '); // Replace non-breaking thin space
+            
+            // Try multiple possible file paths to find the correct file
+            const possiblePaths = [
+                cleanPath,
+                cleanPath.replace(/\s+/g, '_'), // Replace spaces with underscores
+                cleanPath.replace(/\s+/g, ''), // Remove all spaces
+                cleanPath.replace(/\s+at\s+/g, '_at_') // Replace " at " with "_at_"
+            ];
+            
+            let foundPath = null;
+            for (const testPath of possiblePaths) {
+                const fullTestPath = `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(testPath)}`;
+                // We'll try the first path that seems reasonable
+                if (testPath.includes('_at_') && !testPath.includes(' ')) {
+                    foundPath = fullTestPath;
+                    cleanPath = testPath;
+                    break;
+                }
+            }
+            
+            const fullPath = foundPath || `data/trips/${encodeURIComponent(currentTrip.name)}/receipts/${encodeURIComponent(cleanPath)}`;
             
             // Determine file type and display accordingly
             const fileExtension = cleanPath.toLowerCase().split('.').pop();
