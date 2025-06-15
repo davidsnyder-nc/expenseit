@@ -24,6 +24,20 @@
                         <i data-feather="refresh-cw"></i> Refresh
                     </button>
                 </div>
+                <div class="toolbar-center">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search trips, expenses, merchants..." class="search-input">
+                        <div class="search-options">
+                            <label class="search-option">
+                                <input type="checkbox" id="includeArchives" onchange="performSearch()">
+                                Include Archives
+                            </label>
+                        </div>
+                        <button class="btn btn-secondary search-btn" onclick="performSearch()">
+                            <i data-feather="search"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="toolbar-right">
                     <span id="selectedCount" style="display: none; margin-right: 15px; color: #4299e1; font-weight: 500;"></span>
                     <button class="btn btn-danger" id="deleteBtn" onclick="deleteSelectedTrips()" style="display: none;">
@@ -347,9 +361,13 @@
             if (selectedTrips.size === 0) return;
             
             const tripNames = Array.from(selectedTrips);
-            const message = `Are you sure you want to archive ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}?\n\nArchived trips will be moved to a separate section and compressed into zip files.`;
+            const message = `Are you sure you want to archive ${tripNames.length} trip${tripNames.length > 1 ? 's' : ''}? Archived trips will be moved to a separate section and compressed into zip files.`;
             
-            if (!confirm(message)) return;
+            showConfirmModal('Archive Trips', message, performArchive);
+        }
+
+        async function performArchive() {
+            const tripNames = Array.from(selectedTrips);
             
             try {
                 for (const tripName of tripNames) {
