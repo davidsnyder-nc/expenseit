@@ -94,9 +94,10 @@
             tripTitle.innerHTML = `<i data-feather="map"></i> ${trip.metadata.name}`;
             
             const allExpenses = trip.expenses || [];
-            // Filter out travel documents from expenses
-            const expenses = allExpenses.filter(expense => !expense.is_travel_document);
+            // Include travel documents in expenses by default (user can exclude them)
+            const expenses = allExpenses;
             const total = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+            const taxTotal = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.tax_amount || 0), 0);
             
             // Group expenses by category
             const categories = {};
@@ -136,6 +137,15 @@
                             <div class="stat-content">
                                 <h3>Total</h3>
                                 <p>$${total.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon tax">
+                                <i data-feather="percent"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Tax Total</h3>
+                                <p>$${taxTotal.toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
@@ -198,6 +208,7 @@
                                             <th>Date</th>
                                             <th>Merchant</th>
                                             <th>Amount</th>
+                                            <th>Tax</th>
                                             <th>Note</th>
                                             <th>Receipt</th>
                                             <th>Actions</th>
@@ -209,6 +220,7 @@
                                                 <td>${formatDate(expense.date)}</td>
                                                 <td>${expense.merchant || '-'}</td>
                                                 <td class="amount">$${parseFloat(expense.amount || 0).toFixed(2)}</td>
+                                                <td class="amount">${expense.tax_amount ? '$' + parseFloat(expense.tax_amount).toFixed(2) : '-'}</td>
                                                 <td>${formatExpenseNote(expense.note)}</td>
                                                 <td>
                                                     ${expense.source ? `

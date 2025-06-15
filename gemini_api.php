@@ -159,6 +159,7 @@ function processWithGemini($filePath, $fileName, $mimeType, $apiKey) {
   \"date\": \"YYYY-MM-DD\",
   \"merchant\": \"merchant name\",
   \"amount\": 0.00,
+  \"tax_amount\": 0.00,
   \"category\": \"Meals|Transportation|Lodging|Entertainment|Groceries|Shopping|Gas|Other\",
   \"note\": \"brief description\"
 }
