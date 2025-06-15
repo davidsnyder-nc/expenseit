@@ -256,18 +256,45 @@ async function handleFiles(files) {
         return;
     }
     
-    // Upload files without processing yet
+    // Upload files with retry logic and better error handling
+    let uploadedCount = 0;
     for (const file of validFiles) {
         try {
             await uploadFileOnly(file);
-            console.log(`Successfully uploaded: ${file.name}`);
+            uploadedCount++;
+            console.log(`Successfully uploaded: ${file.name} (${uploadedCount}/${validFiles.length})`);
+            
+            // Small delay between uploads to prevent server overload
+            if (uploadedCount < validFiles.length) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
         } catch (error) {
             console.error(`Upload failed for ${file.name}:`, error);
             showErrorMessage(`Failed to upload ${file.name}: ${error.message}`);
+            
+            // Try one retry for failed uploads
+            try {
+                console.log(`Retrying upload for ${file.name}...`);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await uploadFileOnly(file);
+                uploadedCount++;
+                console.log(`Retry successful for: ${file.name}`);
+            } catch (retryError) {
+                console.error(`Retry also failed for ${file.name}:`, retryError);
+            }
         }
     }
     
-    console.log(`Total files uploaded: ${tripData.files.length} of ${validFiles.length} attempted`);
+    console.log(`Final upload count: ${tripData.files.length} files uploaded of ${validFiles.length} attempted`);
+    
+    if (tripData.files.length === 0) {
+        showErrorMessage('No files were successfully uploaded. Please try again.');
+        return;
+    }
+    
+    if (tripData.files.length < validFiles.length) {
+        showErrorMessage(`Only ${tripData.files.length} of ${validFiles.length} files were uploaded successfully. Proceeding with available files.`);
+    }
     
     // Start automatic processing
     if (tripData.files.length > 0) {
@@ -491,9 +518,9 @@ async function processAllReceipts() {
 }
 
 async function finalizeTrip() {
-    // Process all uploaded files comprehensively
+    // Process ALL uploaded files with comprehensive Gemini analysis
     try {
-        const response = await fetch('process_uploads.php', {
+        const response = await fetch('process_all_files.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -504,12 +531,13 @@ async function finalizeTrip() {
         });
         
         const result = await response.json();
+        console.log('Comprehensive processing result:', result);
         
         if (result.success) {
-            // Update trip data with processed results
-            tripData.metadata = result.tripDetails;
+            // Update trip data with comprehensive processing results
+            tripData.metadata = result.tripMetadata;
             
-            // Load processed expenses
+            // Load processed expenses from the updated trip
             const expensesResponse = await fetch(`api.php?action=trip&name=${result.tripName}`);
             const tripInfo = await expensesResponse.json();
             
@@ -522,12 +550,17 @@ async function finalizeTrip() {
                     tripData.metadata.name = result.tripName;
                 }
                 
+                console.log(`Processed ${result.totalFilesAnalyzed} files with Gemini`);
+                console.log(`Found ${result.expenseCount} expenses and ${result.travelDocumentCount} travel documents`);
+                
                 // Go to completion step
                 currentStep = 4;
                 updateWizard();
                 setupCompletionStep();
                 return;
             }
+        } else {
+            console.error('Processing failed:', result.error);
         }
     } catch (error) {
         console.error('Processing error:', error);
