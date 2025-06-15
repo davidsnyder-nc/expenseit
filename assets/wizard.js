@@ -280,9 +280,17 @@ function isValidFile(file) {
 }
 
 async function uploadFileOnly(file) {
+    // Generate a temporary trip name that will be updated later
+    const tempTripName = 'temp_' + Date.now();
+    
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('tripName', 'temp_' + Date.now());
+    formData.append('tripName', tempTripName);
+    
+    // Set initial trip metadata if not set
+    if (!tripData.metadata.name) {
+        tripData.metadata.name = tempTripName;
+    }
     
     try {
         const response = await fetch('upload.php', {
@@ -389,16 +397,51 @@ async function extractTripDetailsFromUploads() {
             const result = await response.json();
             
             if (result.success && result.tripDetails) {
+                // Update trip metadata with extracted details
+                const oldName = tripData.metadata.name;
+                
                 tripData.metadata = {
-                    name: result.tripDetails.destination || 'Trip',
-                    start_date: result.tripDetails.start_date || '',
-                    end_date: result.tripDetails.end_date || '',
-                    notes: result.tripDetails.notes || ''
+                    name: result.tripDetails.destination || result.tripDetails.trip_name || 'Austin Trip',
+                    start_date: result.tripDetails.start_date || result.tripDetails.departure_date || '',
+                    end_date: result.tripDetails.end_date || result.tripDetails.return_date || '',
+                    notes: result.tripDetails.notes || result.tripDetails.description || '',
+                    destination: result.tripDetails.destination || 'Austin'
                 };
+                
+                // If we got a better trip name, we should move files to the correct directory
+                if (tripData.metadata.name !== oldName && tripData.metadata.name !== 'Trip') {
+                    await moveFilesToNewTripName(oldName, tripData.metadata.name);
+                }
             }
         } catch (error) {
             console.error('Trip detail extraction failed:', error);
         }
+    }
+}
+
+async function moveFilesToNewTripName(oldName, newName) {
+    try {
+        const response = await fetch('api.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'rename_trip',
+                oldName: oldName,
+                newName: newName
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            // Update file paths in tripData
+            tripData.files.forEach(file => {
+                file.path = file.path.replace(`/trips/${oldName}/`, `/trips/${newName}/`);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to move files to new trip name:', error);
     }
 }
 
@@ -762,7 +805,7 @@ async function completeTrip() {
         const result = await response.json();
         
         if (result.success) {
-            currentStep = 5;
+            currentStep = 4;
             updateWizard();
             setupCompletionStep();
         } else {
