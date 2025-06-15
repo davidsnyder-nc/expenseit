@@ -492,6 +492,176 @@ try {
             echo json_encode(['success' => false, 'error' => 'Failed to rename trip directory']);
         }
         
+    } elseif ($action === 'toggle_expense_exclusion') {
+        $tripName = $_POST['trip_name'] ?? '';
+        $expenseId = $_POST['expense_id'] ?? '';
+        
+        if (empty($tripName) || empty($expenseId)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name and expense ID are required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        $expensesFile = 'data/trips/' . $tripName . '/expenses.json';
+        
+        if (!file_exists($expensesFile)) {
+            echo json_encode(['success' => false, 'error' => 'Trip expenses not found']);
+            exit;
+        }
+        
+        $expenses = json_decode(file_get_contents($expensesFile), true);
+        if (!$expenses) {
+            echo json_encode(['success' => false, 'error' => 'Failed to load expenses']);
+            exit;
+        }
+        
+        $found = false;
+        foreach ($expenses as &$expense) {
+            if ($expense['id'] === $expenseId) {
+                $expense['excluded'] = !($expense['excluded'] ?? false);
+                $found = true;
+                break;
+            }
+        }
+        
+        if (!$found) {
+            echo json_encode(['success' => false, 'error' => 'Expense not found']);
+            exit;
+        }
+        
+        if (file_put_contents($expensesFile, json_encode($expenses, JSON_PRETTY_PRINT))) {
+            echo json_encode(['success' => true, 'message' => 'Expense exclusion status updated']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to save changes']);
+        }
+        
+    } elseif ($action === 'delete_expense') {
+        $tripName = $_POST['trip_name'] ?? '';
+        $expenseId = $_POST['expense_id'] ?? '';
+        
+        if (empty($tripName) || empty($expenseId)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name and expense ID are required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        $expensesFile = 'data/trips/' . $tripName . '/expenses.json';
+        
+        if (!file_exists($expensesFile)) {
+            echo json_encode(['success' => false, 'error' => 'Trip expenses not found']);
+            exit;
+        }
+        
+        $expenses = json_decode(file_get_contents($expensesFile), true);
+        if (!$expenses) {
+            echo json_encode(['success' => false, 'error' => 'Failed to load expenses']);
+            exit;
+        }
+        
+        $originalCount = count($expenses);
+        $expenses = array_filter($expenses, function($expense) use ($expenseId) {
+            return $expense['id'] !== $expenseId;
+        });
+        
+        if (count($expenses) === $originalCount) {
+            echo json_encode(['success' => false, 'error' => 'Expense not found']);
+            exit;
+        }
+        
+        // Re-index array to maintain proper JSON structure
+        $expenses = array_values($expenses);
+        
+        if (file_put_contents($expensesFile, json_encode($expenses, JSON_PRETTY_PRINT))) {
+            echo json_encode(['success' => true, 'message' => 'Expense deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to save changes']);
+        }
+        
+    } elseif ($action === 'update_expense') {
+        $tripName = $_POST['trip_name'] ?? '';
+        $expenseId = $_POST['expense_id'] ?? '';
+        
+        if (empty($tripName) || empty($expenseId)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name and expense ID are required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        $expensesFile = 'data/trips/' . $tripName . '/expenses.json';
+        
+        if (!file_exists($expensesFile)) {
+            echo json_encode(['success' => false, 'error' => 'Trip expenses not found']);
+            exit;
+        }
+        
+        $expenses = json_decode(file_get_contents($expensesFile), true);
+        if (!$expenses) {
+            echo json_encode(['success' => false, 'error' => 'Failed to load expenses']);
+            exit;
+        }
+        
+        $found = false;
+        foreach ($expenses as &$expense) {
+            if ($expense['id'] === $expenseId) {
+                $expense['date'] = $_POST['date'] ?? $expense['date'];
+                $expense['merchant'] = $_POST['merchant'] ?? $expense['merchant'];
+                $expense['amount'] = floatval($_POST['amount'] ?? $expense['amount']);
+                $expense['tax_amount'] = floatval($_POST['tax_amount'] ?? $expense['tax_amount']);
+                $expense['category'] = $_POST['category'] ?? $expense['category'];
+                $expense['note'] = $_POST['note'] ?? $expense['note'];
+                $found = true;
+                break;
+            }
+        }
+        
+        if (!$found) {
+            echo json_encode(['success' => false, 'error' => 'Expense not found']);
+            exit;
+        }
+        
+        if (file_put_contents($expensesFile, json_encode($expenses, JSON_PRETTY_PRINT))) {
+            echo json_encode(['success' => true, 'message' => 'Expense updated successfully']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to save changes']);
+        }
+        
+    } elseif ($action === 'update_trip') {
+        $originalName = $_POST['original_name'] ?? '';
+        $newName = $_POST['name'] ?? '';
+        
+        if (empty($originalName) || empty($newName)) {
+            echo json_encode(['success' => false, 'error' => 'Original name and new name are required']);
+            exit;
+        }
+        
+        $originalName = sanitizeName($originalName);
+        $newName = sanitizeName($newName);
+        
+        $metadataFile = 'data/trips/' . $originalName . '/metadata.json';
+        
+        if (!file_exists($metadataFile)) {
+            echo json_encode(['success' => false, 'error' => 'Trip metadata not found']);
+            exit;
+        }
+        
+        $metadata = json_decode(file_get_contents($metadataFile), true);
+        if (!$metadata) {
+            echo json_encode(['success' => false, 'error' => 'Failed to load trip metadata']);
+            exit;
+        }
+        
+        $metadata['name'] = $newName;
+        $metadata['destination'] = $_POST['destination'] ?? $metadata['destination'];
+        $metadata['start_date'] = $_POST['start_date'] ?? $metadata['start_date'];
+        $metadata['end_date'] = $_POST['end_date'] ?? $metadata['end_date'];
+        $metadata['notes'] = $_POST['notes'] ?? $metadata['notes'];
+        
+        if (file_put_contents($metadataFile, json_encode($metadata, JSON_PRETTY_PRINT))) {
+            echo json_encode(['success' => true, 'message' => 'Trip updated successfully']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to save changes']);
+        }
+        
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
     }

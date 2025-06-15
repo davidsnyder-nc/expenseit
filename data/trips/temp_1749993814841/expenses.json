@@ -88,7 +88,7 @@
         "is_travel_document": true,
         "tax_amount": 0,
         "gemini_processed": true,
-        "excluded": true
+        "excluded": false
     },
     {
         "id": "684ec96e94625",

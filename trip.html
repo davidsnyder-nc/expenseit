@@ -750,12 +750,62 @@
             showSuccessMessage('Add expense functionality will be implemented');
         }
 
-        function toggleExpenseExclusion(expenseId) {
-            showSuccessMessage('Toggle expense functionality will be implemented');
+        async function toggleExpenseExclusion(expenseId) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'toggle_expense_exclusion');
+                formData.append('trip_name', currentTrip.name);
+                formData.append('expense_id', expenseId);
+
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage('Expense status updated successfully');
+                    // Reload trip details to reflect changes
+                    loadTripDetails(currentTrip.name);
+                } else {
+                    showErrorMessage('Failed to update expense: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error toggling expense:', error);
+                showErrorMessage('Error updating expense');
+            }
         }
 
-        function deleteExpense(expenseId) {
-            showSuccessMessage('Delete expense functionality will be implemented');
+        async function deleteExpense(expenseId) {
+            if (!confirm('Are you sure you want to delete this expense? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'delete_expense');
+                formData.append('trip_name', currentTrip.name);
+                formData.append('expense_id', expenseId);
+
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage('Expense deleted successfully');
+                    // Reload trip details to reflect changes
+                    loadTripDetails(currentTrip.name);
+                } else {
+                    showErrorMessage('Failed to delete expense: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error deleting expense:', error);
+                showErrorMessage('Error deleting expense');
+            }
         }
 
         function bulkDownloadReceipts() {
