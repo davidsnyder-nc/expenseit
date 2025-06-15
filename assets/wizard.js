@@ -1370,12 +1370,30 @@ function fillTripDetailsForm(tripDetails) {
 
 // Mobile Camera Functions
 function setupMobileCamera() {
-    // Only show camera button on mobile devices
+    // Detect if user is on mobile device
     const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const cameraSection = document.getElementById('mobileCameraSection');
+    const desktopTip = document.getElementById('desktopMobileTip');
     
-    if (cameraSection && isMobile) {
-        cameraSection.style.display = 'block';
+    if (isMobile) {
+        // Show camera button on mobile
+        if (cameraSection) {
+            cameraSection.style.display = 'block';
+        }
+        // Hide desktop tip on mobile
+        if (desktopTip) {
+            desktopTip.style.display = 'none';
+        }
+    } else {
+        // Show desktop tip on desktop
+        if (desktopTip) {
+            desktopTip.style.display = 'block';
+            feather.replace();
+        }
+        // Hide camera button on desktop
+        if (cameraSection) {
+            cameraSection.style.display = 'none';
+        }
     }
 }
 
