@@ -147,10 +147,9 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                 margin: 5px 0;
             }
             .summary-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 20px;
-                margin-bottom: 30px;
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
             }
             .summary-card {
                 text-align: center;
@@ -158,6 +157,14 @@ function buildPDFHTML($metadata, $expenses, $categories, $total, $receipts = [])
                 background: #f8f9fa;
                 border-radius: 8px;
                 border: 1px solid #e9ecef;
+                width: 33.33%;
+                display: inline-block;
+                vertical-align: top;
+                box-sizing: border-box;
+                margin-right: 1%;
+            }
+            .summary-card:last-child {
+                margin-right: 0;
             }
             .summary-card h3 {
                 margin: 0 0 5px 0;
