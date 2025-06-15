@@ -199,11 +199,44 @@ function loadTripSummary($tripName, $tripDir) {
 }
 
 /**
+ * Find the filesystem directory name for a trip by checking metadata
+ */
+function findTripFilesystemName($tripDisplayName) {
+    $tripsDir = 'data/trips';
+    if (!is_dir($tripsDir)) {
+        return null;
+    }
+    
+    $tripDirs = glob($tripsDir . '/*', GLOB_ONLYDIR);
+    
+    foreach ($tripDirs as $tripDir) {
+        $metadataPath = $tripDir . '/metadata.json';
+        if (file_exists($metadataPath)) {
+            $metadata = json_decode(file_get_contents($metadataPath), true);
+            if ($metadata && isset($metadata['name']) && $metadata['name'] === $tripDisplayName) {
+                return basename($tripDir);
+            }
+            // Also check filesystem_name if it exists
+            if ($metadata && isset($metadata['filesystem_name']) && $metadata['filesystem_name'] === $tripDisplayName) {
+                return basename($tripDir);
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
  * Load complete trip details
  */
 function loadTrip($tripName) {
-    $tripName = sanitizeName($tripName);
-    $tripDir = 'data/trips/' . $tripName;
+    // Find the correct filesystem directory name for this trip
+    $filesystemName = findTripFilesystemName($tripName);
+    if (!$filesystemName) {
+        throw new Exception('Trip not found');
+    }
+    
+    $tripDir = 'data/trips/' . $filesystemName;
     
     // Check if trip directory exists
     if (!is_dir($tripDir)) {
@@ -291,7 +324,16 @@ function sanitizeName($name) {
  * Load trip receipts for API
  */
 function loadTripReceipts($tripName) {
-    $receipts = getTripReceipts($tripName);
+    // Find the correct filesystem directory name for this trip
+    $filesystemName = findTripFilesystemName($tripName);
+    if (!$filesystemName) {
+        return [
+            'success' => false,
+            'error' => 'Trip not found'
+        ];
+    }
+    
+    $receipts = getTripReceipts($filesystemName);
     
     return [
         'success' => true,
