@@ -155,40 +155,56 @@ try {
     $fileName = strtolower($file['name']);
     $documentType = 'receipt'; // default
     
-    // Enhanced travel document keywords (including common misspellings)
-    $travelKeywords = [
-        'itinerary', 'itenary', 'itenery', 'confirmation', 'boarding', 'flight', 'airline',
-        'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
-        'american airlines', 'delta', 'united', 'southwest', 'jetblue',
-        'marriott', 'hilton', 'hyatt', 'homewood', 'rental', 'car',
-        'avis', 'hertz', 'enterprise', 'budget', 'gmail', 'fw_', 'trip'
+    // Car rental companies should be treated as receipts, not travel documents
+    $carRentalCompanies = [
+        'avis', 'hertz', 'enterprise', 'budget', 'alamo', 'national',
+        'thrifty', 'dollar', 'zipcar', 'apex_auto_rentals', 'apex auto rentals'
     ];
     
-    // Check for receipt keywords to avoid false positives
-    $receiptKeywords = [
-        'receipt', 'invoice', 'bill', 'purchase', 'transaction',
-        'grocery', 'restaurant', 'store', 'shop', 'payment'
-    ];
-    
-    $hasReceiptKeywords = false;
-    $hasTravelKeywords = false;
-    
-    foreach ($receiptKeywords as $keyword) {
-        if (strpos($fileName, $keyword) !== false) {
-            $hasReceiptKeywords = true;
+    // Check if it's a car rental company first
+    foreach ($carRentalCompanies as $company) {
+        if (strpos($fileName, $company) !== false) {
+            $documentType = 'receipt';
             break;
         }
     }
     
-    foreach ($travelKeywords as $keyword) {
-        if (strpos($fileName, $keyword) !== false) {
-            $hasTravelKeywords = true;
-            break;
+    if ($documentType === 'receipt') {
+        // Already classified as receipt due to car rental
+    } else {
+        // Enhanced travel document keywords (including common misspellings)
+        $travelKeywords = [
+            'itinerary', 'itenary', 'itenery', 'confirmation', 'boarding', 'flight', 'airline',
+            'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
+            'american airlines', 'delta', 'united', 'southwest', 'jetblue',
+            'marriott', 'hilton', 'hyatt', 'homewood', 'gmail', 'fw_', 'trip'
+        ];
+        
+        // Check for receipt keywords to avoid false positives
+        $receiptKeywords = [
+            'receipt', 'invoice', 'bill', 'purchase', 'transaction',
+            'grocery', 'restaurant', 'store', 'shop', 'payment'
+        ];
+        
+        $hasReceiptKeywords = false;
+        $hasTravelKeywords = false;
+        
+        foreach ($receiptKeywords as $keyword) {
+            if (strpos($fileName, $keyword) !== false) {
+                $hasReceiptKeywords = true;
+                break;
+            }
         }
-    }
-    
-    // If it has travel keywords and no receipt keywords, mark as travel doc
-    if ($hasTravelKeywords && !$hasReceiptKeywords) {
+        
+        foreach ($travelKeywords as $keyword) {
+            if (strpos($fileName, $keyword) !== false) {
+                $hasTravelKeywords = true;
+                break;
+            }
+        }
+        
+        // If it has travel keywords and no receipt keywords, mark as travel doc
+        if ($hasTravelKeywords && !$hasReceiptKeywords) {
         $documentType = 'travel_document';
     }
     
