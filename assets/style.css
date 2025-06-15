@@ -24,7 +24,7 @@ body {
 /* Header Styles */
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 2rem;
     padding: 1.5rem 2rem;
@@ -33,6 +33,7 @@ body {
     border-radius: 12px;
     color: #2d3748;
     box-shadow: 0 4px 16px rgba(245, 101, 101, 0.25);
+    position: relative;
 }
 
 .header h1 {
@@ -77,6 +78,8 @@ body {
     transition: background-color 0.2s;
     background: rgba(45, 55, 72, 0.1);
     border: 1px solid rgba(45, 55, 72, 0.2);
+    position: absolute;
+    right: 2rem;
 }
 
 .back-link:hover {
