@@ -86,7 +86,7 @@ function convertToJpeg($sourcePath, $targetPath, $sourceExtension) {
     }
     
     // Fallback to GD for basic formats
-    if (extension_loaded('gd') && in_array($sourceExtension, ['png', 'jpg', 'jpeg'])) {
+    if (extension_loaded('gd') && in_array($sourceExtension, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'])) {
         try {
             switch ($sourceExtension) {
                 case 'png':
@@ -96,11 +96,40 @@ function convertToJpeg($sourcePath, $targetPath, $sourceExtension) {
                 case 'jpeg':
                     $sourceImage = imagecreatefromjpeg($sourcePath);
                     break;
+                case 'gif':
+                    $sourceImage = imagecreatefromgif($sourcePath);
+                    break;
+                case 'webp':
+                    if (function_exists('imagecreatefromwebp')) {
+                        $sourceImage = imagecreatefromwebp($sourcePath);
+                    } else {
+                        return false;
+                    }
+                    break;
+                case 'bmp':
+                    if (function_exists('imagecreatefrombmp')) {
+                        $sourceImage = imagecreatefrombmp($sourcePath);
+                    } else {
+                        return false;
+                    }
+                    break;
                 default:
                     return false;
             }
             
             if ($sourceImage) {
+                // Handle transparency for PNG and GIF by creating white background
+                if (in_array($sourceExtension, ['png', 'gif'])) {
+                    $width = imagesx($sourceImage);
+                    $height = imagesy($sourceImage);
+                    $background = imagecreatetruecolor($width, $height);
+                    $white = imagecolorallocate($background, 255, 255, 255);
+                    imagefill($background, 0, 0, $white);
+                    imagecopy($background, $sourceImage, 0, 0, 0, 0, $width, $height);
+                    imagedestroy($sourceImage);
+                    $sourceImage = $background;
+                }
+                
                 $result = imagejpeg($sourceImage, $targetPath, 85);
                 imagedestroy($sourceImage);
                 return $result;
@@ -184,103 +213,5 @@ try {
         'success' => false,
         'error' => $e->getMessage()
     ]);
-}
-
-/**
- * Sanitize name for use as directory name
- */
-function sanitizeName($name) {
-    // Remove or replace invalid characters
-    $name = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $name);
-    // Replace spaces with underscores
-    $name = str_replace(' ', '_', $name);
-    // Remove multiple underscores
-    $name = preg_replace('/_+/', '_', $name);
-    // Trim underscores from start and end
-    $name = trim($name, '_');
-    
-    return $name ?: 'untitled';
-}
-
-/**
- * Generate unique filename to avoid conflicts
- */
-function generateUniqueFilename($originalName, $directory, $extension) {
-    $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-    $baseName = sanitizeName($baseName);
-    
-    $filename = $baseName . '.' . $extension;
-    $counter = 1;
-    
-    while (file_exists($directory . '/' . $filename)) {
-        $filename = $baseName . '_' . $counter . '.' . $extension;
-        $counter++;
-    }
-    
-    return $filename;
-}
-
-/**
- * Convert uploaded image to JPEG format
- */
-function convertToJpeg($sourcePath, $targetPath, $sourceExtension) {
-    // Try ImageMagick first
-    if (extension_loaded('imagick') && class_exists('Imagick')) {
-        try {
-            $imagick = new Imagick();
-            $imagick->readImage($sourcePath);
-            $imagick->setImageFormat('jpeg');
-            $imagick->setImageCompressionQuality(85);
-            
-            // Resize if image is too large (max 2048px on longest side)
-            $width = $imagick->getImageWidth();
-            $height = $imagick->getImageHeight();
-            $maxDimension = 2048;
-            
-            if ($width > $maxDimension || $height > $maxDimension) {
-                if ($width > $height) {
-                    $newWidth = $maxDimension;
-                    $newHeight = ($height * $maxDimension) / $width;
-                } else {
-                    $newHeight = $maxDimension;
-                    $newWidth = ($width * $maxDimension) / $height;
-                }
-                $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
-            }
-            
-            $imagick->writeImage($targetPath);
-            $imagick->clear();
-            return true;
-        } catch (Exception $e) {
-            error_log("ImageMagick conversion failed: " . $e->getMessage());
-        }
-    }
-    
-    // Fallback to GD for basic formats
-    if (extension_loaded('gd') && in_array($sourceExtension, ['png', 'jpg', 'jpeg'])) {
-        try {
-            switch ($sourceExtension) {
-                case 'png':
-                    $sourceImage = imagecreatefrompng($sourcePath);
-                    break;
-                case 'jpg':
-                case 'jpeg':
-                    $sourceImage = imagecreatefromjpeg($sourcePath);
-                    break;
-                default:
-                    return false;
-            }
-            
-            if ($sourceImage) {
-                $result = imagejpeg($sourceImage, $targetPath, 85);
-                imagedestroy($sourceImage);
-                return $result;
-            }
-        } catch (Exception $e) {
-            error_log("GD conversion failed: " . $e->getMessage());
-        }
-    }
-    
-    return false;
 }
 ?>

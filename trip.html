@@ -370,29 +370,21 @@
                     </div>
                 `;
             } else {
-                receiptsGrid.innerHTML = receipts.map(receipt => {
-                    const extension = receipt.filename.split('.').pop().toLowerCase();
-                    const isHeicTiff = ['heic', 'tiff', 'tif'].includes(extension);
-                    const thumbnailUrl = receipt.isPdf ? null : 
-                        (isHeicTiff ? `convert_image.php?file=${encodeURIComponent(receipt.filename)}&trip=${encodeURIComponent(currentTrip.name)}` : receipt.fullUrl);
-                    const viewUrl = isHeicTiff ? `convert_image.php?file=${encodeURIComponent(receipt.filename)}&trip=${encodeURIComponent(currentTrip.name)}` : receipt.fullUrl;
-                    
-                    return `
+                receiptsGrid.innerHTML = receipts.map(receipt => `
                     <div class="receipt-item">
                         <div class="receipt-preview">
                             ${receipt.isPdf ? 
                                 `<div class="file-icon"><i data-feather="file-text"></i></div>` :
-                                `<img src="${thumbnailUrl}" alt="${receipt.filename}" class="receipt-thumbnail" loading="lazy">`
+                                `<img src="${receipt.fullUrl}" alt="${receipt.filename}" class="receipt-thumbnail" loading="lazy">`
                             }
                         </div>
                         <div class="receipt-info">
                             <div class="receipt-name">${receipt.filename}</div>
                             <div class="receipt-size">${formatFileSize(receipt.size)}</div>
-                            ${receipt.isPdf ? '<div class="receipt-type">PDF Document</div>' : ''}
-                            ${isHeicTiff ? '<div class="receipt-type">HEIC/TIFF Image</div>' : ''}
+                            ${receipt.isPdf ? '<div class="receipt-type">PDF Document</div>' : '<div class="receipt-type">Image</div>'}
                         </div>
                         <div class="receipt-actions">
-                            <a href="${viewUrl}" target="_blank" class="btn btn-small">
+                            <a href="${receipt.fullUrl}" target="_blank" class="btn btn-small">
                                 <i data-feather="eye"></i> View
                             </a>
                             <a href="${receipt.fullUrl}" download class="btn btn-small btn-secondary">
@@ -400,8 +392,7 @@
                             </a>
                         </div>
                     </div>
-                    `;
-                }).join('');
+                `).join('');
             }
             
             feather.replace();
