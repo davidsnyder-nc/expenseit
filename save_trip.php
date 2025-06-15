@@ -105,7 +105,7 @@ function createTrip($tripData) {
         }
     }
     
-    // Move files from temp directory if they exist
+    // Move receipt files from temp directory if they exist
     $tempDir = "data/trips/temp/receipts";
     if (is_dir($tempDir)) {
         $files = glob($tempDir . "/*");
@@ -113,12 +113,28 @@ function createTrip($tripData) {
             $filename = basename($file);
             $newPath = $receiptsDir . "/" . $filename;
             if (!rename($file, $newPath)) {
-                error_log("Failed to move file: $file to $newPath");
+                error_log("Failed to move receipt file: $file to $newPath");
             }
         }
-        // Clean up temp directory
+        // Clean up temp receipts directory
         @rmdir($tempDir);
         @rmdir("data/trips/temp");
+    }
+    
+    // Move travel documents from temp directory if they exist
+    $tempTravelDocsDir = "data/trips/temp_travel_docs/receipts";
+    if (is_dir($tempTravelDocsDir)) {
+        $files = glob($tempTravelDocsDir . "/*");
+        foreach ($files as $file) {
+            $filename = basename($file);
+            $newPath = $travelDocsDir . "/" . $filename;
+            if (!rename($file, $newPath)) {
+                error_log("Failed to move travel document: $file to $newPath");
+            }
+        }
+        // Clean up temp travel docs directory
+        @rmdir($tempTravelDocsDir);
+        @rmdir("data/trips/temp_travel_docs");
     }
     
     // Update expense sources to point to new location
