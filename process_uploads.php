@@ -18,51 +18,8 @@ function sanitizeName($name) {
 }
 
 function detectDocumentType($fileName) {
-    $fileName = strtolower($fileName);
-    
-    // Car rental companies should be treated as receipts, not travel documents
-    $carRentalCompanies = [
-        'avis', 'hertz', 'enterprise', 'budget', 'alamo', 'national',
-        'thrifty', 'dollar', 'zipcar', 'apex_auto_rentals', 'apex auto rentals'
-    ];
-    
-    $travelKeywords = [
-        'itinerary', 'confirmation', 'boarding', 'flight', 'airline',
-        'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
-        'american airlines', 'delta', 'united', 'southwest', 'jetblue',
-        'marriott', 'hilton', 'hyatt', 'homewood', 'gmail', 'fw_', 'trip'
-    ];
-    
-    $receiptKeywords = [
-        'receipt', 'invoice', 'bill', 'purchase', 'transaction',
-        'grocery', 'restaurant', 'store', 'shop', 'payment'
-    ];
-    
-    // Check if it's a car rental company first
-    foreach ($carRentalCompanies as $company) {
-        if (strpos($fileName, $company) !== false) {
-            return 'receipt';
-        }
-    }
-    
-    $hasReceiptKeywords = false;
-    $hasTravelKeywords = false;
-    
-    foreach ($receiptKeywords as $keyword) {
-        if (strpos($fileName, $keyword) !== false) {
-            $hasReceiptKeywords = true;
-            break;
-        }
-    }
-    
-    foreach ($travelKeywords as $keyword) {
-        if (strpos($fileName, $keyword) !== false) {
-            $hasTravelKeywords = true;
-            break;
-        }
-    }
-    
-    return ($hasTravelKeywords && !$hasReceiptKeywords) ? 'travel_document' : 'receipt';
+    // Everything is treated as a receipt
+    return 'receipt';
 }
 
 function processReceiptFile($filePath, $fileName) {

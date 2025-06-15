@@ -421,38 +421,9 @@ function updateProcessingStep(stepId, status) {
 }
 
 async function detectFileTypes() {
-    // Analyze files to detect travel documents vs receipts
+    // Everything is treated as receipts
     for (const file of tripData.files) {
-        // Enhanced heuristic for travel document detection
-        const fileName = file.name.toLowerCase();
-        
-        // Check for travel document keywords
-        const travelKeywords = [
-            'itinerary', 'confirmation', 'boarding', 'flight', 'airline',
-            'travel', 'reservation', 'ticket', 'eticket', 'hotel', 'booking',
-            'american airlines', 'delta', 'united', 'southwest', 'jetblue',
-            'marriott', 'hilton', 'hyatt', 'homewood', 'rental', 'car',
-            'avis', 'hertz', 'enterprise', 'budget'
-        ];
-        
-        // Check for receipt keywords to avoid false positives
-        const receiptKeywords = [
-            'receipt', 'invoice', 'bill', 'purchase', 'transaction',
-            'grocery', 'restaurant', 'store', 'shop', 'payment'
-        ];
-        
-        const hasReceiptKeywords = receiptKeywords.some(keyword => fileName.includes(keyword));
-        const hasTravelKeywords = travelKeywords.some(keyword => fileName.includes(keyword));
-        
-        // If it has travel keywords and no receipt keywords, mark as travel doc
-        if (hasTravelKeywords && !hasReceiptKeywords) {
-            file.documentType = 'travel_document';
-            tripData.travelDocuments.push(file);
-            tripData.hasItinerary = true;
-        } else {
-            // Default to receipt for processing
-            file.documentType = 'receipt';
-        }
+        file.documentType = 'receipt';
     }
 }
 
