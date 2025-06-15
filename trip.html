@@ -739,8 +739,99 @@
                 return;
             }
             
-            // Create edit modal (simplified for now)
-            showSuccessMessage('Edit functionality will be implemented');
+            // Create edit modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3>Edit Expense</h3>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editExpenseForm">
+                            <div class="form-group">
+                                <label for="editDate">Date:</label>
+                                <input type="date" id="editDate" value="${expense.date || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editMerchant">Merchant:</label>
+                                <input type="text" id="editMerchant" value="${expense.merchant || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editAmount">Amount:</label>
+                                <input type="number" id="editAmount" step="0.01" value="${expense.amount || 0}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTaxAmount">Tax Amount:</label>
+                                <input type="number" id="editTaxAmount" step="0.01" value="${expense.tax_amount || 0}">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCategory">Category:</label>
+                                <select id="editCategory" required>
+                                    <option value="Meals" ${expense.category === 'Meals' ? 'selected' : ''}>Meals</option>
+                                    <option value="Transportation" ${expense.category === 'Transportation' ? 'selected' : ''}>Transportation</option>
+                                    <option value="Lodging" ${expense.category === 'Lodging' ? 'selected' : ''}>Lodging</option>
+                                    <option value="Entertainment" ${expense.category === 'Entertainment' ? 'selected' : ''}>Entertainment</option>
+                                    <option value="Groceries" ${expense.category === 'Groceries' ? 'selected' : ''}>Groceries</option>
+                                    <option value="Shopping" ${expense.category === 'Shopping' ? 'selected' : ''}>Shopping</option>
+                                    <option value="Gas" ${expense.category === 'Gas' ? 'selected' : ''}>Gas</option>
+                                    <option value="Other" ${expense.category === 'Other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editNote">Note:</label>
+                                <textarea id="editNote" rows="3">${expense.note || ''}</textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveExpenseEdit('${expenseId}')">Save Changes</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function saveExpenseEdit(expenseId) {
+            try {
+                const updatedExpense = {
+                    id: expenseId,
+                    date: document.getElementById('editDate').value,
+                    merchant: document.getElementById('editMerchant').value,
+                    amount: parseFloat(document.getElementById('editAmount').value),
+                    tax_amount: parseFloat(document.getElementById('editTaxAmount').value) || 0,
+                    category: document.getElementById('editCategory').value,
+                    note: document.getElementById('editNote').value
+                };
+
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'edit_expense',
+                        tripName: currentTrip.name,
+                        expense: updatedExpense
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage('Expense updated successfully');
+                    document.querySelector('.modal').remove();
+                    loadTrip(currentTrip.name);
+                } else {
+                    showErrorMessage('Failed to update expense: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating expense:', error);
+                showErrorMessage('Error updating expense');
+            }
         }
 
         function deleteExpense(expenseId) {
@@ -783,7 +874,90 @@
         }
 
         function editTrip() {
-            showSuccessMessage('Edit trip functionality will be implemented');
+            // Create trip edit modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3>Edit Trip Details</h3>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editTripForm">
+                            <div class="form-group">
+                                <label for="editTripName">Trip Name:</label>
+                                <input type="text" id="editTripName" value="${currentTrip.metadata.name || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDestination">Destination:</label>
+                                <input type="text" id="editDestination" value="${currentTrip.metadata.destination || ''}" placeholder="City, State">
+                            </div>
+                            <div class="form-group">
+                                <label for="editStartDate">Start Date:</label>
+                                <input type="date" id="editStartDate" value="${currentTrip.metadata.start_date || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="editEndDate">End Date:</label>
+                                <input type="date" id="editEndDate" value="${currentTrip.metadata.end_date || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="editTripNotes">Notes:</label>
+                                <textarea id="editTripNotes" rows="3" placeholder="Trip description or additional notes">${currentTrip.metadata.notes || ''}</textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveTripEdit()">Save Changes</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function saveTripEdit() {
+            try {
+                const updatedMetadata = {
+                    name: document.getElementById('editTripName').value,
+                    destination: document.getElementById('editDestination').value,
+                    start_date: document.getElementById('editStartDate').value,
+                    end_date: document.getElementById('editEndDate').value,
+                    notes: document.getElementById('editTripNotes').value
+                };
+
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'edit_trip_metadata',
+                        tripName: currentTrip.name,
+                        metadata: updatedMetadata
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage('Trip details updated successfully');
+                    document.querySelector('.modal').remove();
+                    
+                    // If trip name changed, redirect to new URL
+                    if (result.newTripName && result.newTripName !== currentTrip.name) {
+                        window.location.href = `trip.html?trip=${encodeURIComponent(result.newTripName)}`;
+                    } else {
+                        loadTrip(currentTrip.name);
+                    }
+                } else {
+                    showErrorMessage('Failed to update trip: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating trip:', error);
+                showErrorMessage('Error updating trip details');
+            }
         }
 
         function downloadReport() {

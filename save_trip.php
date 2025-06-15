@@ -56,6 +56,12 @@ try {
         case 'toggle_expense_exclusion':
             $result = toggleExpenseExclusion($data['tripName'], $data['expenseId']);
             break;
+        case 'edit_expense':
+            $result = editExpense($data['tripName'], $data['expense']);
+            break;
+        case 'edit_trip_metadata':
+            $result = editTripMetadata($data['tripName'], $data['metadata']);
+            break;
         case 'delete_trip':
             $result = deleteTrip($data['tripName']);
             break;
@@ -630,5 +636,162 @@ function exportAllTrips() {
         }
         throw $e;
     }
+}
+
+/**
+ * Edit an existing expense
+ */
+function editExpense($tripName, $expenseData) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    $expensesPath = $tripDir . "/expenses.json";
+    
+    if (!file_exists($expensesPath)) {
+        throw new Exception('Expenses file not found');
+    }
+    
+    // Load expenses
+    $expenses = json_decode(file_get_contents($expensesPath), true);
+    if (!$expenses) {
+        throw new Exception('Failed to load expenses');
+    }
+    
+    // Find and update expense
+    $found = false;
+    foreach ($expenses as &$expense) {
+        if ($expense['id'] === $expenseData['id']) {
+            // Preserve certain fields that shouldn't be edited
+            $preservedFields = ['source', 'is_travel_document', 'gemini_processed', 'daily_breakdown', 'is_hotel_stay'];
+            foreach ($preservedFields as $field) {
+                if (isset($expense[$field])) {
+                    $expenseData[$field] = $expense[$field];
+                }
+            }
+            
+            // Update the expense
+            $expense = array_merge($expense, $expenseData);
+            $found = true;
+            break;
+        }
+    }
+    
+    if (!$found) {
+        throw new Exception('Expense not found');
+    }
+    
+    // Save expenses
+    if (!file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT))) {
+        throw new Exception('Failed to save expenses');
+    }
+    
+    return ['success' => true];
+}
+
+/**
+ * Edit trip metadata
+ */
+function editTripMetadata($tripName, $metadata) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    $metadataPath = $tripDir . "/metadata.json";
+    
+    if (!is_dir($tripDir)) {
+        throw new Exception('Trip not found');
+    }
+    
+    // Load existing metadata
+    $existingMetadata = [];
+    if (file_exists($metadataPath)) {
+        $existingMetadata = json_decode(file_get_contents($metadataPath), true) ?: [];
+    }
+    
+    // Check if trip name is changing
+    $newTripName = sanitizeName($metadata['name']);
+    $nameChanged = ($newTripName !== $tripName);
+    
+    // If name changed, check if new name already exists
+    if ($nameChanged) {
+        $newTripDir = "data/trips/" . $newTripName;
+        if (is_dir($newTripDir)) {
+            throw new Exception('A trip with that name already exists');
+        }
+    }
+    
+    // Update metadata
+    $updatedMetadata = array_merge($existingMetadata, [
+        'name' => $metadata['name'],
+        'destination' => $metadata['destination'],
+        'start_date' => $metadata['start_date'],
+        'end_date' => $metadata['end_date'],
+        'notes' => $metadata['notes']
+    ]);
+    
+    // Save updated metadata
+    if (!file_put_contents($metadataPath, json_encode($updatedMetadata, JSON_PRETTY_PRINT))) {
+        throw new Exception('Failed to save metadata');
+    }
+    
+    $result = ['success' => true];
+    
+    // If name changed, rename the directory
+    if ($nameChanged) {
+        $newTripDir = "data/trips/" . $newTripName;
+        if (rename($tripDir, $newTripDir)) {
+            // Update metadata file in new location
+            $newMetadataPath = $newTripDir . "/metadata.json";
+            file_put_contents($newMetadataPath, json_encode($updatedMetadata, JSON_PRETTY_PRINT));
+            $result['newTripName'] = $newTripName;
+        } else {
+            throw new Exception('Failed to rename trip directory');
+        }
+    }
+    
+    return $result;
+}
+
+/**
+ * Toggle expense exclusion function (was missing)
+ */
+function toggleExpenseExclusion($tripName, $expenseId) {
+    $tripName = sanitizeName($tripName);
+    $tripDir = "data/trips/" . $tripName;
+    $expensesPath = $tripDir . "/expenses.json";
+    
+    if (!file_exists($expensesPath)) {
+        throw new Exception('Expenses file not found');
+    }
+    
+    // Load expenses
+    $expenses = json_decode(file_get_contents($expensesPath), true);
+    if (!$expenses) {
+        throw new Exception('Failed to load expenses');
+    }
+    
+    // Find and toggle expense exclusion
+    $found = false;
+    $excluded = false;
+    foreach ($expenses as &$expense) {
+        if ($expense['id'] === $expenseId) {
+            $expense['excluded'] = !($expense['excluded'] ?? false);
+            $excluded = $expense['excluded'];
+            $found = true;
+            break;
+        }
+    }
+    
+    if (!$found) {
+        throw new Exception('Expense not found');
+    }
+    
+    // Save expenses
+    if (!file_put_contents($expensesPath, json_encode($expenses, JSON_PRETTY_PRINT))) {
+        throw new Exception('Failed to save expenses');
+    }
+    
+    return [
+        'success' => true, 
+        'excluded' => $excluded,
+        'message' => $excluded ? 'Expense excluded from totals' : 'Expense included in totals'
+    ];
 }
 ?>
