@@ -9,6 +9,11 @@ function sanitizeName($name) {
     return trim($name) ?: 'untitled';
 }
 
+function getFilesystemName($displayName) {
+    // Convert display name to filesystem-safe name
+    return str_replace(' ', '_', sanitizeName($displayName));
+}
+
 function extractDestinationSimple($tripName) {
     // Simple pattern matching for common destinations
     $patterns = [
@@ -234,9 +239,9 @@ try {
             exit;
         }
         
-        // URL decode the trip name first, then sanitize for filesystem
+        // URL decode the trip name first, then convert to filesystem name
         $displayName = urldecode($tripName);
-        $filesystemName = str_replace(' ', '_', sanitizeName($displayName));
+        $filesystemName = getFilesystemName($displayName);
         $tripDir = 'data/trips/' . $filesystemName;
         $archiveDir = 'data/archive/' . $filesystemName;
         

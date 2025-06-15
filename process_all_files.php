@@ -380,22 +380,25 @@ try {
             $dateSuffix = ' ' . date('F Y', strtotime($tripMetadata['start_date']));
         }
         
-        // Create clean trip name with destination and date
-        $newTripName = sanitizeName($cityName . $dateSuffix);
+        // Create clean trip name with destination and date - keep user-friendly format
+        $displayTripName = $cityName . $dateSuffix;
+        $fileSystemTripName = sanitizeName($displayTripName);
         
         // Handle conflicts by adding counter
         $counter = 1;
-        $originalName = $newTripName;
-        while (is_dir("data/trips/" . $newTripName)) {
+        $originalFileSystemName = $fileSystemTripName;
+        while (is_dir("data/trips/" . $fileSystemTripName)) {
             $counter++;
-            $newTripName = sanitizeName($cityName . $dateSuffix . "_" . $counter);
+            $fileSystemTripName = $originalFileSystemName . "_" . $counter;
+            $displayTripName = $cityName . $dateSuffix . " " . $counter;
         }
         
-        $newTripDir = "data/trips/" . $newTripName;
+        $newTripDir = "data/trips/" . $fileSystemTripName;
         
         if (rename($tripDir, $newTripDir)) {
-            $finalTripName = $newTripName;
-            $tripMetadata['name'] = $newTripName;
+            $finalTripName = $displayTripName; // Return user-friendly name
+            $tripMetadata['name'] = $displayTripName; // Store user-friendly name
+            $tripMetadata['filesystem_name'] = $fileSystemTripName; // Store filesystem name
             
             // Update metadata in new location
             file_put_contents($newTripDir . '/metadata.json', json_encode($tripMetadata, JSON_PRETTY_PRINT));
