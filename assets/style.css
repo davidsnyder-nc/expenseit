@@ -64,6 +64,7 @@ body {
     width: 80px;
     height: 80px;
     object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .brand-it {
@@ -905,10 +906,13 @@ body {
 }
 
 .trip-actions .btn {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.5rem;
     font-size: 0.875rem;
-    border-radius: 6px;
-    min-width: auto;
+    border-radius: 8px;
+    min-width: 120px;
+    flex: 0 0 auto;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .trip-actions .btn-primary {
@@ -1581,11 +1585,18 @@ body {
 .trip-actions {
     display: flex;
     gap: 1rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     padding-top: 1rem;
     border-top: 1px solid #e2e8f0;
     margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .trip-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
 }
 
 .expenses-section h2 {
