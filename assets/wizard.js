@@ -868,7 +868,19 @@ function removeTravelDocument(path) {
 async function extractTripDetails(filePath, fileName) {
     const extractionStatus = document.getElementById('extractionStatus');
     
-    // Show processing status
+    // First try to extract basic info from filename
+    const basicDetails = extractDetailsFromFilename(fileName);
+    if (basicDetails) {
+        extractionStatus.className = 'extraction-status success';
+        extractionStatus.innerHTML = `
+            <i data-feather="check-circle"></i> Trip details extracted from filename!
+        `;
+        fillTripDetailsForm(basicDetails);
+        feather.replace();
+        return;
+    }
+    
+    // Show processing status for AI analysis
     extractionStatus.className = 'extraction-status processing';
     extractionStatus.innerHTML = `
         <i data-feather="loader"></i> Analyzing ${fileName} for trip details...
@@ -916,6 +928,55 @@ async function extractTripDetails(filePath, fileName) {
         `;
         feather.replace();
     }
+}
+
+function extractDetailsFromFilename(fileName) {
+    // Extract trip details from filename patterns like:
+    // "Gmail - FW_ Confirmation_ Trip - Austin, 06_12_2025 - 06_16_2025.pdf"
+    
+    const patterns = [
+        // Pattern for "City, MM_DD_YYYY - MM_DD_YYYY"
+        /([A-Za-z\s]+),\s*(\d{2}_\d{2}_\d{4})\s*-\s*(\d{2}_\d{2}_\d{4})/,
+        // Pattern for "City MM_DD_YYYY - MM_DD_YYYY"
+        /([A-Za-z\s]+)\s+(\d{2}_\d{2}_\d{4})\s*-\s*(\d{2}_\d{2}_\d{4})/,
+        // Pattern for "Trip - City"
+        /Trip\s*-\s*([A-Za-z\s]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+        const match = fileName.match(pattern);
+        if (match) {
+            const details = {};
+            
+            if (match[1]) {
+                // Clean up city name
+                details.tripName = match[1].trim().replace(/[_-]/g, ' ');
+            }
+            
+            if (match[2] && match[3]) {
+                // Convert MM_DD_YYYY to YYYY-MM-DD
+                details.startDate = convertDateFormat(match[2]);
+                details.endDate = convertDateFormat(match[3]);
+            }
+            
+            // Only return if we found meaningful data
+            if (details.tripName || details.startDate) {
+                return details;
+            }
+        }
+    }
+    
+    return null;
+}
+
+function convertDateFormat(dateStr) {
+    // Convert MM_DD_YYYY to YYYY-MM-DD
+    const parts = dateStr.split('_');
+    if (parts.length === 3) {
+        const [month, day, year] = parts;
+        return `${year}-${month}-${day}`;
+    }
+    return null;
 }
 
 function fillTripDetailsForm(tripDetails) {
