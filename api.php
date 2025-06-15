@@ -373,6 +373,64 @@ try {
             'receipts' => $receipts
         ]);
         
+    } elseif ($action === 'travel_documents') {
+        $tripName = $_GET['name'] ?? '';
+        if (empty($tripName)) {
+            echo json_encode(['success' => false, 'error' => 'Trip name is required']);
+            exit;
+        }
+        
+        $tripName = sanitizeName($tripName);
+        $documentsDir = 'data/trips/' . $tripName . '/travel_documents';
+        $archiveDocumentsDir = 'data/archive/' . $tripName . '/travel_documents';
+        
+        // Check both active and archived locations
+        if (is_dir($documentsDir)) {
+            $targetDir = $documentsDir;
+        } elseif (is_dir($archiveDocumentsDir)) {
+            $targetDir = $archiveDocumentsDir;
+        } else {
+            echo json_encode(['success' => true, 'documents' => []]);
+            exit;
+        }
+        
+        $documents = [];
+        
+        if (is_dir($targetDir)) {
+            $documentFiles = glob($targetDir . '/*');
+            foreach ($documentFiles as $file) {
+                if (is_file($file)) {
+                    $filename = basename($file);
+                    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                    
+                    // Only show PDF files in travel documents
+                    if ($extension !== 'pdf') {
+                        continue;
+                    }
+                    
+                    // Use relative web-accessible paths
+                    $webPath = $targetDir . '/' . $filename;
+                    
+                    $documents[] = [
+                        'filename' => $filename,
+                        'name' => $filename,
+                        'path' => $webPath,
+                        'fullUrl' => $webPath,
+                        'displayUrl' => $webPath,
+                        'size' => filesize($file),
+                        'modified' => filemtime($file),
+                        'isPdf' => true,
+                        'extension' => $extension
+                    ];
+                }
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'documents' => $documents
+        ]);
+        
     } elseif ($action === 'search') {
         $query = $_GET['query'] ?? '';
         $includeArchives = ($_GET['include_archives'] ?? 'false') === 'true';

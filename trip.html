@@ -74,6 +74,7 @@
                 if (data.success) {
                     currentTrip = data.trip;
                     displayTripDetails(data.trip);
+                    loadTravelDocuments(data.trip.name);
                     loadTripReceipts(data.trip.name);
                 } else {
                     showError('Failed to load trip details');
@@ -155,6 +156,13 @@
                             <p>${trip.metadata.notes}</p>
                         </div>
                     ` : ''}
+                </div>
+
+                <div class="travel-documents-section">
+                    <h2><i data-feather="file-text"></i> Travel Documents</h2>
+                    <div class="documents-grid" id="documentsGrid">
+                        <!-- Travel documents will be loaded here -->
+                    </div>
                 </div>
 
                 <div class="receipts-section">
@@ -348,6 +356,55 @@
         }
 
         let receiptsData = [];
+        let documentsData = [];
+
+        async function loadTravelDocuments(tripName) {
+            try {
+                const response = await fetch(`api.php?action=travel_documents&name=${encodeURIComponent(tripName)}`);
+                const data = await response.json();
+                
+                if (data.success && data.documents) {
+                    documentsData = data.documents;
+                    displayTravelDocuments(data.documents);
+                }
+            } catch (error) {
+                console.error('Error loading travel documents:', error);
+            }
+        }
+
+        function displayTravelDocuments(documents) {
+            const documentsGrid = document.getElementById('documentsGrid');
+            
+            if (documents.length === 0) {
+                documentsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i data-feather="file-text"></i>
+                        <h3>No travel documents found</h3>
+                        <p>No travel document files are associated with this trip.</p>
+                    </div>
+                `;
+            } else {
+                documentsGrid.innerHTML = documents.map(document => `
+                    <div class="document-item">
+                        <div class="document-preview">
+                            <div class="file-icon"><i data-feather="file-text"></i></div>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">${document.filename}</div>
+                            <div class="document-size">${formatFileSize(document.size)}</div>
+                            <div class="document-type">PDF Document</div>
+                        </div>
+                        <div class="document-actions">
+                            <a href="${document.fullUrl}" target="_blank" class="btn btn-small">
+                                <i data-feather="eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            feather.replace();
+        }
 
         async function loadTripReceipts(tripName) {
             try {

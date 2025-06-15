@@ -174,27 +174,20 @@
                     // Clear the allTrips array when no trips are found
                     allTrips = [];
                     
-                    // Show appropriate empty state message based on tab
-                    const emptyMessage = currentTab === 'active' 
-                        ? 'No active trips found' 
-                        : 'No archived trips found';
-                    const emptySubtext = currentTab === 'active'
-                        ? 'Create your first trip to start tracking expenses'
-                        : 'Archived trips will appear here when you archive them';
-                    
-                    tripsContainer.innerHTML = `
-                        <div class="empty-state">
-                            <i data-feather="${currentTab === 'active' ? 'folder' : 'archive'}"></i>
-                            <h3>${emptyMessage}</h3>
-                            <p>${emptySubtext}</p>
-                            ${currentTab === 'active' ? `
-                                <button class="btn btn-primary" onclick="createNewTrip()">
-                                    <i data-feather="plus"></i> New Trip
-                                </button>
-                            ` : ''}
-                        </div>
-                    `;
-                    feather.replace();
+                    // Show minimal empty state for archived trips only
+                    if (currentTab === 'archived') {
+                        tripsContainer.innerHTML = `
+                            <div class="empty-state">
+                                <i data-feather="archive"></i>
+                                <h3>No archived trips found</h3>
+                                <p>Archived trips will appear here when you archive them</p>
+                            </div>
+                        `;
+                        feather.replace();
+                    } else {
+                        // For active trips, just show empty table structure
+                        displayTripsTable([]);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading trips:', error);
