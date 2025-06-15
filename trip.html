@@ -109,6 +109,27 @@
             });
 
             tripContent.innerHTML = `
+                <div class="trip-actions-card">
+                    <div class="actions-grid">
+                        <button class="action-card btn-primary" onclick="editTrip()">
+                            <i data-feather="edit"></i>
+                            <span>Edit Trip</span>
+                        </button>
+                        <button class="action-card btn-secondary" onclick="downloadReport()">
+                            <i data-feather="download"></i>
+                            <span>Download PDF</span>
+                        </button>
+                        <button class="action-card btn-outline" onclick="addExpense()">
+                            <i data-feather="plus"></i>
+                            <span>Add Expense</span>
+                        </button>
+                        <button class="action-card btn-danger" onclick="deleteTrip()">
+                            <i data-feather="trash-2"></i>
+                            <span>Delete Trip</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="trip-summary">
                     <div class="trip-stats">
                         <div class="stat-item">
@@ -147,21 +168,6 @@
                                 <p>$${taxTotal.toFixed(2)}</p>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="trip-actions">
-                        <button class="btn btn-primary" onclick="editTrip()">
-                            <i data-feather="edit"></i> Edit Trip
-                        </button>
-                        <button class="btn btn-secondary" onclick="downloadReport()">
-                            <i data-feather="download"></i> Download PDF
-                        </button>
-                        <button class="btn btn-outline" onclick="addExpense()">
-                            <i data-feather="plus"></i> Add Expense
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteTrip()">
-                            <i data-feather="trash-2"></i> Delete Trip
-                        </button>
                     </div>
                     
                     ${trip.metadata.notes ? `
