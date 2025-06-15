@@ -1,20 +1,42 @@
 [
     {
-        "id": "kw97udum9",
-        "date": "2025-06-14",
-        "merchant": "WALMART Supercenter",
-        "amount": 12.14,
-        "category": "Groceries",
-        "note": "Groceries purchased at Walmart including milk, bread, bananas, and eggs.",
-        "source": "receipts\/5.png"
+        "id": "me6ek6cu4",
+        "date": "2025-06-12",
+        "merchant": "Various (Travel Expenses)",
+        "amount": 1457.56,
+        "category": "Other",
+        "note": "Trip to Austin, TX including flights, rental car, and hotel.",
+        "source": "receipts\/itenary.pdf",
+        "is_travel_document": true
     },
     {
-        "id": "yhw00h9ao",
+        "id": "lv7kyvv9s",
         "date": "2023-10-15",
         "merchant": "Greenfield Grocers",
         "amount": 75,
         "category": "Groceries",
-        "note": "Purchase of various grocery items including fruits, vegetables, dairy, and snacks.",
-        "source": "receipts\/2.pdf"
+        "note": "Purchase of various grocery items including produce, dairy, grains, and snacks.",
+        "source": "receipts\/reciepts3.pdf",
+        "is_travel_document": false
+    },
+    {
+        "id": "rknnjmo0c",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
+        "source": "receipts\/reciepts2.jpg",
+        "is_travel_document": false
+    },
+    {
+        "id": "x9p2m8k7r",
+        "date": "2023-10-14",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Purchase of various grocery items including produce, dairy, grains, and snacks.",
+        "source": "receipts\/1.jpg",
+        "is_travel_document": false
     }
 ]

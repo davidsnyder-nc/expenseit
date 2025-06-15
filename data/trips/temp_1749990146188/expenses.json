@@ -1,0 +1,22 @@
+[
+    {
+        "id": "p6ajet5wx",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Purchase of various grocery items including produce, dairy, grains, and snacks.",
+        "source": "receipts\/reciepts3.pdf",
+        "is_travel_document": false
+    },
+    {
+        "id": "vjhx696zb",
+        "date": "2023-10-15",
+        "merchant": "Greenfield Grocers",
+        "amount": 75,
+        "category": "Groceries",
+        "note": "Grocery shopping including produce, dairy, grains, and snacks.",
+        "source": "receipts\/reciepts2.jpg",
+        "is_travel_document": false
+    }
+]

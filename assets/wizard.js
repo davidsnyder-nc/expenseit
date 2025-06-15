@@ -2,12 +2,13 @@
 let currentStep = 1;
 const totalSteps = 4;
 let tripData = {
-    metadata: {},
+    metadata: { name: null },
     files: [],
     expenses: [],
     travelDocuments: [],
     hasItinerary: false,
-    needsReview: false
+    needsReview: false,
+    sessionTripName: null // Consistent trip name for the session
 };
 
 // Initialize wizard
@@ -280,17 +281,16 @@ function isValidFile(file) {
 }
 
 async function uploadFileOnly(file) {
-    // Generate a temporary trip name that will be updated later
-    const tempTripName = 'temp_' + Date.now();
+    // Use existing trip name or generate one for the first file
+    let tripName = tripData.metadata.name;
+    if (!tripName) {
+        tripName = 'temp_' + Date.now();
+        tripData.metadata.name = tripName;
+    }
     
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('tripName', tempTripName);
-    
-    // Set initial trip metadata if not set
-    if (!tripData.metadata.name) {
-        tripData.metadata.name = tempTripName;
-    }
+    formData.append('tripName', tripName);
     
     try {
         const response = await fetch('upload.php', {
