@@ -1004,8 +1004,6 @@ body {
     gap: 1.5rem;
     margin-bottom: 2rem;
     width: 100%;
-    position: relative;
-    z-index: 1;
 }
 
 @media (max-width: 768px) {
@@ -1030,8 +1028,6 @@ body {
     background: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
-    position: relative;
-    z-index: 2;
 }
 
 .stat-icon {
@@ -2345,8 +2341,6 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
     border: 1px solid #e2e8f0;
-    overflow: hidden;
-    position: relative;
 }
 
 .summary-cards {
@@ -2395,8 +2389,6 @@ body {
     border-top: 1px solid #e2e8f0;
     clear: both;
     width: 100%;
-    position: relative;
-    z-index: 0;
 }
 
 .trip-notes h3 {
