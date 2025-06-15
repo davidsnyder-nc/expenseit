@@ -1044,6 +1044,21 @@ body {
     border: 1px solid #e2e8f0;
 }
 
+/* Excluded expense styling */
+.excluded-expense {
+    opacity: 0.5;
+    background-color: #f7fafc !important;
+}
+
+.excluded-expense td {
+    color: #a0aec0;
+    text-decoration: line-through;
+}
+
+.excluded-expense .amount {
+    color: #a0aec0 !important;
+}
+
 /* Wizard Styles */
 .wizard-container {
     max-width: 800px;

@@ -94,7 +94,7 @@
             const allExpenses = trip.expenses || [];
             // Filter out travel documents from expenses
             const expenses = allExpenses.filter(expense => !expense.is_travel_document);
-            const total = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+            const total = expenses.filter(expense => !expense.excluded).reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
             
             // Group expenses by category
             const categories = {};
@@ -182,7 +182,7 @@
                         <div class="category-section">
                             <h3 class="category-title">
                                 <i data-feather="tag"></i> ${category}
-                                <span class="category-total">$${categories[category].reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0).toFixed(2)}</span>
+                                <span class="category-total">$${categories[category].filter(exp => !exp.excluded).reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0).toFixed(2)}</span>
                             </h3>
                             <div class="expenses-table">
                                 <table>
@@ -198,7 +198,7 @@
                                     </thead>
                                     <tbody>
                                         ${categories[category].map(expense => `
-                                            <tr>
+                                            <tr class="${expense.excluded ? 'excluded-expense' : ''}">
                                                 <td>${formatDate(expense.date)}</td>
                                                 <td>${expense.merchant || '-'}</td>
                                                 <td class="amount">$${parseFloat(expense.amount || 0).toFixed(2)}</td>
@@ -213,6 +213,10 @@
                                                 <td>
                                                     <button class="btn btn-small" onclick="editExpense('${expense.id}')">
                                                         <i data-feather="edit-2"></i>
+                                                    </button>
+                                                    <button class="btn btn-small ${expense.excluded ? 'btn-success' : 'btn-warning'}" onclick="toggleExpenseExclusion('${expense.id}')">
+                                                        <i data-feather="${expense.excluded ? 'eye' : 'eye-off'}"></i>
+                                                        ${expense.excluded ? 'Include' : 'Exclude'}
                                                     </button>
                                                     <button class="btn btn-small btn-danger" onclick="deleteExpense('${expense.id}')">
                                                         <i data-feather="trash-2"></i>
@@ -556,6 +560,103 @@
                     document.body.removeChild(toast);
                 }, 300);
             }, 3000);
+        }
+
+        async function toggleExpenseExclusion(expenseId) {
+            try {
+                const response = await fetch('save_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'toggle_expense_exclusion',
+                        tripName: currentTrip.name,
+                        expenseId: expenseId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage(result.excluded ? 'Expense excluded from totals' : 'Expense included in totals');
+                    // Reload the trip to update the display
+                    loadTrip(currentTrip.name);
+                } else {
+                    showErrorMessage('Failed to update expense: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error toggling expense exclusion:', error);
+                showErrorMessage('Error updating expense exclusion');
+            }
+        }
+
+        function editExpense(expenseId) {
+            // Find the expense to edit
+            const expense = currentTrip.expenses.find(exp => exp.id === expenseId);
+            if (!expense) {
+                showErrorMessage('Expense not found');
+                return;
+            }
+            
+            // Create edit modal (simplified for now)
+            showSuccessMessage('Edit functionality will be implemented');
+        }
+
+        function deleteExpense(expenseId) {
+            showConfirmModal(
+                'Delete Expense',
+                'Are you sure you want to permanently delete this expense? This action cannot be undone.',
+                async () => {
+                    try {
+                        const response = await fetch('save_trip.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'delete_expense',
+                                tripName: currentTrip.name,
+                                expenseId: expenseId
+                            })
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            showSuccessMessage('Expense deleted successfully');
+                            loadTrip(currentTrip.name);
+                        } else {
+                            showErrorMessage('Failed to delete expense: ' + (result.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error deleting expense:', error);
+                        showErrorMessage('Error deleting expense');
+                    }
+                }
+            );
+        }
+
+        function addExpense() {
+            showSuccessMessage('Add expense functionality will be implemented');
+        }
+
+        function editTrip() {
+            showSuccessMessage('Edit trip functionality will be implemented');
+        }
+
+        function downloadReport() {
+            window.open(`generate_pdf.php?trip=${encodeURIComponent(currentTrip.name)}`, '_blank');
+        }
+
+        function deleteTrip() {
+            showConfirmModal(
+                'Delete Trip',
+                'Are you sure you want to permanently delete this trip and all its data? This action cannot be undone.',
+                () => {
+                    showSuccessMessage('Delete trip functionality will be implemented');
+                }
+            );
         }
     </script>
 </body>
