@@ -2,10 +2,6 @@
 
 A modern, single-user web application for tracking travel expenses with AI-powered receipt processing and mobile camera integration.
 
-![Dashboard Interface](https://raw.githubusercontent.com/davidsnyder-nc/expenseit/refs/heads/main/expenseit1.jpeg)
-
-![Mobile Camera Capture](https://raw.githubusercontent.com/davidsnyder-nc/expenseit/refs/heads/main/expenseit2.jpeg)
-
 ## Features
 
 ### 🚀 Core Functionality
@@ -220,3 +216,9 @@ When reporting issues, please include:
 ---
 
 Made with ❤️ for travelers who want to simplify expense tracking.
+
+## Screenshots
+
+![Dashboard Interface](https://dsnyder.cloud/images/expenseit/expenseit1.jpeg)
+
+![Mobile Camera Capture](https://dsnyder.cloud/images/expenseit/expenseit2.jpeg)
