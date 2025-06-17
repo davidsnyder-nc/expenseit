@@ -1,9 +1,32 @@
 <?php
 
+function loadEnvFile() {
+    if (file_exists('.env')) {
+        $lines = file('.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos($line, '=') !== false && !startsWith(trim($line), '#')) {
+                list($key, $value) = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                if (!getenv($key)) {
+                    putenv("$key=$value");
+                }
+            }
+        }
+    }
+}
+
+function startsWith($haystack, $needle) {
+    return substr($haystack, 0, strlen($needle)) === $needle;
+}
+
 function callGeminiVisionAPI($prompt, $filePath) {
+    // Load environment variables from .env file
+    loadEnvFile();
+    
     $apiKey = getenv('GEMINI_API_KEY');
     
-    if (!$apiKey) {
+    if (!$apiKey || $apiKey === 'your_gemini_api_key_here') {
         throw new Exception('Gemini API key not configured');
     }
     

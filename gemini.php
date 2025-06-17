@@ -33,10 +33,13 @@ try {
         throw new Exception('File not found');
     }
     
-    // Get API key from environment or use default
-    $apiKey = getenv('GEMINI_API_KEY') ?: 'default_key';
+    // Load environment variables and get API key
+    if (function_exists('loadEnvFile')) {
+        loadEnvFile();
+    }
+    $apiKey = getenv('GEMINI_API_KEY');
     
-    if ($apiKey === 'default_key') {
+    if (!$apiKey || $apiKey === 'your_gemini_api_key_here') {
         throw new Exception('Gemini API key not configured');
     }
     
