@@ -25,7 +25,7 @@ sudo apt update
 
 # Install PHP and required extensions
 echo -e "${GREEN}Installing PHP and extensions...${NC}"
-sudo apt install -y php8.1 php8.1-cli php8.1-fpm php8.1-gd php8.1-curl php8.1-json php8.1-mbstring php8.1-zip
+sudo apt install -y php8.1 php8.1-cli php8.1-fpm php8.1-gd php8.1-curl php8.1-json php8.1-mbstring php8.1-zip php8.1-fileinfo
 
 # Install Composer if not present
 if ! command -v composer &> /dev/null; then

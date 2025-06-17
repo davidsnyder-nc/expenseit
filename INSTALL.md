@@ -10,10 +10,13 @@
 
 ### PHP Extensions Required
 - php-gd (for image processing)
-- php-curl (for API requests)
+- php-curl (for API requests to Gemini)
 - php-json (for JSON handling)
 - php-mbstring (for string handling)
 - php-zip (for file compression)
+- php-fileinfo (for MIME type detection)
+
+**Critical**: The `php-curl` and `php-fileinfo` extensions are essential for AI receipt processing. Without them, you'll get 500 errors when uploading files.
 
 ## Installation Steps
 
@@ -22,7 +25,7 @@
 #### Ubuntu/Debian
 ```bash
 sudo apt update
-sudo apt install php8.1 php8.1-gd php8.1-curl php8.1-json php8.1-mbstring php8.1-zip composer
+sudo apt install php8.1 php8.1-gd php8.1-curl php8.1-json php8.1-mbstring php8.1-zip php8.1-fileinfo composer
 ```
 
 #### CentOS/RHEL
@@ -151,6 +154,45 @@ Open your browser and navigate to your domain. You should see the expense.it hom
 
 ### Common Issues
 
+#### 500 Internal Server Error on Receipt Processing
+This typically occurs when required PHP extensions are missing or the API key is not properly configured.
+
+**Step 1: Check PHP Extensions**
+```bash
+php -m | grep -E "(curl|fileinfo|gd|json)"
+```
+
+If any are missing:
+```bash
+sudo apt install php8.1-curl php8.1-fileinfo php8.1-gd php8.1-json
+sudo systemctl restart apache2
+```
+
+**Step 2: Verify API Key Configuration**
+```bash
+# Check if .env file exists and has API key
+cat .env | grep GEMINI_API_KEY
+
+# Test API key with a simple call
+php -r "
+\$key = getenv('GEMINI_API_KEY') ?: (file_exists('.env') ? trim(explode('=', file_get_contents('.env'))[1]) : null);
+if (\$key && \$key !== 'your_gemini_api_key_here') {
+    echo 'API key found: ' . substr(\$key, 0, 10) . '...\n';
+} else {
+    echo 'ERROR: Valid API key not found in .env file\n';
+}
+"
+```
+
+**Step 3: Check Error Logs**
+```bash
+# Apache error log
+sudo tail -f /var/log/apache2/error.log
+
+# PHP error log
+sudo tail -f /var/log/php8.1-fpm.log
+```
+
 #### "Class not found" errors
 ```bash
 composer dump-autoload
@@ -175,6 +217,12 @@ curl -H "Content-Type: application/json" \
      -H "x-goog-api-key: YOUR_API_KEY" \
      https://generativelanguage.googleapis.com/v1beta/models
 ```
+
+#### Files upload but processing fails
+- Ensure `.env` file has valid `GEMINI_API_KEY`
+- Check that `php-curl` extension is installed and enabled
+- Verify write permissions on `data/trips/` directory
+- Check server error logs for specific PHP errors
 
 ## Security Considerations
 

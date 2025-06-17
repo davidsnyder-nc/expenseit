@@ -1,0 +1,122 @@
+wizard.js:257 Successfully uploaded: 2025-06-05-global_horizons_airways.pdf (1/10)
+wizard.js:257 Successfully uploaded: 2025-06-10-apex_auto_rentals.pdf (2/10)
+wizard.js:257 Successfully uploaded: 2025-06-10-grand_voyager_inn_detailed.pdf (3/10)
+wizard.js:257 Successfully uploaded: 2025-06-09-aero_market_receipt.pdf (4/10)
+wizard.js:257 Successfully uploaded: 2025-06-06-terminal_treats_receipt.pdf (5/10)
+wizard.js:257 Successfully uploaded: 2025-06-07-aero_market_receipt.pdf (6/10)
+wizard.js:257 Successfully uploaded: 2025-06-05-roam_&_ride_receipt.pdf (7/10)
+wizard.js:257 Successfully uploaded: 2025-06-07-boarding_bazaar_receipt.pdf (8/10)
+wizard.js:257 Successfully uploaded: 2025-06-05-nomad_essentials_receipt.pdf (9/10)
+wizard.js:257 Successfully uploaded: 2025-06-05-aero_market_receipt.pdf (10/10)
+wizard.js:280 Final upload count: 10 files uploaded of 10 attempted
+feather-icons:12 feather: 'receipt' is not a valid icon
+(anonymous) @ feather-icons:12
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Unexpected end of JSON input
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+gemini.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:703 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at processSingleReceipt (wizard.js:658:39)
+    at async processAllReceipts (wizard.js:518:13)
+    at async startAutomaticProcessing (wizard.js:392:9)
+    at async handleFiles (wizard.js:293:9)
+processSingleReceipt @ wizard.js:703
+process_all_files.php:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+wizard.js:572 Processing error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at finalizeTrip (wizard.js:539:39)
+    at async startAutomaticProcessing (wizard.js:397:9)
+    at async handleFiles (wizard.js:293:9)
+finalizeTrip @ wizard.js:572
+feather-icons:12 feather: 'receipt' is not a valid icon
+(anonymous) @ feather-icons:12
+feather-icons:12 feather: 'receipt' is not a valid icon
+(anonymous) @ feather-icons:12
