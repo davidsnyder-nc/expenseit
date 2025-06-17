@@ -214,13 +214,16 @@ function analyzeFileWithGemini($filePath, $fileName) {
     \"daily_breakdown\": []
 }
 
-CRITICAL LOCATION EXTRACTION:
-- Always extract the location (city, state) from the receipt
-- Look for merchant addresses, store locations, city names, airport codes
-- Common patterns: \"123 Main St, Austin, TX\", \"Miami, FL\", \"DFW Airport\", \"LAX\"
-- For airports: DFW=Dallas, LAX=Los Angeles, MIA=Miami, etc.
-- Extract the actual city and state, not just the business name
-- If you see any location information, include it in the location field
+CRITICAL LOCATION EXTRACTION (UNIVERSAL):
+- ALWAYS extract ANY location information from the receipt
+- Look for merchant addresses, store locations, city names, airport codes, country names
+- Extract the most specific geographic information available
+- Common patterns: \"Seattle, WA\", \"Portland, OR\", \"Denver, CO\", \"Boston, MA\"
+- International: \"London, UK\", \"Paris, France\", \"Toronto, Canada\", \"Sydney, Australia\"
+- Airports: Convert codes to cities (JFK=New York, LAX=Los Angeles, DEN=Denver, ATL=Atlanta, ORD=Chicago)
+- Full addresses: Extract city/state from \"123 Main St, Chicago, IL 60601\"
+- Even partial locations: \"Downtown Portland\", \"Times Square NYC\", \"Beverly Hills\"
+- If you see ANY geographic reference, include it in the location field
 
 HOTEL PROCESSING:
 For hotel receipts with multiple nights, carefully extract each daily rate:

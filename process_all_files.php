@@ -37,38 +37,51 @@ function extractDestinationFromTransportation($note, $merchant) {
             
             // Map airport codes to cities
             $airportCodes = [
-                'AUS' => 'Austin, TX',
-                'DFW' => 'Dallas, TX',
-                'IAH' => 'Houston, TX',
-                'LAX' => 'Los Angeles, CA',
-                'JFK' => 'New York, NY',
-                'ORD' => 'Chicago, IL',
-                'ATL' => 'Atlanta, GA',
-                'MIA' => 'Miami, FL',
-                'SEA' => 'Seattle, WA',
-                'SFO' => 'San Francisco, CA',
-                'LAS' => 'Las Vegas, NV',
-                'PHX' => 'Phoenix, AZ',
-                'DEN' => 'Denver, CO',
-                'MSP' => 'Minneapolis, MN',
-                'DTW' => 'Detroit, MI',
-                'BOS' => 'Boston, MA',
-                'PHL' => 'Philadelphia, PA',
-                'LGA' => 'New York, NY',
-                'BWI' => 'Baltimore, MD',
-                'IAD' => 'Washington, DC',
-                'CLT' => 'Charlotte, NC',
-                'MCO' => 'Orlando, FL',
-                'FLL' => 'Fort Lauderdale, FL',
-                'SAN' => 'San Diego, CA',
-                'TPA' => 'Tampa, FL',
-                'PDX' => 'Portland, OR',
-                'MSY' => 'New Orleans, LA',
-                'BNA' => 'Nashville, TN',
-                'RDU' => 'Raleigh, NC',
-                'CLE' => 'Cleveland, OH',
-                'PIT' => 'Pittsburgh, PA',
-                'ILM' => 'Wilmington, NC'
+                // US Major Cities
+                'AUS' => 'Austin, TX', 'DFW' => 'Dallas, TX', 'IAH' => 'Houston, TX',
+                'LAX' => 'Los Angeles, CA', 'JFK' => 'New York, NY', 'LGA' => 'New York, NY',
+                'ORD' => 'Chicago, IL', 'ATL' => 'Atlanta, GA', 'MIA' => 'Miami, FL',
+                'SEA' => 'Seattle, WA', 'SFO' => 'San Francisco, CA', 'LAS' => 'Las Vegas, NV',
+                'PHX' => 'Phoenix, AZ', 'DEN' => 'Denver, CO', 'MSP' => 'Minneapolis, MN',
+                'DTW' => 'Detroit, MI', 'BOS' => 'Boston, MA', 'PHL' => 'Philadelphia, PA',
+                'BWI' => 'Baltimore, MD', 'DCA' => 'Washington, DC', 'IAD' => 'Washington, DC',
+                'CLT' => 'Charlotte, NC', 'MCO' => 'Orlando, FL', 'FLL' => 'Fort Lauderdale, FL',
+                'SAN' => 'San Diego, CA', 'TPA' => 'Tampa, FL', 'PDX' => 'Portland, OR',
+                'MSY' => 'New Orleans, LA', 'BNA' => 'Nashville, TN', 'RDU' => 'Raleigh, NC',
+                'CLE' => 'Cleveland, OH', 'PIT' => 'Pittsburgh, PA', 'SLC' => 'Salt Lake City, UT',
+                'SAT' => 'San Antonio, TX', 'MEM' => 'Memphis, TN', 'STL' => 'St. Louis, MO',
+                
+                // Canada
+                'YYZ' => 'Toronto, ON', 'YVR' => 'Vancouver, BC', 'YUL' => 'Montreal, QC',
+                'YYC' => 'Calgary, AB', 'YEG' => 'Edmonton, AB', 'YOW' => 'Ottawa, ON',
+                'YHZ' => 'Halifax, NS', 'YWG' => 'Winnipeg, MB',
+                
+                // Europe
+                'LHR' => 'London, UK', 'LGW' => 'London, UK', 'CDG' => 'Paris, France',
+                'ORY' => 'Paris, France', 'FRA' => 'Frankfurt, Germany', 'MUC' => 'Munich, Germany',
+                'BER' => 'Berlin, Germany', 'AMS' => 'Amsterdam, Netherlands', 'FCO' => 'Rome, Italy',
+                'MAD' => 'Madrid, Spain', 'BCN' => 'Barcelona, Spain', 'ZUR' => 'Zurich, Switzerland',
+                'VIE' => 'Vienna, Austria', 'CPH' => 'Copenhagen, Denmark', 'ARN' => 'Stockholm, Sweden',
+                'OSL' => 'Oslo, Norway', 'HEL' => 'Helsinki, Finland', 'DUB' => 'Dublin, Ireland',
+                'BRU' => 'Brussels, Belgium', 'LIS' => 'Lisbon, Portugal', 'ATH' => 'Athens, Greece',
+                'IST' => 'Istanbul, Turkey', 'SVO' => 'Moscow, Russia',
+                
+                // Asia Pacific
+                'NRT' => 'Tokyo, Japan', 'HND' => 'Tokyo, Japan', 'KIX' => 'Osaka, Japan',
+                'ICN' => 'Seoul, South Korea', 'PEK' => 'Beijing, China', 'PVG' => 'Shanghai, China',
+                'HKG' => 'Hong Kong', 'SIN' => 'Singapore', 'BKK' => 'Bangkok, Thailand',
+                'KUL' => 'Kuala Lumpur, Malaysia', 'CGK' => 'Jakarta, Indonesia', 'MNL' => 'Manila, Philippines',
+                'SYD' => 'Sydney, Australia', 'MEL' => 'Melbourne, Australia', 'BNE' => 'Brisbane, Australia',
+                'PER' => 'Perth, Australia', 'AKL' => 'Auckland, New Zealand', 'DEL' => 'Delhi, India',
+                'BOM' => 'Mumbai, India', 'BLR' => 'Bangalore, India',
+                
+                // Middle East & Africa
+                'DXB' => 'Dubai, UAE', 'DOH' => 'Doha, Qatar', 'CAI' => 'Cairo, Egypt',
+                'JNB' => 'Johannesburg, South Africa', 'CPT' => 'Cape Town, South Africa',
+                
+                // South America
+                'GRU' => 'São Paulo, Brazil', 'GIG' => 'Rio de Janeiro, Brazil', 'SCL' => 'Santiago, Chile',
+                'LIM' => 'Lima, Peru', 'BOG' => 'Bogotá, Colombia', 'EZE' => 'Buenos Aires, Argentina'
             ];
             
             if (isset($airportCodes[$destination])) {
@@ -83,9 +96,47 @@ function extractDestinationFromTransportation($note, $merchant) {
 }
 
 function extractCityFromDestination($destination) {
-    // Extract just the city name from "City, State" format
-    $parts = explode(',', $destination);
-    return trim($parts[0]);
+    // Extract city name from various location formats
+    if (empty($destination)) {
+        return 'Trip';
+    }
+    
+    // Handle different location formats:
+    // "City, State" -> "City"
+    // "City, Country" -> "City"
+    // "Airport Code (City)" -> "City"
+    // "Downtown City" -> "City"
+    // "Full Address with City, State" -> "City"
+    
+    // Clean up the destination string
+    $destination = trim($destination);
+    
+    // Extract from airport format: "LAX (Los Angeles)" or "JFK (New York)"
+    if (preg_match('/\([^)]+\s+([^,)]+)(?:,\s*[^)]+)?\)/', $destination, $matches)) {
+        return trim($matches[1]);
+    }
+    
+    // Extract from "City, State/Country" format
+    if (strpos($destination, ',') !== false) {
+        $parts = explode(',', $destination);
+        $cityPart = trim($parts[0]);
+        
+        // Remove common prefixes like "Downtown", "North", "South", etc.
+        $cityPart = preg_replace('/^(Downtown|North|South|East|West|Central)\s+/i', '', $cityPart);
+        
+        return $cityPart;
+    }
+    
+    // For single words or phrases, clean up common location prefixes
+    $destination = preg_replace('/^(Downtown|North|South|East|West|Central)\s+/i', '', $destination);
+    
+    // Extract city from airport codes if they contain city names
+    if (preg_match('/([A-Za-z\s]+)\s+Airport/i', $destination, $matches)) {
+        return trim($matches[1]);
+    }
+    
+    // Return the cleaned destination as city name
+    return $destination;
 }
 
 // Function removed - now using the one from gemini_api.php
