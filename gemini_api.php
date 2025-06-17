@@ -209,11 +209,21 @@ function analyzeFileWithGemini($filePath, $fileName) {
     \"tax_amount\": 0.00,
     \"category\": \"Meals|Transportation|Lodging|Entertainment|Groceries|Shopping|Gas|Other\",
     \"note\": \"description\",
+    \"location\": \"City, State\",
     \"is_hotel_stay\": false,
     \"daily_breakdown\": []
 }
 
-IMPORTANT: For hotel receipts with multiple nights, carefully extract each daily rate:
+CRITICAL LOCATION EXTRACTION:
+- Always extract the location (city, state) from the receipt
+- Look for merchant addresses, store locations, city names, airport codes
+- Common patterns: \"123 Main St, Austin, TX\", \"Miami, FL\", \"DFW Airport\", \"LAX\"
+- For airports: DFW=Dallas, LAX=Los Angeles, MIA=Miami, etc.
+- Extract the actual city and state, not just the business name
+- If you see any location information, include it in the location field
+
+HOTEL PROCESSING:
+For hotel receipts with multiple nights, carefully extract each daily rate:
 - Set is_hotel_stay to true
 - Look for daily room rates, nightly charges, or per-night amounts
 - Extract taxes for each night (room tax, city tax, etc.)
@@ -228,7 +238,7 @@ IMPORTANT: For hotel receipts with multiple nights, carefully extract each daily
     }
 ]
 
-Pay special attention to line items showing nightly rates, room charges per night, daily taxes, and any itemized breakdown by date. Extract the actual dollar amounts, not zeros.";
+Pay special attention to addresses, location references, airport codes, and any geographic information on the receipt. Extract the actual dollar amounts for hotel daily rates, not zeros.";
 
         $result = callGeminiVisionAPI($analysisPrompt, $filePath);
         
@@ -256,6 +266,7 @@ Pay special attention to line items showing nightly rates, room charges per nigh
                 $analysis['tax_amount'] = floatval($analysis['tax_amount'] ?? 0);
                 $analysis['category'] = $analysis['category'] ?? 'Other';
                 $analysis['note'] = $analysis['note'] ?? 'Processed receipt';
+                $analysis['location'] = $analysis['location'] ?? '';
                 $analysis['is_hotel_stay'] = $analysis['is_hotel_stay'] ?? false;
                 $analysis['daily_breakdown'] = $analysis['daily_breakdown'] ?? [];
                 
@@ -273,6 +284,7 @@ Pay special attention to line items showing nightly rates, room charges per nigh
             'tax_amount' => 0,
             'category' => 'Other',
             'note' => 'Failed to process with AI',
+            'location' => '',
             'is_hotel_stay' => false,
             'daily_breakdown' => [],
             'gemini_processed' => false
@@ -289,6 +301,7 @@ Pay special attention to line items showing nightly rates, room charges per nigh
             'tax_amount' => 0,
             'category' => 'Other',
             'note' => 'Error: ' . $e->getMessage(),
+            'location' => '',
             'is_hotel_stay' => false,
             'daily_breakdown' => [],
             'gemini_processed' => false

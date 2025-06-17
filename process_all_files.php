@@ -175,6 +175,7 @@ try {
                     'amount' => floatval($analysis['amount'] ?? 0),
                     'category' => $analysis['category'] ?? 'Other',
                     'note' => $analysis['note'] ?? 'Receipt',
+                    'location' => $analysis['location'] ?? '',
                     'source' => 'receipts/' . $fileName,
                     'is_travel_document' => false,
                     'tax_amount' => floatval($analysis['tax_amount'] ?? 0),
@@ -193,6 +194,14 @@ try {
                         $tripMetadata['destination'] = $destination;
                         $tripMetadata['trip_name'] = extractCityFromDestination($destination);
                     }
+                }
+                
+                // Collect location data for destination detection
+                if (!empty($expense['location'])) {
+                    if (!isset($tripMetadata['detected_locations'])) {
+                        $tripMetadata['detected_locations'] = [];
+                    }
+                    $tripMetadata['detected_locations'][] = $expense['location'];
                 }
                 
                 // Track date range for all expenses
@@ -262,6 +271,24 @@ try {
                 $expenses[] = $expense;
             }
         }
+    }
+    
+    // Smart destination detection from collected locations
+    if (!isset($tripMetadata['destination']) && isset($tripMetadata['detected_locations']) && !empty($tripMetadata['detected_locations'])) {
+        $locationCounts = array_count_values($tripMetadata['detected_locations']);
+        arsort($locationCounts); // Sort by frequency, most common first
+        
+        // Use the most frequently mentioned location as destination
+        $mostCommonLocation = array_key_first($locationCounts);
+        if ($mostCommonLocation) {
+            $tripMetadata['destination'] = $mostCommonLocation;
+            $tripMetadata['trip_name'] = extractCityFromDestination($mostCommonLocation);
+        }
+    }
+    
+    // Clean up temporary location data
+    if (isset($tripMetadata['detected_locations'])) {
+        unset($tripMetadata['detected_locations']);
     }
     
     // Save all data
