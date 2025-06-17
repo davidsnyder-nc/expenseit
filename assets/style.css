@@ -115,7 +115,7 @@ body {
 }
 
 .back-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     color: #2d3748;
@@ -127,6 +127,8 @@ body {
     background: rgba(45, 55, 72, 0.1);
     border: 1px solid rgba(45, 55, 72, 0.2);
     white-space: nowrap;
+    width: auto;
+    align-self: flex-start;
 }
 
 @media (max-width: 768px) {
