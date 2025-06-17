@@ -561,8 +561,10 @@ try {
             exit;
         }
         
-        $tripName = sanitizeName($tripName);
-        $expensesFile = 'data/trips/' . $tripName . '/expenses.json';
+        // Convert display name to filesystem name properly
+        $displayName = urldecode($tripName);
+        $filesystemName = getFilesystemName($displayName);
+        $expensesFile = 'data/trips/' . $filesystemName . '/expenses.json';
         
         if (!file_exists($expensesFile)) {
             echo json_encode(['success' => false, 'error' => 'Trip expenses not found']);
@@ -603,8 +605,10 @@ try {
             exit;
         }
         
-        $tripName = sanitizeName($tripName);
-        $expensesFile = 'data/trips/' . $tripName . '/expenses.json';
+        // Convert display name to filesystem name properly
+        $displayName = urldecode($tripName);
+        $filesystemName = getFilesystemName($displayName);
+        $expensesFile = 'data/trips/' . $filesystemName . '/expenses.json';
         
         if (!file_exists($expensesFile)) {
             echo json_encode(['success' => false, 'error' => 'Trip expenses not found']);

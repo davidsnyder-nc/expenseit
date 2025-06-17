@@ -1,9 +1,8 @@
 {
     "name": "Austin June 2025",
-    "destination": "Austin",
-    "trip_name": "Austin",
     "start_date": "2025-06-05",
     "end_date": "2025-06-10",
-    "filesystem_name": "Austin_June_2025",
-    "notes": "Work trip to Austin, Texas, June 5, 2025 to June 10, 2025"
+    "destination": "Austin",
+    "trip_name": "Austin",
+    "filesystem_name": "Austin_June_2025"
 }

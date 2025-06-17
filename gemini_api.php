@@ -213,7 +213,22 @@ function analyzeFileWithGemini($filePath, $fileName) {
     \"daily_breakdown\": []
 }
 
-For hotel receipts with multiple days, set is_hotel_stay to true and include daily_breakdown array with individual day charges. Extract the transaction date, merchant name, total amount, tax amount (if shown), appropriate category, and brief description. Return only the JSON, no additional text.";
+IMPORTANT: For hotel receipts with multiple nights, carefully extract each daily rate:
+- Set is_hotel_stay to true
+- Look for daily room rates, nightly charges, or per-night amounts
+- Extract taxes for each night (room tax, city tax, etc.)
+- Include each night as a separate entry in daily_breakdown array:
+[
+    {
+        \"date\": \"YYYY-MM-DD\",
+        \"room_rate\": 150.00,
+        \"tax_rate\": 15.00,
+        \"tax_percentage\": \"10.0%\",
+        \"daily_total\": 165.00
+    }
+]
+
+Pay special attention to line items showing nightly rates, room charges per night, daily taxes, and any itemized breakdown by date. Extract the actual dollar amounts, not zeros.";
 
         $result = callGeminiVisionAPI($analysisPrompt, $filePath);
         
