@@ -1195,6 +1195,12 @@ body {
     border-bottom: 1px solid #e2e8f0;
 }
 
+.daily-breakdown-table th:nth-child(2),
+.daily-breakdown-table th:nth-child(3),
+.daily-breakdown-table th:nth-child(5) {
+    text-align: right;
+}
+
 .daily-breakdown-table td {
     padding: 0.5rem;
     border-bottom: 1px solid #f1f5f9;
