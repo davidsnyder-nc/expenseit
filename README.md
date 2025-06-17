@@ -2,7 +2,9 @@
 
 A modern, single-user web application for tracking travel expenses with AI-powered receipt processing and mobile camera integration.
 
-![expense.it Logo](assets/logo.png)
+![Dashboard Interface](https://raw.githubusercontent.com/davidsnyder-nc/expenseit/refs/heads/main/expenseit1.jpeg)
+
+![Mobile Camera Capture](https://raw.githubusercontent.com/davidsnyder-nc/expenseit/refs/heads/main/expenseit2.jpeg)
 
 ## Features
 
@@ -20,11 +22,14 @@ A modern, single-user web application for tracking travel expenses with AI-power
 - **Offline-Ready** - Works without constant internet connection
 
 ### 🎯 Smart Features
+- **Universal Location Detection** - Automatically extracts locations from receipts worldwide
+- **Smart Trip Naming** - AI detects destinations and creates meaningful trip names
 - **Automatic Categorization** - AI categorizes expenses (meals, transportation, lodging, etc.)
 - **Date Recognition** - Extracts dates from receipts automatically
 - **Merchant Detection** - Identifies business names and locations
 - **Tax Tracking** - Separate tracking for tax-deductible expenses
 - **Archive System** - Keep historical trips organized
+- **Hotel Daily Breakdown** - Detailed nightly rates and tax breakdown for hotel stays
 
 ## Technology Stack
 
@@ -47,8 +52,8 @@ A modern, single-user web application for tracking travel expenses with AI-power
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/expense-tracker.git
-cd expense-tracker
+git clone https://github.com/davidsnyder-nc/expenseit.git
+cd expenseit
 
 # Install dependencies
 composer install
@@ -72,15 +77,7 @@ For detailed installation instructions, see [INSTALL.md](INSTALL.md).
 
 ## Screenshots
 
-### Desktop Interface
-- Clean, modern dashboard with trip overview
-- Drag-and-drop file upload with progress indicators
-- Detailed expense editing with category selection
-
-### Mobile Experience
-- Full-screen camera interface for receipt capture
-- Touch-optimized navigation and controls
-- Responsive design adapts to all screen sizes
+The dashboard provides a clean interface for managing all your travel expenses with AI-powered processing and mobile-optimized design.
 
 ## File Structure
 
@@ -216,8 +213,9 @@ When reporting issues, please include:
 
 ### Version History
 - **v1.0.0** - Initial release with core functionality
-- **v1.1.0** - Added mobile camera capture
-- **v1.2.0** - Improved AI accuracy and PDF reports
+- **v1.1.0** - Added mobile camera capture and responsive design
+- **v1.2.0** - Universal location detection and smart trip naming
+- **v1.3.0** - Enhanced AI processing with hotel daily breakdowns and archived trip support
 
 ---
 
