@@ -6,6 +6,11 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'gemini_api.php';
 
+// Load environment variables immediately
+if (function_exists('loadEnvFile')) {
+    loadEnvFile();
+}
+
 function sanitizeName($name) {
     // For file system compatibility, replace spaces with underscores but keep user display name separate
     $name = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $name);
