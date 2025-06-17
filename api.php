@@ -215,7 +215,8 @@ try {
                     }
                     
                     $trips[] = [
-                        'name' => $tripName,
+                        'name' => $metadata['name'] ?? $tripName, // Use display name from metadata
+                        'filesystem_name' => $tripName, // Store filesystem name for URL routing
                         'metadata' => $metadata,
                         'expenseCount' => count($expenses),
                         'total' => number_format($total, 2),
@@ -241,22 +242,49 @@ try {
             exit;
         }
         
-        // URL decode the trip name first, then convert to filesystem name
+        // URL decode the trip name first
         $displayName = urldecode($tripName);
         $filesystemName = getFilesystemName($displayName);
-        $tripDir = 'data/trips/' . $filesystemName;
-        $archiveDir = 'data/archive/' . $filesystemName;
+        $tripDir = null;
+        $isArchived = false;
         
-        // Check both active and archived locations
-        if (is_dir($tripDir)) {
-            // Active trip
+        // Try active trips first
+        $activeTripDir = 'data/trips/' . $filesystemName;
+        if (is_dir($activeTripDir)) {
+            $tripDir = $activeTripDir;
             $isArchived = false;
-        } elseif (is_dir($archiveDir)) {
-            // Archived trip
-            $tripDir = $archiveDir;
-            $isArchived = true;
         } else {
-            echo json_encode(['success' => false, 'error' => 'Trip not found']);
+            // Search archived trips by filesystem name and display name
+            $archiveBaseDir = 'data/archive';
+            if (is_dir($archiveBaseDir)) {
+                $archiveDirs = glob($archiveBaseDir . '/*', GLOB_ONLYDIR);
+                
+                foreach ($archiveDirs as $archiveDir) {
+                    $archiveTripName = basename($archiveDir);
+                    
+                    // Check if filesystem name matches
+                    if ($archiveTripName === $filesystemName) {
+                        $tripDir = $archiveDir;
+                        $isArchived = true;
+                        break;
+                    }
+                    
+                    // Also check metadata for display name match
+                    $metadataPath = $archiveDir . '/metadata.json';
+                    if (file_exists($metadataPath)) {
+                        $metadata = json_decode(file_get_contents($metadataPath), true);
+                        if ($metadata && isset($metadata['name']) && $metadata['name'] === $displayName) {
+                            $tripDir = $archiveDir;
+                            $isArchived = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (!$tripDir) {
+            echo json_encode(['success' => false, 'error' => 'Trip not found: ' . $displayName]);
             exit;
         }
         
