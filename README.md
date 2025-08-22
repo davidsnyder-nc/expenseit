@@ -217,8 +217,4 @@ When reporting issues, please include:
 
 Made with ❤️ for travelers who want to simplify expense tracking.
 
-## Screenshots
-
-![Dashboard Interface](https://dsnyder.cloud/images/expenseit/expenseit1.jpeg)
-
-![Mobile Camera Capture](https://dsnyder.cloud/images/expenseit/expenseit2.jpeg)
+<br><br><img src="screenshot.jpg" alt="Screenshot">
